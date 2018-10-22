@@ -24,7 +24,7 @@ class App extends Component {
 
   async componentDidMount(){
     let account = '0xc031D5e3822bE0335027ecf88aFdfd3433A97fe1', cdpId = 5
-    this.setState({loadingMsg:'Initializing...',})
+    this.setState({loadingMsg:'Metamask/Mobile Wallet required',})
     const maker = new MakerService()
     if(await maker.isLoggedIn()){
       await maker.init()
@@ -56,12 +56,16 @@ class App extends Component {
       })
       circulatingDai = parseFloat(circulatingDai.toFixed(2))
       await maker.setCdpId(cdpId)
-      const {wipeDraw, cdpDetails, systemStatus} = await maker.getAllDetails()
+      const {wipeDraw, cdpDetails, systemStatus, error} = await maker.getAllDetails()
+      if(error){
+        this.setState({loadingMsg: `Error loading CDP - Try refreshing`, cdps})
+        return
+      }
       cdpDetails.account = account
       systemStatus.circulatingDai = circulatingDai
-      this.setState({account, maker, cdpId, currentAccount, cdps, wipeDraw, cdpDetails, systemStatus,})
+      this.setState({account, maker, cdpId, currentAccount, cdps, wipeDraw, cdpDetails, systemStatus,loadingMsg:''})
     }else{
-      this.setState({loadingMsg: 'Please login to metamask'})
+      this.setState({loadingMsg: 'Please login to Metamask'})
     }
 
   }
@@ -69,12 +73,16 @@ class App extends Component {
   handleSearchClick = async (e, {value}) =>{
     const id = parseInt(value)
     if(this.state.cdpId !== id){
-      this.setState({wipeDraw:null, cdpDetails: null, cdpId: '' })
+      this.setState({wipeDraw:null, cdpDetails: null, cdpId: '', loadingMsg:''})
       const maker = this.state.maker
       await maker.setCdpId(id)
-      const {wipeDraw, cdpDetails, systemStatus} = await maker.getAllDetails()
-      console.log('Wipe draw after click so: ', wipeDraw)
-
+      const {wipeDraw, cdpDetails, systemStatus, error} = await maker.getAllDetails()
+      console.log('Wipe draw after click so: ', wipeDraw, error)
+      if(error){
+        this.setState({loadingMsg: `Error loading CDP ${id}`})
+        console.log(this.state)
+        return
+      }
       const { account } = this.state.cdps.find((cdp) =>{
         return cdp.cdpId === id
     })
@@ -93,16 +101,16 @@ class App extends Component {
             <TopMenu loadingMsg={this.state.loadingMsg} handleSearchClick={this.handleSearchClick} cdps={this.state.cdps} account={this.state.currentAccount}/>
           </Grid.Row>
           <Grid.Row style={{paddingTop:0,paddingLeft:'2px'}}>
-          <SideMenu 
-          wipeDraw={this.state.wipeDraw} 
-          cdpDetails={this.state.cdpDetails} 
-          systemStatus={this.state.systemStatus}
-          account={this.state.account} 
-          cdpId={this.state.cdpId} 
-          />
-            <Grid.Column width={10}>
+            <SideMenu 
+            wipeDraw={this.state.wipeDraw} 
+            cdpDetails={this.state.cdpDetails} 
+            systemStatus={this.state.systemStatus}
+            account={this.state.account} 
+            cdpId={this.state.cdpId} 
+            />
+          <Grid.Column width={12} tablet={10}>
               {this.state.data ? <Chart data={this.state.data} /> : <Loader inverted active/>}
-            </Grid.Column>
+          </Grid.Column>
             {/* <Grid.Column width={3}>
               <RecentActions/>
             </Grid.Column> */}
