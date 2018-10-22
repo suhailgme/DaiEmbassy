@@ -58,7 +58,7 @@ class App extends Component {
       await maker.setCdpId(cdpId)
       const {wipeDraw, cdpDetails, systemStatus, error} = await maker.getAllDetails()
       if(error){
-        this.setState({loadingMsg: `Error loading CDP - Try refreshing`, cdps})
+        this.setState({loadingMsg: `Error loading CDP - Try refreshing`})
         return
       }
       cdpDetails.account = account
