@@ -11,7 +11,10 @@ export default class WipeDrawWidget extends Component {
         ...this.props.wipeDraw
     }
     
-
+    componentDidMount(){
+        console.log('liquidation price: ', isNaN(this.props.wipeDraw.liquidationPrice))
+        isNaN(this.props.wipeDraw.liquidationPrice) ? this.setState({liquidationPrice:0}) : null
+    }
 
   static getDerivedStateFromProps(nextProps, prevState){
     // console.log('WipeDraw derived state: ' , prevState, 'props ', nextProps)
