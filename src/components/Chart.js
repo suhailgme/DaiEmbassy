@@ -44,7 +44,7 @@ class AreaChartWithEdge extends React.Component {
                 clamp={true}
 				ratio={ratio}
 				width={width}
-				margin={{ left: 70, right: 70, top: 20, bottom: 30 }}
+				margin={{ left: 20, right: 20, top: 20, bottom: 30 }}
 				type={type}
 				seriesName="ETHUSD"
 				data={data}
@@ -55,15 +55,17 @@ class AreaChartWithEdge extends React.Component {
 			>
 			
 			<Label 
-				x={(width - 140) / 2} y={60}
+				x={(width - 40) / 2} y={60}
 				fontSize={30} 
 				text="ETHUSD" 
-				fill='#BDC4C7' 
+				fill='#BDC4C7'
+				opacity={0.1} 
+				fontFamily='roboto'
 				/>
 
 				<Chart id={1} yExtents={d => [d.high, d.low]}>
 					<XAxis axisAt="bottom" orient="bottom" ticks={15} stroke="#BDC4C7" tickStroke="#BDC4C7"/>
-					<YAxis axisAt="right" orient="right" ticks={5} tickStroke="#BDC4C7" />
+					<YAxis axisAt="right" orient="left" ticks={5} tickStroke="#BDC4C7"/>
 
 					<MouseCoordinateX
 						at="bottom"
@@ -71,7 +73,7 @@ class AreaChartWithEdge extends React.Component {
 						displayFormat={timeFormat("%Y-%m-%d")} />
 					<MouseCoordinateY
 						at="right"
-						orient="right"
+						orient="left"
 						displayFormat={format(".2f")} />
 
 					<AreaSeries yAccessor={d => d.close}/>
