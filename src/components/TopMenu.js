@@ -11,7 +11,7 @@ export default class TopMenu extends Component {
 
 
     static getDerivedStateFromProps(nextProps, prevState){
-            if(nextProps.cdps != prevState.cdps){
+            if(nextProps.cdps !== prevState.cdps){
                 // console.log('cdps from top menu: ', cdps)
                 let cdps = []
                 nextProps.cdps.forEach(cdp => {
@@ -58,7 +58,6 @@ export default class TopMenu extends Component {
     }
 
     render(){
-        const { activeItem } = this.state
         return(
             <Menu fluid inverted stackable borderless attached size='huge' style={{marginBottom:'5px', backgroundColor:'#3D4853'}}>
                 <Menu.Item style={{opacity:'0.8'}}> 
