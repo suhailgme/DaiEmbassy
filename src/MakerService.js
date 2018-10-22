@@ -10,8 +10,6 @@ export default class MakerService {
         this.loggedIn = false
     }
 
-
-
     init = async () => {
         this.maker = this.loggedIn ? await Maker.create('browser') : null
         await this.maker.authenticate()
@@ -83,46 +81,60 @@ export default class MakerService {
     }
 
     getAllDetails = async () => {
-        const cdpId = this.cdpId
-        const daiDebt = await this.getDaiDebt()
-        console.log(daiDebt)
-
-        const ethCollateral = await this.getEthCollateral()
-        const ethPrice = await this.getEthPrice()
-        const mkrPrice = await this.getMkrPrice()
-        const liquidationRatio = await this.getLiquidationRatio()
-        const pethWethRatio = await this.getPethWethRatio()
-        const liquidationPrice = await this.getLiquidationPrice()
-        const collateralizationRatio = await this.getCollateralizationRatio()
-        const systemCollateralization = await this.getSystemCollateralization()
-        return {
-            wipeDraw: {
-                cdpId,
-                daiDebt,
-                ethCollateral,
-                ethPrice,
-                liquidationRatio,
-                pethWethRatio,
-                liquidationPrice
-            },
-            cdpDetails: {
-                cdpId,
-                daiDebt,
-                ethCollateral,
-                ethPrice,
-                liquidationRatio,
-                pethWethRatio,
-                liquidationPrice,
-                collateralizationRatio
-            },
-            systemStatus: {
-                ethPrice,
-                mkrPrice,
-                pethWethRatio,
-                systemCollateralization
+        try{
+            const cdpId = this.cdpId
+            const daiDebt = await this.getDaiDebt()
+            const ethCollateral = await this.getEthCollateral()
+            const ethPrice = await this.getEthPrice()
+            const mkrPrice = await this.getMkrPrice()
+            const liquidationRatio = await this.getLiquidationRatio()
+            const pethWethRatio = await this.getPethWethRatio()
+            // Possible issue with dai.js getLiquidationPrice when ink = 0 due to calculation 
+            // with ink * liqRatio (possible issue with null as well) 
+            let liquidationPrice
+            try{
+                 liquidationPrice = await this.getLiquidationPrice()
+            }catch(e){
+                // Manually calculate liqudation price when ink = 0
+                 liquidationPrice = parseFloat(((daiDebt * liquidationRatio) / (ethCollateral * pethWethRatio)).toFixed(2))
             }
+            
+            const collateralizationRatio = await this.getCollateralizationRatio()
+            const systemCollateralization = await this.getSystemCollateralization()
+            // console.log('daiDebt, ethCollateral,liquidationRatio, pethWethRatio', daiDebt,ethCollateral,liquidationRatio,pethWethRatio)
 
+            return {
+                wipeDraw: {
+                    cdpId,
+                    daiDebt,
+                    ethCollateral,
+                    ethPrice,
+                    liquidationRatio,
+                    pethWethRatio,
+                    liquidationPrice
+                },
+                cdpDetails: {
+                    cdpId,
+                    daiDebt,
+                    ethCollateral,
+                    ethPrice,
+                    liquidationRatio,
+                    pethWethRatio,
+                    liquidationPrice,
+                    collateralizationRatio
+                },
+                systemStatus: {
+                    ethPrice,
+                    mkrPrice,
+                    pethWethRatio,
+                    systemCollateralization
+                }
+            }
+        }catch(error){
+            console.log('AN ERROR HAS OCCURED! ', error)
+            return {error}
         }
+
     }
 
     populateWipeDraw = async () => {
