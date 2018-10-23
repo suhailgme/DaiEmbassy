@@ -37,7 +37,7 @@ export default class MakerService {
     }
 
     getEthCollateral = async () => {
-        let ethCollateral = await this.cdp.getCollateralValue()
+        let ethCollateral = await this.cdp.getCollateralValue(Maker.PETH)
         ethCollateral = parseFloat(ethCollateral.toNumber().toFixed(2))
         return ethCollateral
     }
