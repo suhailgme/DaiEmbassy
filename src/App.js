@@ -30,13 +30,13 @@ class App extends Component {
       await maker.init()
       this.setState({loadingMsg:'Getting CDPs...'})
       const cdps = await getCdps()
+      console.log(cdps)
       this.setState({loadingMsg:'Getting Market data...'})
       const data = await getMarketData()
       this.setState({data})
       // const data = 0 // remove this and restore above const data!!
       // console.log(data)
       const currentAccount = await maker.getCurrentAccount()
-      console.log('CURRENT ACCOUNT', currentAccount)
       this.setState({loadingMsg:'Loading account...'})
       cdps.forEach((cdp) =>{
         if(cdp.account === currentAccount){

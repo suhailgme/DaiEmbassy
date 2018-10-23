@@ -57,6 +57,10 @@ export default class CdpDetails extends Component {
                             <Grid.Column textAlign='right'>{this.numberWithCommas(this.state.daiDebt)} Dai</Grid.Column>
                         </Grid.Row>
                         <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
+                            <Grid.Column textAlign='left'>Accrued Fees</Grid.Column>
+                            <Grid.Column textAlign='right'>{this.numberWithCommas(this.state.governanceFee)} USD</Grid.Column>
+                        </Grid.Row>
+                        <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
                             <Grid.Column style={{paddingTop:'0'}} textAlign='left'>Collateralization</Grid.Column>
                             <Grid.Column textAlign='right' style={{color:'#6abf69'}}>{this.state.collateralizationRatio } %</Grid.Column>
                         </Grid.Row>
