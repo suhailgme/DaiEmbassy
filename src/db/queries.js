@@ -22,6 +22,9 @@ module.exports.getCdps = `{
           nodes {
             act
             time
+            art
+            ink
+            tab
           }
         }
       }
