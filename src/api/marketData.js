@@ -1,8 +1,11 @@
+import { format } from 'util';
+
 const axios = require('axios');
 
 export async function getMarketData() {
     try{
-        let res = await axios.get('https://min-api.cryptocompare.com/data/histohour?fsym=ETH&tsym=USD&limit=1000')
+        
+        let res = await axios.get('https://min-api.cryptocompare.com/data/histohour?fsym=ETH&tsym=USD&limit=10000')
         let marketData = res.data.Data.map(day=>{
             return{
                 date: new Date(day.time*1000),
@@ -10,6 +13,7 @@ export async function getMarketData() {
                 high: +day.high,
                 low: +day.close,
                 close: +day.close,
+                volume: Math.round(day.volumeto), //represents volume in USD as opposed to volumefrom eth
                 
             }
         })
