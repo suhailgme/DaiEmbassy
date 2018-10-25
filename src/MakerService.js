@@ -6,16 +6,21 @@ export default class MakerService {
     constructor(cdpId = 1) {
         console.log('cdpId: ', cdpId)
         this.cdpId = cdpId
-        this.web3 = window.web3 ? new Web3(window.web3.currentProvider) : new Web3()
+        this.hasWeb3 = true
+        this.web3 = window.web3 ? new Web3(window.web3.currentProvider) : this.hasWeb3 = false
         this.loggedIn = false
     }
 
     init = async () => {
-        this.maker = this.loggedIn ? await Maker.create('browser') : null
-        await this.maker.authenticate()
-        this.price = this.maker.service('price')
-        this.ethCdp = await this.maker.service('cdp')
-        this.cdp = await this.maker.getCdp(this.cdpId)
+        try{
+            this.maker = await Maker.create('browser')
+            await this.maker.authenticate()
+            this.price = await this.maker.service('price')
+            this.ethCdp = await this.maker.service('cdp')
+            this.cdp = await this.maker.getCdp(this.cdpId)
+        }catch(e){
+            console.log('Error authenticating: ', e)
+        }
     }
 
     isLoggedIn = async()=>{
@@ -23,6 +28,7 @@ export default class MakerService {
         accounts[0] ? this.loggedIn = true : this.loggedIn = false
         return this.loggedIn
     }
+    
 
     setCdpId = async (cdpId) => {
         this.cdpId = cdpId
@@ -134,7 +140,7 @@ export default class MakerService {
                     mkrPrice,
                     pethWethRatio,
                     systemCollateralization
-                }
+                }, 
             }
         }catch(error){
             console.log('AN ERROR HAS OCCURED! ', error)
