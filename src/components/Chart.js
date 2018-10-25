@@ -37,11 +37,11 @@ class AreaChartWithEdge extends React.Component {
 		} = xScaleProvider(initialData);
 
 		const start = xAccessor(last(data));
-		const end = xAccessor(data[Math.max(0, data.length - 10)]);
+		const end = xAccessor(data[Math.max(0, data.length - 100)]);
 		const xExtents = [start, end];
 		return (
 			<ChartCanvas height={400}
-                clamp={true}
+                // clamp={true}
 				ratio={ratio}
 				width={width}
 				margin={{ left: 20, right: 20, top: 20, bottom: 30 }}
@@ -55,42 +55,73 @@ class AreaChartWithEdge extends React.Component {
 			>
 			
 			<Label 
-				x={(width - 40) / 2} y={60}
+				x={width  / 2} y={100}
 				fontSize={30} 
-				text="ETHUSD" 
+				text="ETHUSD, 60"
 				fill='#BDC4C7'
-				opacity={0.1} 
+				opacity={0.15} 
 				fontFamily='roboto'
 				/>
+				<Label 
+				x={width  / 2} y={140}
+				fontSize={30} 
+				text="Ethereum / US Dollar CCCAGG"
+				fill='#BDC4C7'
+				opacity={0.15} 
+				fontFamily='roboto'
+				fontSize={20}
+				/>
 
-				<Chart id={1} yExtents={d => [d.high, d.low]}>
-					<XAxis axisAt="bottom" orient="bottom" ticks={15} stroke="#BDC4C7" tickStroke="#BDC4C7"/>
-					<YAxis axisAt="right" orient="left" ticks={5} tickStroke="#BDC4C7"/>
+			<Chart id={1} yExtents={d => [d.high, d.low]}>
+				<XAxis axisAt="bottom" orient="bottom"  stroke="#BDC4C7" tickStroke="#BDC4C7"/>
+				<YAxis axisAt="right" orient="left" ticks={5} tickStroke="#BDC4C7"/>
 
-					<MouseCoordinateX
-						at="bottom"
-						orient="bottom"
-						displayFormat={timeFormat("%Y-%m-%d")} />
-					<MouseCoordinateY
-						at="right"
-						orient="left"
-						displayFormat={format(".2f")} />
+				<MouseCoordinateX
+					at="bottom"
+					orient="bottom"
+					displayFormat={timeFormat("%Y-%m-%d")} />
+				<MouseCoordinateY
+					at="right"
+					orient="left"
+					displayFormat={format(".2f")} />
 
-					<AreaSeries yAccessor={d => d.close}/>
-
-					<SingleValueTooltip
-						xLabel="Date" /* xLabel is optional, absence will not show the x value */ 
-						yLabel="Close"
-						yAccessor={d => d.close}
-						xAccessor={d => d.date}
-						xDisplayFormat={timeFormat("%Y-%m-%d %H:%M:%S")} yDisplayFormat={format(".2f")}
-						origin={[-40, 0]}
+				<AreaSeries yAccessor={d => d.close}/>
+				<SingleValueTooltip
+						yLabel="Volume (USD)"
+						yAccessor={d => d.volume}
+						yDisplayFormat={format(".4s")}
+						origin={[0, 20]}
 						valueFill= "#FFFFFF"
-						/>
-						
-				</Chart>
+					/>
+				<SingleValueTooltip
+					xLabel="Date" /* xLabel is optional, absence will not show the x value */ 
+					yLabel="Close"
+					yAccessor={d => d.close}
+					xAccessor={d => d.date}
+					xDisplayFormat={timeFormat("%Y-%m-%d %H:%M:%S")} yDisplayFormat={format(".2f")}
+					origin={[0, 0]}
+					valueFill= "#FFFFFF"
+					/>	
 
-				<CrossHairCursor />
+			</Chart>
+			<Chart id={2}
+					yExtents={d => d.volume}
+					height={150} origin={(w, h) => [0, h - 150]}>
+					{/* <YAxis axisAt="left" orient="right" ticks={5} tickStroke="#BDC4C7" tickFormat={format(".2s")}/> */}
+
+					{/* <MouseCoordinateY
+						at="left"
+						orient="right"
+						displayFormat={format(".4s")}
+						/> */}
+
+					<BarSeries yAccessor={d => d.volume}
+						stroke fill={(d) => d.close > d.open ? "#6BA583" : "#FF0000"}
+						opacity={0.4}
+						widthRatio={1} />
+
+				</Chart>
+			<CrossHairCursor />
 			</ChartCanvas>
 		);
 	}
