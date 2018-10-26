@@ -3,6 +3,7 @@ import TopMenu from './components/TopMenu'
 import SideMenu from './components/SideMenu'
 import RecentActions from './components/RecentActions'
 import Chart from './components/Chart'
+import Footer from './components/Footer'
 import { Grid, Loader, Segment } from 'semantic-ui-react'
 import './App.css';
 import MakerService from './MakerService'
@@ -37,7 +38,7 @@ class App extends Component {
       this.setState({currentAccount})
       this.setState({loadingMsg:'Getting CDPs...'})
       const cdps = await getCdps()
-      // console.log(cdps)
+      console.log(cdps)
       this.setState({loadingMsg:'Getting Market data...'})
       const data = await getMarketData()
       this.setState({data})
@@ -82,9 +83,9 @@ class App extends Component {
       const maker = this.state.maker
       await maker.setCdpId(id)
       const {wipeDraw, cdpDetails, systemStatus, error} = await maker.getAllDetails()
-      console.log('Wipe draw after click: ', wipeDraw,cdpDetails,systemStatus, error)
+      // console.log('Wipe draw after click: ', wipeDraw,cdpDetails,systemStatus, error)
       if(error){
-        this.setState({loadingMsg: `Error loading CDP ${id}`, searchMsg: `Error loading CDP ${id}`})
+        this.setState({loadingMsg: `Error loading CDP ${id} - Please wait a few seconds before retrying.`, searchMsg: `Error loading CDP ${id}`})
         return
       }
       const { account } = this.state.cdps.find((cdp) =>{
@@ -97,7 +98,41 @@ class App extends Component {
     }
   }
  
-
+  isLoaded = () =>{
+    if(this.state.wipeDraw && this.state.cdpDetails && this.state.systemStatus){
+      return(
+        <Grid.Row style={{paddingTop:0,paddingLeft:'2px'}} >
+        <SideMenu 
+        wipeDraw={this.state.wipeDraw} 
+        cdpDetails={this.state.cdpDetails} 
+        systemStatus={this.state.systemStatus}
+        account={this.state.account} 
+        cdpId={this.state.cdpId} 
+        />
+        
+      <Grid.Column width={12} tablet={10}>
+          <Segment inverted style={{
+            backgroundColor:'#273340', 
+            borderRadius:'5px', 
+            border: '2px solid #38414B'
+            }}>
+            <Chart data={this.state.data} /></Segment>  
+          <RecentActions cdps={this.state.cdps} cdpId={this.state.cdpId}/>  
+      </Grid.Column>
+      </Grid.Row>
+      )
+    }else{
+      return(
+        //return only loader element to restore previous function (remove grids, etc.) ONLY IF NEEDED
+        <Grid.Row style={{paddingTop:'10%', paddingBottom:'10%'}}>
+          <Grid.Column>
+            <Loader inverted active content={this.state.loadingMsg}/>
+          </Grid.Column>
+        </Grid.Row>
+        
+      )
+    }
+  }
 
   render() {
     return (
@@ -106,30 +141,9 @@ class App extends Component {
           <Grid.Row style={{paddingBottom:0, paddingLeft:'2px'}}>
             <TopMenu searchMsg={this.state.searchMsg} loadingMsg={this.state.loadingMsg} handleSearchClick={this.handleSearchClick} cdps={this.state.cdps} account={this.state.currentAccount}/>
           </Grid.Row>
-        {this.state.wipeDraw && this.state.cdpDetails && this.state.systemStatus ? 
-          <Grid.Row style={{paddingTop:0,paddingLeft:'2px'}} >
-            <SideMenu 
-            wipeDraw={this.state.wipeDraw} 
-            cdpDetails={this.state.cdpDetails} 
-            systemStatus={this.state.systemStatus}
-            account={this.state.account} 
-            cdpId={this.state.cdpId} 
-            />
-            
-          <Grid.Column width={12} tablet={10} >
-              <Segment inverted style={{
-                backgroundColor:'#273340', 
-                borderRadius:'5px', 
-                border: '2px solid #38414B'}}>
-                <Chart data={this.state.data} /></Segment>  
-              <RecentActions cdps={this.state.cdps} cdpId={this.state.cdpId}/>  
-               
-          </Grid.Column>
-          </Grid.Row>
-        : <Loader inverted active content={this.state.loadingMsg} /> }
-
+          {this.isLoaded()}
         </Grid>
-
+        {/* <Footer/> */}
       </div>
     );
   }
