@@ -27,6 +27,7 @@ module.exports.getCdps = `{
             ink
             tab
             tx
+            pip
           }
         }
       }
