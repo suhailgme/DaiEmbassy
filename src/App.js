@@ -69,7 +69,7 @@ class App extends Component {
       cdpDetails.account = account
       systemStatus.circulatingDai = circulatingDai
 
-      this.setState({account, maker, cdpId, cdps, wipeDraw, cdpDetails,circulatingDai, systemStatus,loadingMsg:'', })
+      this.setState({currentAccount, account, maker, cdpId, cdps, wipeDraw, cdpDetails,circulatingDai, systemStatus,loadingMsg:'', })
     }else{
       this.setState({loadingMsg: 'Please login to Metamask'})
     }
