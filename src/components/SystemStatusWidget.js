@@ -38,6 +38,10 @@ export default class SystemStatusWidget extends Component{
                         <Grid.Column textAlign='right' style={{color:'#FF695E', whiteSpace:'nowrap'}}>{`${this.numberWithCommas(this.state.circulatingDai)}`}</Grid.Column>
                     </Grid.Row>
                     <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
+                        <Grid.Column textAlign='left'>PETH</Grid.Column>
+                        <Grid.Column textAlign='right' style={{color:'#FF695E', whiteSpace:'nowrap'}}>{`${this.numberWithCommas(this.state.circulatingDai*(this.state.systemCollateralization/100))}`}</Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
                         <Grid.Column textAlign='left'>Collateralization</Grid.Column>
                         <Grid.Column textAlign='right' style={{color:'#6abf69'}}>{this.state.systemCollateralization}%</Grid.Column>
                     </Grid.Row>
