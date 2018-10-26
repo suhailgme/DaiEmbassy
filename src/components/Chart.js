@@ -84,6 +84,7 @@ class AreaChartWithEdge extends React.Component {
 					at="right"
 					orient="left"
 					displayFormat={format(".2f")} />
+					
 
 				<AreaSeries yAccessor={d => d.close}/>
 				<SingleValueTooltip
