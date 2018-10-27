@@ -1,6 +1,5 @@
 module.exports.getCdps = `{
     allCups(
-      condition: { deleted: false },
       orderBy: ID_DESC
     ) {
       totalCount
