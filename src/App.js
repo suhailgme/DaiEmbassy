@@ -7,8 +7,10 @@ import Footer from './components/Footer'
 import { Grid, Loader, Segment } from 'semantic-ui-react'
 import './App.css';
 import MakerService from './MakerService'
-import { getCdpByAccount,getCdps } from './api/daiService'
+import { getCdps } from './api/daiService'
 import { getMarketData} from './api/marketData'
+import ReactGA from 'react-ga'
+
 
 
 class App extends Component {
@@ -25,9 +27,16 @@ class App extends Component {
   }
 
   async componentDidMount(){
+    ReactGA.initialize('UA-128182811-1')
+    ReactGA.pageview(window.location.pathname + window.location.search)
     let account = '0xc031D5e3822bE0335027ecf88aFdfd3433A97fe1', cdpId = 5
-    const maker = new MakerService()
+    const maker = new MakerService() //TODO catch error here on new Maker (maybe metamask issue...)
     if(!maker.hasWeb3){
+      ReactGA.event({
+        category: 'Error',
+        action: 'No Metamask or Mobile Wallet',
+        label: new Date().toString()
+      })
       this.setState({loadingMsg:'Metamask/Mobile Wallet required',})
       return
     }
@@ -35,42 +44,56 @@ class App extends Component {
       this.setState({loadingMsg:'Initializing...',})
       await maker.init()
       const currentAccount = await maker.getCurrentAccount()
-      this.setState({currentAccount})
-      this.setState({loadingMsg:'Getting CDPs...'})
+      ReactGA.event({
+        category: currentAccount,
+        action: 'logged in',
+        label: new Date().toString()
+
+      })
+      this.setState({currentAccount,loadingMsg:'Getting CDPs...'})
       const cdps = await getCdps()
-      console.log(cdps)
+      // console.log(cdps)
       this.setState({loadingMsg:'Getting Market data...'})
       const data = await getMarketData()
       this.setState({data})
-      // const data = 0 // remove this and restore above const data!!
       // console.log(data)
       this.setState({loadingMsg:'Loading account...'})
       cdps.forEach((cdp) =>{
         if(cdp.account === currentAccount){
           cdpId = cdp.cdpId
           account = cdp.account
+          ReactGA.event({
+            category: currentAccount,
+            action: `owns ${cdpId}`,
+            label: new Date().toString()
+
+          })
         }
       })
 
       // console.log(account, cdpId)
-      let circulatingDai = 0
-      cdps.forEach(cdp => {
-        circulatingDai+= +cdp.daiDebt
-      })
-      circulatingDai = parseFloat(circulatingDai.toFixed(2))
-
       await maker.setCdpId(cdpId)
 
       const {wipeDraw, cdpDetails, systemStatus, error} = await maker.getAllDetails()
       if(error){
+        ReactGA.event({
+          category: 'Error',
+          action: `Error on initial load`,
+          label: new Date().toString()
+        })
         this.setState({loadingMsg: `Error loading CDP - Try refreshing`})
         return
       }
       cdpDetails.account = account
-      systemStatus.circulatingDai = circulatingDai
+      systemStatus.totalCDPs = cdps.length
 
-      this.setState({currentAccount, account, maker, cdpId, cdps, wipeDraw, cdpDetails,circulatingDai, systemStatus,loadingMsg:'', })
+      this.setState({currentAccount, account, maker, cdpId, cdps, wipeDraw, cdpDetails, systemStatus,loadingMsg:'', })
     }else{
+      ReactGA.event({
+        category: 'Error',
+        action: `Web3 available but not logged in`,
+        label: new Date().toString()
+      })
       this.setState({loadingMsg: 'Please login to Metamask'})
     }
 
@@ -79,12 +102,24 @@ class App extends Component {
   handleSearchClick = async (e, {value}) =>{
     const id = parseInt(value)
     if(this.state.cdpId !== id){
+
+      ReactGA.event({
+        category: this.state.currentAccount,
+        action: `Searched for CDP ${id}`,
+        label: new Date().toString()
+      })
+
       this.setState({wipeDraw:null, cdpDetails: null, cdpId: '', searchMsg: '', loadingMsg:`Loading CDP: ${id}`,})
       const maker = this.state.maker
       await maker.setCdpId(id)
       const {wipeDraw, cdpDetails, systemStatus, error} = await maker.getAllDetails()
       // console.log('Wipe draw after click: ', wipeDraw,cdpDetails,systemStatus, error)
       if(error){
+        ReactGA.event({
+          category: this.state.currentAccount,
+          action: `encountered error searching for CDP ${id}`,
+          label: new Date().toString()
+        })
         this.setState({loadingMsg: `Error loading CDP ${id} - Please wait a few seconds before retrying.`, searchMsg: `Error loading CDP ${id}`})
         return
       }
@@ -92,7 +127,6 @@ class App extends Component {
         return cdp.cdpId === id
     })
       cdpDetails.account = account
-      systemStatus.circulatingDai = this.state.circulatingDai
 
       this.setState({wipeDraw, cdpDetails, systemStatus, cdpId:id, loadingMsg:''})
     }

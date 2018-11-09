@@ -15,7 +15,7 @@ export default class CdpDetails extends Component {
         return {...nextProps.cdpDetails}
       }
     async componentDidMount(){
-        console.log('cdpDetails: ', this.props)
+        // console.log('cdpDetails: ', this.props)
         }
 
     numberWithCommas = (number) => {

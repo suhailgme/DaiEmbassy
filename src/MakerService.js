@@ -90,6 +90,10 @@ export default class MakerService {
         return this.web3.utils.toChecksumAddress(await this.maker.currentAccount().address)
     }
 
+    getDaiSupply = async () =>{
+        return parseFloat((await this.maker.getToken('DAI').totalSupply()).toNumber().toFixed(0))
+    }
+
     getAllDetails = async () => {
         try{
             const cdpId = this.cdpId
@@ -99,6 +103,7 @@ export default class MakerService {
             const mkrPrice = await this.getMkrPrice()
             const liquidationRatio = await this.getLiquidationRatio()
             const pethWethRatio = await this.getPethWethRatio()
+            const circulatingDai = await this.getDaiSupply()
             // Possible issue with dai.js getLiquidationPrice when ink = 0 due to calculation 
             // with ink * liqRatio (possible issue with null as well) 
             let liquidationPrice
@@ -139,6 +144,7 @@ export default class MakerService {
                     ethPrice,
                     mkrPrice,
                     pethWethRatio,
+                    circulatingDai,
                     systemCollateralization
                 }, 
             }
