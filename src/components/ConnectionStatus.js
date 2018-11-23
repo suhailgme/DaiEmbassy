@@ -27,7 +27,7 @@ class ConnectionStatus extends Component {
                     <Dropdown.Menu>
                         <Dropdown.Item>
                         <img style={{width:'50px'}}src={metamaskLogo} alt='metamask logo'/>
-                        {account} 
+                        <span style={{fontSize:'0.9em'}}>{account} </span>
                         </Dropdown.Item>
                     </Dropdown.Menu>
                 </Dropdown>
