@@ -3,7 +3,7 @@ import Web3 from 'web3'
 
 export default class MakerService {
 
-    constructor(cdpId = 1) {
+    constructor(cdpId) {
         console.log('cdpId: ', cdpId)
         this.cdpId = cdpId
         this.hasWeb3 = true
@@ -17,7 +17,7 @@ export default class MakerService {
             await this.maker.authenticate()
             this.price = await this.maker.service('price')
             this.ethCdp = await this.maker.service('cdp')
-            this.cdp = await this.maker.getCdp(this.cdpId)
+            // this.cdp = await this.maker.getCdp(this.cdpId)
         }catch(e){
             console.log('Error authenticating: ', e)
         }
@@ -31,9 +31,18 @@ export default class MakerService {
     
 
     setCdpId = async (cdpId) => {
-        this.cdpId = cdpId
-        this.cdp = await this.maker.getCdp(this.cdpId)
-        console.log('set cdp to id: ', this.cdpId)
+        if(this.cdpId !== cdpId){
+        try{
+            this.cdpId = cdpId
+            this.cdp = await this.maker.getCdp(this.cdpId)
+            console.log('set cdp to id: ', this.cdpId)
+        }
+        catch(e){
+            console.error('Maker Service: Unable to get CDP ', this.cdpId, e)
+            return e
+        }
+    }
+
     }
 
     getDaiDebt = async () => {
@@ -42,10 +51,10 @@ export default class MakerService {
         return daiDebt
     }
 
-    getEthCollateral = async () => {
-        let ethCollateral = await this.cdp.getCollateralValue(Maker.PETH)
-        ethCollateral = parseFloat(ethCollateral.toNumber().toFixed(2))
-        return ethCollateral
+    getPethCollateral = async () => {
+        let pethCollateral = await this.cdp.getCollateralValue(Maker.PETH)
+        pethCollateral = parseFloat(pethCollateral.toNumber().toFixed(2))
+        return pethCollateral
     }
 
     getEthPrice = async () => {
@@ -83,7 +92,7 @@ export default class MakerService {
     }
 
     getGovernanceFee = async() =>{
-        return parseFloat((await this.cdp.getGovernanceFee()).toNumber().toFixed(2))
+        return parseFloat((await this.cdp.getGovernanceFee(Maker.USD)).toNumber().toFixed(2))
     }
 
     getCurrentAccount = async () => {
@@ -94,11 +103,20 @@ export default class MakerService {
         return parseFloat((await this.maker.getToken('DAI').totalSupply()).toNumber().toFixed(0))
     }
 
+        //TODO, reduces number of calls to blockchain by 3 by removing getPethCollateral, getDaiDebt, 
+    getCdpInfo = async () =>{
+        const cdpInfo = await this.ethCdp.getInfo(this.cdpId)
+        const pethCollateral = this.web3.utils.fromWei(cdpInfo[1].toString())
+        const daiDebt = this.web3.utils.fromWei(cdpInfo[2].toString())
+        console.log(cdpInfo, pethCollateral, daiDebt)
+    }
+
     getAllDetails = async () => {
         try{
+            // await this.getCdpInfo()
             const cdpId = this.cdpId
             const daiDebt = await this.getDaiDebt()
-            const ethCollateral = await this.getEthCollateral()
+            const pethCollateral = await this.getPethCollateral()
             const ethPrice = await this.getEthPrice()
             const mkrPrice = await this.getMkrPrice()
             const liquidationRatio = await this.getLiquidationRatio()
@@ -111,19 +129,19 @@ export default class MakerService {
                  liquidationPrice = await this.getLiquidationPrice()
             }catch(e){
                 // Manually calculate liqudation price when ink = 0
-                 liquidationPrice = parseFloat(((daiDebt * liquidationRatio) / (ethCollateral * pethWethRatio)).toFixed(2))
+                 liquidationPrice = parseFloat(((daiDebt * liquidationRatio) / (pethCollateral * pethWethRatio)).toFixed(2))
             }
             
             const collateralizationRatio = await this.getCollateralizationRatio()
             const systemCollateralization = await this.getSystemCollateralization()
             const governanceFee = await this.getGovernanceFee()
-            // console.log('daiDebt, ethCollateral,liquidationRatio, pethWethRatio', daiDebt,ethCollateral,liquidationRatio,pethWethRatio)
+            // console.log('daiDebt, pethCollateral,liquidationRatio, pethWethRatio', daiDebt,pethCollateral,liquidationRatio,pethWethRatio)
 
             return {
                 wipeDraw: {
                     cdpId,
                     daiDebt,
-                    ethCollateral,
+                    pethCollateral,
                     ethPrice,
                     liquidationRatio,
                     pethWethRatio,
@@ -132,7 +150,7 @@ export default class MakerService {
                 cdpDetails: {
                     cdpId,
                     daiDebt,
-                    ethCollateral,
+                    pethCollateral,
                     ethPrice,
                     liquidationRatio,
                     pethWethRatio,
@@ -150,6 +168,8 @@ export default class MakerService {
             }
         }catch(error){
             console.log('AN ERROR HAS OCCURED! ', error)
+            // const block = await this.web3.eth.getBlock('latest')
+            // console.log('block: ', block)
             return {error}
         }
 
@@ -157,7 +177,7 @@ export default class MakerService {
 
     populateWipeDraw = async () => {
         const daiDebt = await this.getDaiDebt()
-        const ethCollateral = await this.getEthCollateral()
+        const pethCollateral = await this.getPethCollateral()
         const ethPrice = await this.getEthPrice()
         const liquidationRatio = await this.getLiquidationRatio()
         const pethWethRatio = await this.getPethWethRatio()
@@ -165,7 +185,7 @@ export default class MakerService {
         const account = await this.getCurrentAccount()
         return {
             daiDebt,
-            ethCollateral,
+            pethCollateral,
             ethPrice,
             liquidationRatio,
             pethWethRatio,
@@ -178,7 +198,7 @@ export default class MakerService {
         const cdpId = this.cdpId
         const daiDebt = await this.getDaiDebt()
         const collateralizationRatio = await this.getCollateralizationRatio()
-        const ethCollateral = await this.getEthCollateral()
+        const pethCollateral = await this.getPethCollateral()
         const ethPrice = await this.getEthPrice()
         const account = await this.getCurrentAccount()
         return {
@@ -186,7 +206,7 @@ export default class MakerService {
             daiDebt,
             collateralizationRatio,
             ethPrice,
-            ethCollateral,
+            pethCollateral,
             account
         }
     }
