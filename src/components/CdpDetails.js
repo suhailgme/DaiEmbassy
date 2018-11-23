@@ -39,8 +39,8 @@ export default class CdpDetails extends Component {
                 <p>Collateral</p> 
                 </Container>
                 <Statistic.Group size='mini' widths='two'>
-                    <Statistic  inverted size='mini' label='PETH' value={this.state.ethCollateral}/>
-                    <Statistic inverted size='mini' label='USD' value={(this.numberWithCommas(this.state.ethCollateral * this.state.ethPrice))} color='red'/>
+                    <Statistic  inverted size='mini' label='PETH' value={this.numberWithCommas(this.state.pethCollateral)}/>
+                    <Statistic inverted size='mini' label='USD' value={(this.numberWithCommas((this.state.pethCollateral * this.state.pethWethRatio) * this.state.ethPrice))} color='red'/>
                 </Statistic.Group>
                 <Form inverted>
                     <Grid columns='equal' padded='vertically'>
@@ -62,7 +62,7 @@ export default class CdpDetails extends Component {
                         </Grid.Row>
                         <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
                             <Grid.Column style={{paddingTop:'0'}} textAlign='left'>Collateralization</Grid.Column>
-                            <Grid.Column textAlign='right' style={{color:'#6abf69'}}>{this.state.collateralizationRatio } %</Grid.Column>
+                            <Grid.Column textAlign='right' style={{color: this.state.collateralizationRatio == "Infinity" ? '#FFF' : this.state.collateralizationRatio < 170 ? '#FF695E' : this.state.collateralizationRatio < 200 ? '#EFBC72' : '#6ABF69' }}>{this.state.collateralizationRatio } %</Grid.Column>
                         </Grid.Row>
                     </Grid>
                     <hr/>
