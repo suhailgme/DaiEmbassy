@@ -5,7 +5,7 @@ const axios = require('axios');
 export async function getMarketData() {
     try{
         
-        let res = await axios.get('https://min-api.cryptocompare.com/data/histohour?fsym=ETH&tsym=USD&limit=10000')
+        let res = await axios.get('https://min-api.cryptocompare.com/data/histohour?fsym=ETH&tsym=USD&limit=1000')
         let marketData = res.data.Data.map(day=>{
             return{
                 date: new Date(day.time*1000),
