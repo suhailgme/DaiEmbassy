@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import { format } from "d3-format";
 import { timeFormat } from "d3-time-format";
 
-import { ChartCanvas, Chart } from "react-stockcharts";
+import { ChartCanvas, Chart, ZoomButtons } from "react-stockcharts";
 import {
 	BarSeries,
 	AreaSeries,
@@ -24,6 +24,12 @@ import { fitWidth } from "react-stockcharts/lib/helper";
 import { last } from "react-stockcharts/lib/utils";
 
 class AreaChartWithEdge extends React.Component {
+	state = {suffix: 1}
+
+	handleReset = () => {
+		this.setState({suffix: this.state.suffix + 1})
+	}
+
 	render() {
 		const { type, data: initialData, width, ratio } = this.props;
 
@@ -46,7 +52,7 @@ class AreaChartWithEdge extends React.Component {
 				width={width}
 				margin={{ left: 20, right: 20, top: 20, bottom: 30 }}
 				type={type}
-				seriesName="ETHUSD"
+				seriesName={`ETHUSD_${this.state.suffix}`}
 				data={data}
 				xScale={xScale}
 				xAccessor={xAccessor}
@@ -79,7 +85,7 @@ class AreaChartWithEdge extends React.Component {
 				<MouseCoordinateX
 					at="bottom"
 					orient="bottom"
-					displayFormat={timeFormat("%Y-%m-%d")} />
+					displayFormat={timeFormat("%Y-%m-%d %H:%M")} />
 				<MouseCoordinateY
 					at="right"
 					orient="left"
@@ -99,10 +105,11 @@ class AreaChartWithEdge extends React.Component {
 					yLabel="Close"
 					yAccessor={d => d.close}
 					xAccessor={d => d.date}
-					xDisplayFormat={timeFormat("%Y-%m-%d %H:%M:%S")} yDisplayFormat={format(".2f")}
+					xDisplayFormat={timeFormat("%Y-%m-%d %H:%M")} yDisplayFormat={format(".2f")}
 					origin={[0, 0]}
 					valueFill= "#FFFFFF"
 					/>	
+				<ZoomButtons onReset={this.handleReset}/>
 
 			</Chart>
 			<Chart id={2}
@@ -120,6 +127,7 @@ class AreaChartWithEdge extends React.Component {
 						stroke fill={(d) => d.close > d.open ? "#6BA583" : "#FF0000"}
 						opacity={0.4}
 						widthRatio={1} />
+					
 
 				</Chart>
 			<CrossHairCursor />
