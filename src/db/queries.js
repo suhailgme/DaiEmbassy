@@ -28,6 +28,7 @@ module.exports.getCdps = `{
             tab
             tx
             pip
+            ratio
           }
         }
       }
