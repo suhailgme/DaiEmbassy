@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Statistic, Form, Grid, Container, Loader } from 'semantic-ui-react'
+import { Statistic, Form, Grid, Container, Popup, Icon } from 'semantic-ui-react'
 import MakerService from '../MakerService'
 const Humanize = require('humanize-plus')
 
@@ -12,6 +12,7 @@ export default class CdpDetails extends Component {
 
     static getDerivedStateFromProps(nextProps, prevState){
         //this does not work, fix it!!
+        // console.log(nextProps)
         return {...nextProps.cdpDetails}
       }
     async componentDidMount(){
@@ -28,6 +29,14 @@ export default class CdpDetails extends Component {
 
     truncateAddress = (account) => {
     return `${account.slice(0,6)}...${account.slice(-4)}` 
+    }
+
+    calculateLiqudationPenalty = () =>{
+        let remainingCollateral = ((this.state.pethCollateral * this.state.liquidationPrice * this.state.pethWethRatio) - (0.13 * this.state.daiDebt)) - this.state.daiDebt
+        remainingCollateral = (remainingCollateral / this.state.liquidationPrice) / this.state.pethWethRatio
+        const liquidationPenalty = (this.state.pethCollateral - remainingCollateral) * this.state.pethWethRatio
+        return !liquidationPenalty ? 0 : this.numberWithCommas(liquidationPenalty)
+        
     }
 
 
@@ -54,11 +63,23 @@ export default class CdpDetails extends Component {
                         </Grid.Row>
                         <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
                             <Grid.Column textAlign='left'>Debt</Grid.Column>
-                            <Grid.Column textAlign='right'>{this.numberWithCommas(this.state.daiDebt)} Dai</Grid.Column>
+                            <Grid.Column textAlign='right'>{this.numberWithCommas(this.state.daiDebt)} DAI</Grid.Column>
                         </Grid.Row>
                         <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
                             <Grid.Column textAlign='left'>Accrued Fees</Grid.Column>
-                            <Grid.Column textAlign='right'>{this.numberWithCommas(this.state.governanceFee)} USD</Grid.Column>
+                            <Grid.Column textAlign='right' style={{whiteSpace:'nowrap'}}>{this.numberWithCommas(this.state.governanceFee)} USD</Grid.Column>
+                        </Grid.Row>
+                        <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
+                            <Grid.Column style={{paddingTop:'0'}} textAlign='left'> Liq. Penalty
+                                    <Popup trigger={<Icon style={{paddingLeft:'3px', cursor:'help'}} 
+                                        name='question circle' 
+                                        size='small'/>}
+
+                                        header='Liquidation Penalty' 
+                                        content='Total value subtracted from CDP should liquidation occur at the liquidation price.' 
+                                        inverted/>
+                            </Grid.Column>
+                            <Grid.Column textAlign='right' style={{whiteSpace:'nowrap'}}>{`${this.calculateLiqudationPenalty()} ETH`}</Grid.Column>
                         </Grid.Row>
                         <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
                             <Grid.Column style={{paddingTop:'0'}} textAlign='left'>Collateralization</Grid.Column>
