@@ -22,6 +22,7 @@ import {
 import { SingleValueTooltip } from "react-stockcharts/lib/tooltip";
 import { fitWidth } from "react-stockcharts/lib/helper";
 import { last } from "react-stockcharts/lib/utils";
+import EdgeIndicator from "react-stockcharts/lib/coordinates/EdgeIndicator";
 
 class AreaChartWithEdge extends React.Component {
 	state = {suffix: 1}
@@ -52,7 +53,7 @@ class AreaChartWithEdge extends React.Component {
 				width={width}
 				margin={{ left: 20, right: 20, top: 20, bottom: 30 }}
 				type={type}
-				seriesName={`ETHUSD_${this.state.suffix}`}
+				seriesName={`DAIUSD_${this.state.suffix}`}
 				data={data}
 				xScale={xScale}
 				xAccessor={xAccessor}
@@ -63,7 +64,7 @@ class AreaChartWithEdge extends React.Component {
 			<Label 
 				x={width  / 2} y={100}
 				fontSize={30} 
-				text="ETHUSD, 60"
+				text="DAIUSD, 1D"
 				fill='#BDC4C7'
 				opacity={0.15} 
 				fontFamily='roboto'
@@ -71,7 +72,7 @@ class AreaChartWithEdge extends React.Component {
 				<Label 
 				x={width  / 2} y={140}
 				fontSize={30} 
-				text="Ethereum / US Dollar CCCAGG"
+				text="DAI / US Dollar Market Agg."
 				fill='#BDC4C7'
 				opacity={0.15} 
 				fontFamily='roboto'
@@ -110,6 +111,7 @@ class AreaChartWithEdge extends React.Component {
 					valueFill= "#FFFFFF"
 					/>	
 				<ZoomButtons onReset={this.handleReset}/>
+				<EdgeIndicator itemType='last' orient='left' edgeAt='right' fill={d => d.close > d.open ? "#6BA583" : "#FF0000"} yAccessor={d=> d.close}/>
 
 			</Chart>
 			<Chart id={2}
