@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Table, Segment} from 'semantic-ui-react'
+import {  Loader } from 'semantic-ui-react'
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 const Humanize = require('humanize-plus')
@@ -7,44 +7,34 @@ const Humanize = require('humanize-plus')
 
 class RecentActions extends Component{
     state = { 
-        cdp: this.props.cdps.find((cdp) =>{
-        return cdp.cdpId === this.props.cdpId
-        }),
-        cdpId: this.props.cdpId
+        // cdp: this.props.cdps.find((cdp) =>{
+        // return cdp.cdpId === this.props.cdpId
+        // }),
+        // cdpId: this.props.cdpId
     }
 
     componentDidMount(){
-        let actions = this.state.cdp.actions
-        // console.log('actions: ', actions)
-        // console.log('Recent Actions State: ',this.state)
+    }
+    
+    static getDerivedStateFromProps(nextProps, prevState){
+        if(nextProps.cdps && nextProps.cdpId !==prevState.cdpId){
+            const cdp = nextProps.cdps.find((cdp) =>{
+                return cdp.cdpId === nextProps.cdpId
+                })
+            return {
+                cdp, 
+                cdpId: nextProps.cdpId, 
+            }
+        }
+        return null
     }
 
-    // getActions = () =>{
-    //     let recentActions = []
-    //     const actions = this.state.cdp.actions
-    //     // console.log('actions: ', actions)
-    //     actions.forEach(action => {
-    //         recentActions.push(<Table.Row>
-    //             <Table.Cell singleLine>
-    //                 {new Date(action.time).toString().slice(0,-37)}
-    //             </Table.Cell>
-    //             <Table.Cell>
-    //                 {`${action.act} `}{action.act === 'OPEN' || action.act === 'GIVE' ? '' : action.act == 'DRAW' || action.act == 'WIPE' ? `${this.numberWithCommas(action.arg)} DAI` : `${this.numberWithCommas(action.arg)} PETH`}
-    //             </Table.Cell>
-    //             <Table.Cell>
-    //                 <a target="_blank" href={`https://etherscan.io/tx/${action.tx}`} style={{textDecoration:'underline', color:'inherit'}}>{this.truncateTx(action.tx)}</a>
-    //             </Table.Cell>
-    //             <Table.Cell>
-    //                 {`$${this.numberWithCommas(action.pip)}`}
-    //             </Table.Cell>
-    //         </Table.Row>)
-    //     })
-    //     return recentActions
-    // }
 
     getActions = () =>{
         let recentActions = []
         const actions = this.state.cdp.actions
+        // console.log("actions:", actions)
+        
         // console.log('actions: ', actions)
         actions.forEach((action, index) => {
             recentActions.push(
@@ -53,6 +43,9 @@ class RecentActions extends Component{
                     act: `${action.act} ${action.act === 'OPEN' || action.act === 'GIVE' ? '' : action.act == 'DRAW' || action.act == 'WIPE' ? `${this.numberWithCommas(action.arg)} DAI` : `${this.numberWithCommas(action.arg)} PETH`}`,
                     tx: <a target="_blank" href={`https://etherscan.io/tx/${action.tx}`} style={{textDecoration:'underline', color:'inherit'}}>{this.truncateTx(action.tx)}</a>,
                     price: `$${this.numberWithCommas(action.pip)}`,
+                    debt: `${this.numberWithCommas(action.art)} DAI`,
+                    collateral: `${this.numberWithCommas(action.ink)} PETH`,
+                    ratio: `${this.numberWithCommas(action.ratio)}`,
                     id: index
                 })
         })
@@ -69,6 +62,8 @@ class RecentActions extends Component{
       }
 
     render(){
+        const loaded = this.state.cdp
+        if(loaded){
         const actions = this.getActions()
         return (
             <div style={{color:'#FFF', borderRadius:'5px', border: '2px solid #38414B',
@@ -89,13 +84,28 @@ class RecentActions extends Component{
                                 accessor: 'act'
                             },
                             {
-                                Header: "Tx Hash",
-                                accessor: "tx"
+                                Header: 'Debt',
+                                accessor: 'debt'
+                            },
+                            {
+                                Header: 'Collateral',
+                                accessor: 'collateral'
+                            },
+                            {
+                                id: 'ratio',
+                                Header: 'Collateralization Ratio',
+                                accessor: data =>data.ratio,
+                                Cell: props => <p style={{color: props.value == 0.00 ? '#FFF' : props.value < 170 ? '#FF695E' : props.value < 200 ? '#EFBC72' : '#FFF' }}>{`${props.value} %`}</p>,
+
                             },
                             {
                                 Header: "ETH/USD",
                                 accessor: "price"
-                            },    
+                            },  
+                            {
+                                Header: "Tx Hash",
+                                accessor: "tx"
+                            },  
                 ]}
                 defaultPageSize={10}
                 className="-striped -highlight"
@@ -105,7 +115,18 @@ class RecentActions extends Component{
                 sortable = {false}
               />
             </div>
-          );
+          )
+        }else{
+            return (
+                <div style={{color:'#FFF', borderRadius:'5px', border: '2px solid #38414B',
+                backgroundColor:'#273340', paddingTop:'10px', paddingLeft:'5px', height:'406px'}}>
+                <h4>Loading Recent Actions</h4>
+                <hr style={{opacity:'0.7'}}/>
+                <Loader active inverted inline='centered'/>
+                
+                </div>
+                )
+        }
         // return(
         //     <Segment style={{paddingTop:'10px', backgroundColor:'#232D39', borderRadius:'5px', border: '2px solid #38414B',maxHeight:384.5, overflow:'auto'}}>
         //     <Table inverted compact style={{backgroundColor:'#3D4853',}}>
