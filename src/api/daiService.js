@@ -1,6 +1,7 @@
 const axios = require('axios')
 const queries = require('../db/queries')
 const url = 'https://graphql.makerdao.com/v1'
+const url2 = 'https://sai-mainnet.makerfoundation.com/v1'
 const kovanUrl = 'https://kovan-data.makerdao.com/v1'
 //const url = 'https://dai-service.makerdao.com/cups/conditions=closed:false/sort=cupi:desc'
 
@@ -8,7 +9,7 @@ const kovanUrl = 'https://kovan-data.makerdao.com/v1'
 
 export async function getCdps() {
     try{
-        let cdps = await axios.post(url, {query:queries.getCdps})
+        let cdps = await axios.post(url2, {query:queries.getCdps})
         cdps = cdps.data.data.allCups.nodes.map(cdp => {
             return {
                 cdpId:cdp.id,
