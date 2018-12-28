@@ -1,5 +1,3 @@
-import { format } from 'util';
-
 const axios = require('axios');
 
 export async function getMarketData() {
@@ -23,6 +21,48 @@ export async function getMarketData() {
         console.error(e)
     }
 
+}
+
+export async function getDaiHistorical  () {
+    let lastYear = new Date()
+    lastYear.setDate(lastYear.getDate()-366)
+    lastYear = parseInt((lastYear.getTime() / 1000)).toFixed()
+    // console.log(lastYear)
+    const url = `https://api.coinpaprika.com/v1/coins/dai-dai/ohlcv/historical?start=${lastYear}&limit=366`
+    try{
+        let res = await axios.get(url)
+        const history = res.data
+        const historicalData = history.map(day =>{
+            return{
+            date: new Date(day.time_close),
+            open: +day.open,
+            high: +day.high,
+            low: + day.low,
+            close: +day.close,
+            volume: Math.round(day.volume)
+            }
+        })
+        return historicalData
+    }catch(e){
+    console.error(e)
+    }
+}
+async function getTickers() {
+    const url = 'https://api.coinpaprika.com/v1/tickers'
+    try{
+        let res = await axios.get(url)
+        const tickers = res.data
+        return tickers
+    }catch(e){
+        console.error(e)
+    }
+}
+
+export async function getEthTicker(){
+    const tickers = await getTickers()
+    return tickers.find((ticker) =>{
+        return ticker.id === 'eth-ethereum'
+    })
 }
 
 export async function getEthPrice() {
