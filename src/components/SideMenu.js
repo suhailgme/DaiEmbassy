@@ -9,14 +9,14 @@ export default class SideMenu extends Component{
 
     componentDidMount(){
         // console.log(window.innerWidth)
-        let fluid = window.innerWidth <= 768 ? true : false
+        let fluid = window.innerWidth < 768 ? true : false
         this.setState({fluid})
     }
 
 
     handleUpdate = (e, {width})=>{
         let fluid = this.state.fluid
-        fluid = width <= 768 ? true : false
+        fluid = width < 768 ? true : false
         this.setState({fluid})
     }
 

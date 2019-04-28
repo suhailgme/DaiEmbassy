@@ -7,7 +7,7 @@ const Humanize = require('humanize-plus')
 
 export default class CdpDetails extends Component {
     state = {
-        ...this.props.cdpDetails
+        ...this.props.cdpDetails,
     }
 
     static getDerivedStateFromProps(nextProps, prevState){

@@ -1,6 +1,7 @@
 import Maker from '@makerdao/dai';
 import Web3 from 'web3'
 
+
 export default class MakerService {
 
     constructor(cdpId) {
@@ -13,11 +14,21 @@ export default class MakerService {
 
     init = async () => {
         try{
-            this.maker = await Maker.create('browser')
+            // Previous host was 'mainnet' provided by Maker. Switched to infura 27-Mar-19.
+            // Private key is random Maker private key from github used on Kovan testnet.
+            // this.maker = await Maker.create('mainnet', {
+            //     privateKey: 'b178ad06eb08e2cd34346b5c8ec06654d6ccb1cadf1c9dbd776afd25d44ab8d0'
+
+            // })
+            this.maker = await Maker.create('http', {
+                privateKey: 'b178ad06eb08e2cd34346b5c8ec06654d6ccb1cadf1c9dbd776afd25d44ab8d0',
+                url: 'https://mainnet.infura.io/v3/9b85e55cfa5b40a7ac195fba882f04de'
+
+            })
             await this.maker.authenticate()
             this.price = await this.maker.service('price')
             this.ethCdp = await this.maker.service('cdp')
-            // this.cdp = await this.maker.getCdp(this.cdpId)
+            this.cdp = await this.maker.getCdp(this.cdpId)
         }catch(e){
             console.log('Error authenticating: ', e)
         }
@@ -27,6 +38,10 @@ export default class MakerService {
         const accounts = await this.web3.eth.getAccounts()
         accounts[0] ? this.loggedIn = true : this.loggedIn = false
         return this.loggedIn
+    }
+
+    hasWeb3 = () => {
+        return this.web3 ? true : false
     }
     
 
@@ -96,7 +111,12 @@ export default class MakerService {
     }
 
     getCurrentAccount = async () => {
+        try{
         return this.web3.utils.toChecksumAddress(await this.maker.currentAccount().address)
+        }catch(e){
+            console.error(e)
+            return 0
+        }
     }
 
     getDaiSupply = async () =>{
@@ -118,10 +138,8 @@ export default class MakerService {
             const daiDebt = await this.getDaiDebt()
             const pethCollateral = await this.getPethCollateral()
             const ethPrice = await this.getEthPrice()
-            const mkrPrice = await this.getMkrPrice()
             const liquidationRatio = await this.getLiquidationRatio()
             const pethWethRatio = await this.getPethWethRatio()
-            const circulatingDai = await this.getDaiSupply()
             // Possible issue with dai.js getLiquidationPrice when ink = 0 due to calculation 
             // with ink * liqRatio (possible issue with null as well) 
             let liquidationPrice
@@ -133,7 +151,6 @@ export default class MakerService {
             }
             
             const collateralizationRatio = await this.getCollateralizationRatio()
-            const systemCollateralization = await this.getSystemCollateralization()
             const governanceFee = await this.getGovernanceFee()
             // console.log('daiDebt, pethCollateral,liquidationRatio, pethWethRatio', daiDebt,pethCollateral,liquidationRatio,pethWethRatio)
 
@@ -157,14 +174,7 @@ export default class MakerService {
                     liquidationPrice,
                     collateralizationRatio,
                     governanceFee
-                },
-                systemStatus: {
-                    ethPrice,
-                    mkrPrice,
-                    pethWethRatio,
-                    circulatingDai,
-                    systemCollateralization
-                }, 
+                }
             }
         }catch(error){
             console.log('AN ERROR HAS OCCURED! ', error)

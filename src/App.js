@@ -2,14 +2,28 @@ import React, { Component } from 'react';
 import TopMenu from './components/TopMenu'
 import SideMenu from './components/SideMenu'
 import RecentActions from './components/RecentActions'
-import Chart from './components/Chart'
+import AllRecentActions from './components/AllRecentActions'
+import SignificantActions from './components/SignificantActions'
+import Liquidations from './components/Liquidations'
+import DaiChart from './components/DaiChart'
+import MkrChart from './components/MkrChart'
+import ChartCdp from './components/ChartCdp'
+import DailyActionsChart from './components/DailyActionsChart'
+import DailyLockFreeChart from './components/DailyLockFreeChart'
+import DailyWipeDrawChart from './components/DailyWipeDrawChart'
+import CdpCollateralChart from './components/CdpCollateralChart'
+import CdpDebtChart from './components/CdpDebtChart'
+
+
 import Footer from './components/Footer'
-import { Grid, Loader, Segment } from 'semantic-ui-react'
+import AllCdps from './components/AllCdps'
+import { Grid, Loader, Tab, Label, Icon } from 'semantic-ui-react'
 import './App.css';
 import MakerService from './MakerService'
 import { getCdps } from './api/daiService'
-import { getMarketData} from './api/marketData'
+import { getMarketData, getEthTicker, getDaiHistorical } from './api/marketData'
 import ReactGA from 'react-ga'
+const axios = require('axios')
 
 
 
@@ -21,163 +35,485 @@ class App extends Component {
     usdCollateral: '',
     daiDebt: '',
     fees: '',
-    account:'',
-    loadingMsg:'',
+    account: '',
+    loadingMsg: '',
     searchMsg: '',
+    error: false,
+    updating: false,
+    selectedMarket: 'daiOHLC',
+    systemSelection: 'dailyWipeDraw',
+    cdpSelection: 'pethCollateral',
+    currentTab: 0, //markets is default tab (1), cdp stats is tab 0
+    cdpActionsTab: 0
   }
 
-  async componentDidMount(){
+  async componentDidMount() {
     ReactGA.initialize('UA-128182811-1')
     ReactGA.pageview(window.location.pathname + window.location.search)
-    let account = '0xc031D5e3822bE0335027ecf88aFdfd3433A97fe1', cdpId = 5
-    const maker = new MakerService() //TODO catch error here on new Maker (maybe metamask issue...)
-    if(!maker.hasWeb3){
-      ReactGA.event({
-        category: 'Error',
-        action: 'No Metamask or Mobile Wallet',
-        label: new Date().toString()
-      })
-      this.setState({loadingMsg:'Metamask/Mobile Wallet required',})
+    const maker = new MakerService(5) //TODO catch error here on new Maker (maybe metamask issue...)
+    this.setState({ loadingMsg: 'Initializing...', })
+    await maker.init()
+    const currentAccount = 'Dai Embassy Node'//await maker.getCurrentAccount()
+
+    this.setState({ loadingMsg: 'Getting Market Data...' })
+    // const data = await getMarketData()
+    // const ethTicker = await getEthTicker()
+    // const ethSupply = ethTicker.circulating_supply
+    // Data2 is DAI price from coinPaprika. Restore to setState({data}) to show ETH price from cryptoCompare.
+    // const data2 = await getDaiHistorical()
+    // const dailyCdpsRes = await axios.get('https://dai-embassy-server.herokuapp.com/dailyCdps')
+    const dailyWipeDrawRes = await axios.get('https://dai-embassy-server.herokuapp.com/dailywipedraw')
+
+    const marketRes = await axios.get('https://dai-embassy-server.herokuapp.com/daiOHLC')
+    // const marketRes = await axios.get('http://localhost:2917/daiOHLC')
+
+    // let dailyActions = await axios.get('https://dai-embassy-server.herokuapp.com/dailyActions')
+    const systemStatusRes = await axios.get('https://dai-embassy-server.herokuapp.com/systemStatus')
+
+    const systemStatus = systemStatusRes.data
+    // let allRecentActions = await axios.get('http://localhost:2917/allRecentActions')
+    // allRecentActions = allRecentActions.data.allRecentActions
+
+
+    let data2 = marketRes.data.daiOHLC
+    data2.forEach(day => {
+      day.date = new Date(day.date)
+    })
+    // let data3 = dailyCdpsRes.data.dailyCdps.reverse()
+    // data3.forEach(day =>{
+    //   day.date = new Date(day.date)
+    // })
+    let dailyWipeDraw = dailyWipeDrawRes.data.dailyWipeDraw.reverse()
+    dailyWipeDraw.forEach(day => {
+      day.date = new Date(day.date)
+    })
+    // dailyActions = (dailyActions.data.dailyActions).reverse()
+    // dailyActions.forEach(action => {
+    //   action.date = new Date(action.date)
+    // })
+
+
+    this.setState({ marketData: data2, dailyWipeDraw, systemStatus, })
+    this.setState({ currentAccount, loadingMsg: 'Getting CDPs...' })
+    const res = await axios.get('https://dai-embassy-server.herokuapp.com/searchableCdps')
+    const cdps = res.data.searchableCdps
+    // console.log(cdps)
+    // const cdps = await getCdps()
+    let mostDebt = 0
+    let cdpId
+    cdps.forEach(cdp => {
+      if (+cdp.daiDebt > mostDebt) {
+        mostDebt = +cdp.daiDebt
+        cdpId = cdp.cdpId
+      }
+    })
+    this.setState({ cdps })
+    // console.log(cdps)
+    this.setState({ loadingMsg: `Loading CDP ${cdpId}...` })
+    const { account } = cdps.find((cdp) => {
+      return cdp.cdpId === cdpId
+    })
+
+    // console.log(account, cdpId)
+    try {
+      await maker.setCdpId(cdpId)
+    } catch (error) {
+      this.setState({ currentAccount, account, maker, cdpId, error: true, loadingMsg: `Error loading CDP - Click to retry` })
       return
     }
-    if(await maker.isLoggedIn()){
-      this.setState({loadingMsg:'Initializing...',})
-      await maker.init()
-      const currentAccount = await maker.getCurrentAccount()
-      ReactGA.event({
-        category: currentAccount,
-        action: 'logged in',
-        label: new Date().toString()
+    this.setState({ cdpId })
 
-      })
-      this.setState({currentAccount,loadingMsg:'Getting CDPs...'})
-      const cdps = await getCdps()
-      // console.log(cdps)
-      this.setState({loadingMsg:'Getting Market data...'})
-      const data = await getMarketData()
-      this.setState({data})
-      // console.log(data)
-      this.setState({loadingMsg:'Loading account...'})
-      cdps.forEach((cdp) =>{
-        if(cdp.account === currentAccount){
-          cdpId = cdp.cdpId
-          account = cdp.account
-          ReactGA.event({
-            category: currentAccount,
-            action: `owns ${cdpId}`,
-            label: new Date().toString()
+    const cdpCollateralDebtRes = await axios.get(`https://dai-embassy-server.herokuapp.com/collateralDebt?&id=${this.state.cdpId}`)
+    // const cdpCollateralDebtRes = await axios.get(`http://localhost:2917/collateralDebt?&id=${this.state.cdpId}`)
 
-          })
-        }
-      })
+    let cdpCollateralDebt = cdpCollateralDebtRes.data.collateralDebt
+    cdpCollateralDebt.forEach(day => {
+      day.date = new Date(day.date)
+    })
 
-      // console.log(account, cdpId)
-      await maker.setCdpId(cdpId)
+    const { wipeDraw, cdpDetails, error } = await maker.getAllDetails()
 
-      const {wipeDraw, cdpDetails, systemStatus, error} = await maker.getAllDetails()
-      if(error){
-        ReactGA.event({
-          category: 'Error',
-          action: `Error on initial load`,
-          label: new Date().toString()
-        })
-        this.setState({loadingMsg: `Error loading CDP - Try refreshing`})
-        return
-      }
-      cdpDetails.account = account
-      systemStatus.totalCDPs = cdps.length
-
-      this.setState({currentAccount, account, maker, cdpId, cdps, wipeDraw, cdpDetails, systemStatus,loadingMsg:'', })
-    }else{
+    if (error) {
       ReactGA.event({
         category: 'Error',
-        action: `Web3 available but not logged in`,
+        action: `Error on initial load`,
         label: new Date().toString()
       })
-      this.setState({loadingMsg: 'Please login to Metamask'})
+      this.setState({ currentAccount, account, maker, cdpId, error: true, loadingMsg: `Error loading CDP - Click to retry` })
+      return
     }
 
+    cdpDetails.account = account
+
+    this.setState({ updating: true, currentAccount, account, maker, cdpId, wipeDraw, cdpDetails, loadingMsg: '', cdpCollateralDebt })
+    // this.updateData()
+    // console.log(this.state.cdpCollateralDebt)
+
   }
-  
-  handleSearchClick = async (e, {value}) =>{
-    const id = parseInt(value)
-    if(this.state.cdpId !== id){
 
-      ReactGA.event({
-        category: this.state.currentAccount,
-        action: `Searched for CDP ${id}`,
-        label: new Date().toString()
-      })
+  handleSearchClick = async (e, { value }) => {
+    if (!this.state.loadingMsg) {
 
-      this.setState({wipeDraw:null, cdpDetails: null, cdpId: '', searchMsg: '', loadingMsg:`Loading CDP: ${id}`,})
-      const maker = this.state.maker
-      await maker.setCdpId(id)
-      const {wipeDraw, cdpDetails, systemStatus, error} = await maker.getAllDetails()
-      // console.log('Wipe draw after click: ', wipeDraw,cdpDetails,systemStatus, error)
-      if(error){
+      window.scrollTo(0, 0)
+      const id = parseInt(value)
+      if (this.state.cdpId !== id || e) {
         ReactGA.event({
           category: this.state.currentAccount,
-          action: `encountered error searching for CDP ${id}`,
+          action: `Searched for CDP ${id}`,
           label: new Date().toString()
         })
-        this.setState({loadingMsg: `Error loading CDP ${id} - Please wait a few seconds before retrying.`, searchMsg: `Error loading CDP ${id}`})
-        return
-      }
-      const { account } = this.state.cdps.find((cdp) =>{
-        return cdp.cdpId === id
-    })
-      cdpDetails.account = account
+        this.setState({ error: false, wipeDraw: null, cdpDetails: null, systemStatus: null, cdpId: null, searchMsg: '', loadingMsg: `Loading CDP: ${id}`, })
 
-      this.setState({wipeDraw, cdpDetails, systemStatus, cdpId:id, loadingMsg:''})
+        const maker = this.state.maker
+        try {
+          await maker.setCdpId(id) // needs error handling! If error occurs, site loads properly with last CDP info (not accurate)
+          this.setState({ cdpId: id })
+        } catch (error) {
+          this.setState({ error: true, loadingMsg: `Error loading CDP ${id} - Please wait a few seconds before retrying.`, searchMsg: `Error loading CDP ${id}` })
+          return
+        }
+        const cdpCollateralDebtRes = await axios.get(`https://dai-embassy-server.herokuapp.com/collateralDebt?&id=${this.state.cdpId}`)
+        // const cdpCollateralDebtRes = await axios.get(`http://localhost:2917/collateralDebt?&id=${this.state.cdpId}`)
+
+        let cdpCollateralDebt = cdpCollateralDebtRes.data.collateralDebt
+        cdpCollateralDebt.forEach(day => {
+          day.date = new Date(day.date)
+        })
+
+        const systemStatusRes = await axios.get('https://dai-embassy-server.herokuapp.com/systemStatus')
+        const systemStatus = systemStatusRes.data
+        const { wipeDraw, cdpDetails, error } = await maker.getAllDetails()
+        // console.log('Wipe draw after click: ', wipeDraw,cdpDetails,systemStatus, error)
+        if (error) {
+          ReactGA.event({
+            category: this.state.currentAccount,
+            action: `encountered error searching for CDP ${id}`,
+            label: new Date().toString()
+          })
+          this.setState({ error: true, loadingMsg: `Error loading CDP ${id} - Please wait a few seconds before retrying.`, searchMsg: `Error loading CDP ${id}` })
+          return
+        }
+        const { account } = this.state.cdps.find((cdp) => {
+          return cdp.cdpId === id
+        })
+
+        cdpDetails.account = account
+
+        if (this.state.updating) {
+          this.setState({ error: false, wipeDraw, cdpDetails, systemStatus, cdpId: id, loadingMsg: '', cdpCollateralDebt })
+        } else {
+          this.setState({ updating: true, error: false, wipeDraw, cdpDetails, systemStatus, cdpId: id, loadingMsg: '', cdpCollateralDebt })
+          // this.updateData()
+        }
+        // console.log(cdpCollateralDebt)
+        ReactGA.pageview(`/cdp/${id}`)
+
+      }
     }
   }
- 
-  isLoaded = () =>{
-    if(this.state.wipeDraw && this.state.cdpDetails && this.state.systemStatus){
-      return(
-        <Grid.Row style={{paddingTop:0,paddingLeft:'2px'}} >
-        <SideMenu 
-        wipeDraw={this.state.wipeDraw} 
-        cdpDetails={this.state.cdpDetails} 
-        systemStatus={this.state.systemStatus}
-        account={this.state.account} 
-        cdpId={this.state.cdpId} 
-        />
-        
-      <Grid.Column width={12} tablet={10}>
-          <Segment inverted style={{
-            backgroundColor:'#273340', 
-            borderRadius:'5px', 
-            border: '2px solid #38414B'
+
+  handleError = async () => {
+    await this.handleSearchClick(this.state.error, { value: this.state.cdpId })
+  }
+
+  updateData = async () => {
+    console.log('Updating data every 30s...')
+    setInterval(async () => {
+      if (!this.state.error && !this.state.loadingMsg) {
+        const maker = this.state.maker
+        const { wipeDraw, cdpDetails, systemStatus, error } = await maker.getAllDetails()
+        console.log('Updating data')
+        if (!error) {
+          console.log('new data: ', systemStatus)
+          this.setState({ wipeDraw, cdpDetails, systemStatus })
+        }
+      }
+    }, 30000)
+  }
+
+  handleMarketButton = async (e) => {
+    e.preventDefault()
+    const currentSelection = this.state.selectedMarket
+    const selection = e.target.value
+    if (selection !== currentSelection) {
+      ReactGA.modalview(`/${selection}`);
+      const marketRes = await axios.get(`https://dai-embassy-server.herokuapp.com/${selection}`)
+      // const marketRes = await axios.get(`http://localhost:2917/${selection}`)
+
+      let data = marketRes.data[selection]
+      data.forEach(day => {
+        day.date = new Date(day.date)
+      })
+      this.setState({ marketData: data, selectedMarket: selection })
+    }
+  }
+
+  handleSystemButton = async (e) => {
+    e.preventDefault()
+    const currentSelection = this.state.systemSelection
+    const selection = e.target.value
+    if (selection !== currentSelection) {
+      this.setState({ [selection]: null })
+
+      ReactGA.modalview(`/${selection}`);
+      const res = await axios.get(`https://dai-embassy-server.herokuapp.com/${selection}`)
+      // const res = await axios.get(`http://localhost:2917/${selection}`)
+
+      let data = res.data[selection].reverse()
+      data.forEach(day => {
+        day.date = new Date(day.date)
+      })
+      // console.log(selection, data)
+      this.setState({ [selection]: data, systemSelection: selection })
+
+    }
+  }
+
+  handleCdpButton = async (e) => {
+    e.preventDefault()
+    const currentSelection = this.state.cdpSelection
+    const selection = e.target.value
+    if (selection !== currentSelection) {
+      ReactGA.modalview(`/${this.state.cdpId}/${selection}`);
+      this.setState({ cdpSelection: selection })
+    }
+  }
+
+
+
+  handleTabChange = (e, activeIndex, menuItem) => {
+    if (this.state.currentTab !== activeIndex) {
+      this.setState({ currentTab: activeIndex })
+      ReactGA.modalview(`/tab/${menuItem}`)
+      // console.log(menuItem)
+    }
+  }
+
+  handleActionsTabChange = (e, activeIndex, menuItem) => {
+    if (this.state.cdpActionsTab !== activeIndex) {
+      this.setState({ cdpActionsTab: activeIndex })
+      ReactGA.modalview(`/table/${menuItem}`)
+      // console.log(menuItem)
+    }
+  }
+
+  loadContent = () => {
+    if (!this.state.error) {
+      const panes = [
+        {
+          menuItem: { key: 0, icon: 'target', content: this.state.cdpId ? `CDP ${this.state.cdpId}` : 'Loading' },
+          render: () =>
+            <Tab.Pane style={{
+              backgroundColor: '#273340',
+              height: '565px',
+              border: '2px solid #38414B',
+              borderTop: 0,
+              borderTopRadius: 0,
+              paddingBottom: 0
             }}>
-            <Chart data={this.state.data} /></Segment>  
-          <RecentActions cdps={this.state.cdps} cdpId={this.state.cdpId}/>  
-      </Grid.Column>
+              <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='pethCollateral' onClick={this.handleCdpButton}>{`PETH Collateral`}</button>
+              <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='daiDebt' onClick={this.handleCdpButton}>{`DAI Debt`}</button>
+              <hr style={{ opacity: '0.7' }} />
+              {this.state.cdpCollateralDebt && this.state.cdpDetails ? this.state.cdpSelection === 'pethCollateral' ? <CdpCollateralChart data={this.state.cdpCollateralDebt} cdpId={this.state.cdpId} /> : <CdpDebtChart data={this.state.cdpCollateralDebt} cdpId={this.state.cdpId} /> : <Loader active inverted inline='centered' />}
+              {this.state.cdpCollateralDebt && this.state.cdpDetails ?
+                <Grid>
+                  <Grid.Column textAlign="right" style={{ paddingRight: "27px", paddingBottom: 0, paddingTop: "12px" }}>
+                    <div className={{ position: "relative" }}>
+                      <div style={{ width: "10px", height: "10px", backgroundColor: "#E6BB48", display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                      <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>Liquidation Price</span>
+                      <div style={{ width: "10px", height: "10px", backgroundColor: this.state.cdpSelection == "pethCollateral" ? "#189F3A" : "#FF0000", display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                      <span style={{ paddingLeft: "20px", color: "#FFF" }}>{this.state.cdpSelection == "pethCollateral" ? `PETH Collateral` : `DAI Debt`}</span>
+                    </div>
+                  </Grid.Column>
+                </Grid>
+                : null}
+
+            </Tab.Pane>
+        },
+        {
+          menuItem: { key: 1, icon: 'cog', content: 'System' },
+          render: () =>
+            <Tab.Pane style={{
+              backgroundColor: '#273340',
+              height: window.innerWidth > 768 ? '565px' : this.state.systemSelection == "dailyLockFree" ? '620px' : '600px',
+              border: '2px solid #38414B',
+              borderTop: 0,
+              borderTopRadius: 0
+            }}
+            >
+              <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='dailyCdps' onClick={this.handleSystemButton}>{`CDP Creation`}</button>
+              <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='dailyActions' onClick={this.handleSystemButton}>{`CDP Activity`}</button>
+              <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='dailyLockFree' onClick={this.handleSystemButton}>{`PETH Deposits/Withdrawals`}</button>
+              <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='dailyWipeDraw' onClick={this.handleSystemButton}>{`DAI Repaid/Created`}</button>
+
+              <hr style={{ opacity: '0.7' }} />
+              {this.state.dailyCdps && this.state.systemSelection === 'dailyCdps' ? <ChartCdp data={this.state.dailyCdps} /> : this.state.dailyActions && this.state.systemSelection === 'dailyActions' ? <DailyActionsChart data={this.state.dailyActions} /> : this.state.dailyLockFree && this.state.systemSelection === 'dailyLockFree' ? <DailyLockFreeChart data={this.state.dailyLockFree} /> : this.state.dailyWipeDraw && this.state.systemSelection === 'dailyWipeDraw' ? <DailyWipeDrawChart data={this.state.dailyWipeDraw} /> : <Loader active inverted inline='centered' />}
+              {(this.state.systemSelection == "dailyWipeDraw" || this.state.systemSelection == "dailyLockFree") && (this.state.dailyWipeDraw || this.state.dailyLockFree) ?
+                <Grid>
+                  <Grid.Column textAlign="right" style={{ paddingRight: "27px", paddingBottom: 0, paddingTop: "12px" }}>
+                    <div className={{ position: "relative" }}>
+                      {(() => {
+                        if (this.state.systemSelection == "dailyLockFree") {
+                          return (
+                            <span>
+                              <div style={{ width: "10px", height: "10px", backgroundColor: "#2a95dd", display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                              <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>Locked ETH</span>
+                            </span>
+                          )
+                        }
+                      })()}
+                      <div style={{ width: "10px", height: "10px", backgroundColor: "#E6BB48", display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                      <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>{this.state.systemSelection == "dailyWipeDraw" ? 'Circ. DAI' : 'Locked PETH'}</span>
+                      <span style={{ display: 'inline-block' }}>
+                        <div style={{ width: "10px", height: "10px", backgroundColor: "#FF0000", display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                        <span style={{ paddingLeft: "20px", color: "#FFF", }}>{this.state.systemSelection == "dailyWipeDraw" ? `DAI Created` : `PETH Withdrawn`}</span>
+                      </span>
+                      <span style={{ display: 'inline-block' }}>
+                        <div style={{ width: "10px", height: "10px", backgroundColor: "#189F3A", display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                        <span style={{ paddingLeft: "20px", color: "#FFF" }}>{this.state.systemSelection == "dailyWipeDraw" ? `DAI Repaid` : `PETH Deposited`}</span>
+                      </span>
+
+                    </div>
+                  </Grid.Column>
+                </Grid>
+                : null}
+
+            </Tab.Pane>
+        },
+        {
+          menuItem: { key: 2, icon: 'area chart', content: 'Markets' },
+          render: () =>
+            <Tab.Pane style={{
+              backgroundColor: '#273340',
+              height: '555px',
+              border: '2px solid #38414B',
+              borderTop: 0,
+              borderTopRadius: 0
+            }}>
+              <button style={{ background: 'none', border: 'none', paddingLeft: 0, textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='daiOHLC' onClick={this.handleMarketButton}>{`DAI/USD`}</button>
+              <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='mkrOHLC' onClick={this.handleMarketButton}>{`MKR/USD`}</button>
+
+              <hr style={{ opacity: '0.7' }} />
+              {this.state.marketData && this.state.selectedMarket === 'daiOHLC' ? <DaiChart data={this.state.marketData} market={this.state.selectedMarket} /> : this.state.marketData && this.state.selectedMarket === 'mkrOHLC' ? <MkrChart data={this.state.marketData} market={this.state.selectedMarket} /> : <Loader active inverted inline='centered' />}
+            </Tab.Pane>
+        },
+      ]
+      const cdpActionsPane = [
+        {
+          menuItem: { key: 0, icon: 'lightning', content: 'Significant CDP Actions' },
+          render: () =>
+            <Tab.Pane style={{
+              backgroundColor: '#273340',
+              border: '2px solid #38414B',
+              borderTop: 0,
+              borderTopRadius: 0,
+              padding: 0
+            }}
+            >
+              <SignificantActions handleSearchClick={this.handleSearchClick} />
+            </Tab.Pane>
+        },
+        {
+          menuItem: { key: 1, icon: 'history', content: 'All CDP Actions' },
+          render: () =>
+            <Tab.Pane style={{
+              backgroundColor: '#273340',
+              border: '2px solid #38414B',
+              borderTop: 0,
+              borderTopRadius: 0,
+              padding: 0
+            }}
+            >
+              <AllRecentActions handleSearchClick={this.handleSearchClick} />
+            </Tab.Pane>
+        },
+        {
+          menuItem: { key: 2, icon: 'trash', content: 'Liquidations' },
+          render: () =>
+            <Tab.Pane style={{
+              backgroundColor: '#273340',
+              border: '2px solid #38414B',
+              borderTop: 0,
+              borderTopRadius: 0,
+              padding: 0
+            }}
+            >
+              <Liquidations handleSearchClick={this.handleSearchClick} />
+            </Tab.Pane>
+        }]
+      return (
+        <Grid.Row style={{ paddingTop: 0, paddingLeft: '2px' }} >
+          <SideMenu
+            wipeDraw={this.state.wipeDraw}
+            cdpDetails={this.state.cdpDetails}
+            systemStatus={this.state.systemStatus}
+            account={this.state.account}
+            cdpId={this.state.cdpId}
+          />
+
+          <Grid.Column width={12} tablet={10}>
+            <Tab
+              menu={{ attached: 'top', inverted: true, style: { backgroundColor: '#273340', border: '2px solid #38414B' } }}
+              style={{ paddingBottom: '10px', }}
+              defaultActiveIndex={this.state.currentTab}
+              onTabChange={(e, { activeIndex }) => this.handleTabChange(e, activeIndex, panes[activeIndex].menuItem.content)}
+              panes={panes}
+              onMouseEnter={() => {
+                if (!this.state.loadingMsg && window.innerWidth > 768) {
+                  let style = document.body.style.overflow
+                  document.body.style.overflow = 'hidden'
+                }
+              }}
+              onMouseLeave={() => {
+                if (!this.state.loadingMsg && window.innerWidth > 768) {
+                  let style = document.body.style.overflow
+                  document.body.style.overflow = 'auto'
+                }
+              }}
+
+            >
+
+            </Tab>
+
+            <RecentActions cdpId={this.state.cdpId} />
+            <Tab
+              menu={{ attached: 'top', inverted: true, style: { backgroundColor: '#273340', border: '2px solid #38414B', display: 'flex', flexDirection: window.innerWidth > 768 ? 'row' : 'column', flexWrap: 'wrap' } }}
+              style={{ paddingTop: '10px',}}
+              defaultActiveIndex ={this.state.cdpActionsTab}
+              onTabChange={(e, {activeIndex}) => this.handleActionsTabChange(e, activeIndex, cdpActionsPane[activeIndex].menuItem.content)}
+              panes={cdpActionsPane}
+            >
+        </Tab>
+              <div style={{paddingTop:'10px'}}>  
+              <AllCdps handleSearchClick={this.handleSearchClick} cdps={this.state.cdps}  systemStatus={this.state.systemStatus}/>
+            </div>
+        </Grid.Column>
       </Grid.Row>
-      )
-    }else{
+       ) 
+    }else{ 
       return(
-        //return only loader element to restore previous function (remove grids, etc.) ONLY IF NEEDED
+        //return only load er element  to restore previous f uncti on (remove grids, etc.) ONLY IF NEEDED
         <Grid.Row style={{paddingTop:'10%', paddingBottom:'10%'}}>
-          <Grid.Column>
-            <Loader inverted active content={this.state.loadingMsg}/>
+          <Grid.Column>        
+            <Loader inverted active content={this.state.error ? <button onClick={this.handleError} style={{background: 'none', border:'none', padding:0, textDecoration:'underline', color:'#FFF', cursor:'pointer'}}>{this.state.loadingMsg}</button> : this.state.loadingMsg}/>
           </Grid.Column>
-        </Grid.Row>
+</Grid.Row>
         
       )
     }
   }
 
   render() {
-    return (
+    return (   
       <div className="App" style={{backgroundColor:'#232D39'}}>
-        <Grid stackable>
-          <Grid.Row style={{paddingBottom:0, paddingLeft:'2px'}}>
+        <Grid stackable>    
+          <Grid.Row style={{paddingBottom:0, paddingLeft:'2px'}}> 
             <TopMenu searchMsg={this.state.searchMsg} loadingMsg={this.state.loadingMsg} handleSearchClick={this.handleSearchClick} cdps={this.state.cdps} account={this.state.currentAccount}/>
           </Grid.Row>
-          {this.isLoaded()}
-        </Grid>
-        {/* <Footer/> */}
+          {this.loadContent()}
+        </Grid> 
+        <Footer/>
+
       </div>
     );
   }

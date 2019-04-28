@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
-import {  Loader } from 'semantic-ui-react'
+import {  Loader, Icon } from 'semantic-ui-react'
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 const Humanize = require('humanize-plus')
+const axios = require('axios')
 
 
 class RecentActions extends Component{
@@ -13,26 +14,39 @@ class RecentActions extends Component{
         // cdpId: this.props.cdpId
     }
 
-    componentDidMount(){
+    async componentDidMount() {
+        // const cdpId = this.state.cdpId
+        // if (cdpId) {
+        //     const cdpRes = await axios.get(`https://dai-embassy-server.herokuapp.com/cdp?id=${cdpId}`)
+        //     const recentActions = cdpRes.data.actions
+        //     console.log(recentActions)
+        //     this.setState({ recentActions })
+        // }
     }
+    async componentDidUpdate(prevProps) {
+        if (this.props.cdpId && this.props.cdpId !== prevProps.cdpId) {
+                const cdpRes = await axios.get(`https://dai-embassy-server.herokuapp.com/cdp?id=${this.props.cdpId}`)
+                const recentActions = cdpRes.data.actions
+                this.setState({ recentActions })
+        }
+      }
     
     static getDerivedStateFromProps(nextProps, prevState){
-        if(nextProps.cdps && nextProps.cdpId !==prevState.cdpId){
-            const cdp = nextProps.cdps.find((cdp) =>{
-                return cdp.cdpId === nextProps.cdpId
-                })
-            return {
-                cdp, 
-                cdpId: nextProps.cdpId, 
-            }
+        if(nextProps.cdpId && nextProps.cdpId !==prevState.cdpId){
+                return {cdpId: nextProps.cdpId, recentActions:null }
         }
         return null
+
     }
 
 
     getActions = () =>{
         let recentActions = []
-        const actions = this.state.cdp.actions
+        const actions = this.state.recentActions
+        if(new Date(actions[0].time) < new Date(actions[actions.length-1].time)){
+            actions.reverse()
+        }
+        
         // console.log("actions:", actions)
         
         // console.log('actions: ', actions)
@@ -62,13 +76,13 @@ class RecentActions extends Component{
       }
 
     render(){
-        const loaded = this.state.cdp
+        const loaded = this.state.recentActions
         if(loaded){
         const actions = this.getActions()
         return (
             <div style={{color:'#FFF', borderRadius:'5px', border: '2px solid #38414B',
             backgroundColor:'#273340', paddingTop:'10px', paddingLeft:'5px'}}>
-                <h4>Recent Actions (CDP {this.state.cdpId})</h4>
+                <h4><Icon name='target'/>CDP {this.state.cdpId} Actions</h4>
                 <hr style={{opacity:'0.7'}}/>
               <ReactTable
                 data = {actions}
@@ -107,7 +121,6 @@ class RecentActions extends Component{
                                 accessor: "tx"
                             },  
                 ]}
-                defaultPageSize={10}
                 className="-striped -highlight"
                 style={{color:'#FFF', textAlign:'center', height:'350px',}}
                 showPagination = {false}
@@ -120,7 +133,7 @@ class RecentActions extends Component{
             return (
                 <div style={{color:'#FFF', borderRadius:'5px', border: '2px solid #38414B',
                 backgroundColor:'#273340', paddingTop:'10px', paddingLeft:'5px', height:'406px'}}>
-                <h4>Loading Recent Actions</h4>
+                <h4><Icon name='target'/>Loading CDP Actions</h4>
                 <hr style={{opacity:'0.7'}}/>
                 <Loader active inverted inline='centered'/>
                 

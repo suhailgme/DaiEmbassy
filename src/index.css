@@ -22,3 +22,12 @@ body {
 .ReactTable .rt-thead .rt-th.-sort-asc {
   box-shadow: inset 0 3px 0 0 #B2B5B9 !important;
 }
+
+.logo:hover{
+  background:#3D4853!important;
+}
+
+.ui.search > .results {
+  overflow-y: auto;
+  max-height: 550px;
+}

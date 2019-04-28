@@ -4,11 +4,12 @@ import PropTypes from "prop-types";
 
 import { format } from "d3-format";
 import { timeFormat } from "d3-time-format";
+import { curveMonotoneX, curveBasis } from "d3-shape"
 
 import { ChartCanvas, Chart, ZoomButtons } from "react-stockcharts";
 import {
-	BarSeries,
 	AreaSeries,
+	LineSeries
 } from "react-stockcharts/lib/series";
 import {  Label } from "react-stockcharts/lib/annotation";
 import { discontinuousTimeScaleProvider } from "react-stockcharts/lib/scale";
@@ -23,16 +24,23 @@ import { SingleValueTooltip } from "react-stockcharts/lib/tooltip";
 import { fitWidth } from "react-stockcharts/lib/helper";
 import { last } from "react-stockcharts/lib/utils";
 import EdgeIndicator from "react-stockcharts/lib/coordinates/EdgeIndicator";
+import { HoverTooltip } from "react-stockcharts/lib/tooltip";
+
+const dateFormat = timeFormat("%Y-%m-%d");
+const numberFormat = format('.4s')
+
 
 class AreaChartWithEdge extends React.Component {
 	state = {suffix: 1}
 
+
 	handleReset = () => {
 		this.setState({suffix: this.state.suffix + 1})
 	}
+	
 
 	render() {
-		const { type, data: initialData, width, ratio } = this.props;
+		const { type, data: initialData, width, ratio, cdpId } = this.props;
 
 		const xScaleProvider = discontinuousTimeScaleProvider
 			.inputDateAccessor(d => d.date);
@@ -44,27 +52,27 @@ class AreaChartWithEdge extends React.Component {
 		} = xScaleProvider(initialData);
 
 		const start = xAccessor(last(data));
-		const end = xAccessor(data[Math.max(0, data.length - 100)]);
+		const end = xAccessor(data[Math.max(0, data.length-400)]);
 		const xExtents = [start, end];
 		return (
-			<ChartCanvas height={400}
+			<ChartCanvas height={490}
                 // clamp={true}
 				ratio={ratio}
 				width={width}
-				margin={{ left: 20, right: 20, top: 20, bottom: 30 }}
+				margin={{ left: 10, right: 10, top: 20, bottom: 30 }}
 				type={type}
-				seriesName={`DAIUSD_${this.state.suffix}`}
+				seriesName={`CDP_DEBT_${this.state.suffix}`}
 				data={data}
 				xScale={xScale}
 				xAccessor={xAccessor}
 				displayXAccessor={displayXAccessor}
 				xExtents={xExtents}
+
 			>
-			
 			<Label 
 				x={width  / 2} y={100}
 				fontSize={30} 
-				text="DAIUSD, 1D"
+				text= {`CDP ${cdpId} DAI Debt`}
 				fill='#BDC4C7'
 				opacity={0.15} 
 				fontFamily='roboto'
@@ -72,66 +80,65 @@ class AreaChartWithEdge extends React.Component {
 				<Label 
 				x={width  / 2} y={140}
 				fontSize={30} 
-				text="DAI / US Dollar Market Agg."
+				text="Dai Embassy"
 				fill='#BDC4C7'
 				opacity={0.15} 
 				fontFamily='roboto'
 				fontSize={20}
 				/>
+				
 
-			<Chart id={1} yExtents={d => [d.high, d.low]}>
+			<Chart id={1} yExtents={d => [0, +d.daiDebt + +d.daiDebt*0.05]}>
 				<XAxis axisAt="bottom" orient="bottom"  stroke="#BDC4C7" tickStroke="#BDC4C7"/>
 				<YAxis axisAt="right" orient="left" ticks={5} tickStroke="#BDC4C7"/>
 
 				<MouseCoordinateX
 					at="bottom"
 					orient="bottom"
-					displayFormat={timeFormat("%Y-%m-%d %H:%M")} />
+					displayFormat={timeFormat("%Y-%m-%d")} />
 				<MouseCoordinateY
 					at="right"
 					orient="left"
-					displayFormat={format(".2f")} />
+					displayFormat={format(".4s")} />
 					
 
-				<AreaSeries yAccessor={d => d.close}/>
+				<AreaSeries yAccessor={d => d.daiDebt} fill='#FF0000' stroke='#FF0000' opacity="0.4" interpolation={curveMonotoneX}/>
+                
 				<SingleValueTooltip
-						yLabel="Volume (USD)"
-						yAccessor={d => d.volume}
-						yDisplayFormat={format(".4s")}
-						origin={[0, 20]}
-						valueFill= "#FFFFFF"
-					/>
-				<SingleValueTooltip
-					xLabel="Date" /* xLabel is optional, absence will not show the x value */ 
-					yLabel="Close"
-					yAccessor={d => d.close}
-					xAccessor={d => d.date}
-					xDisplayFormat={timeFormat("%Y-%m-%d %H:%M")} yDisplayFormat={format(".2f")}
-					origin={[0, 0]}
+					yLabel="DAI Debt"
+					yAccessor={d => d.daiDebt}
+					yDisplayFormat={format(".4s")}
+					xLabel="Liquidation Price"
+					xAccessor={d => d.liquidationPrice}
+					xDisplayFormat={format(".2f")}
+					origin={[10, 0]}
 					valueFill= "#FFFFFF"
 					/>	
-				<ZoomButtons onReset={this.handleReset}/>
-				<EdgeIndicator itemType='last' orient='left' edgeAt='right' fill={d => d.close > d.open ? "#6BA583" : "#FF0000"} yAccessor={d=> d.close}/>
-
-			</Chart>
-			<Chart id={2}
-					yExtents={d => d.volume}
-					height={150} origin={(w, h) => [0, h - 150]}>
-					{/* <YAxis axisAt="left" orient="right" ticks={5} tickStroke="#BDC4C7" tickFormat={format(".2s")}/> */}
-
-					{/* <MouseCoordinateY
-						at="left"
-						orient="right"
-						displayFormat={format(".4s")}
-						/> */}
-
-					<BarSeries yAccessor={d => d.volume}
-						stroke fill={(d) => d.close > d.open ? "#6BA583" : "#FF0000"}
-						opacity={0.4}
-						widthRatio={1} />
 					
+					<SingleValueTooltip
+					yLabel="Date" /* xLabel is optional, absence will not show the x value */ 
+					yAccessor={d => d.date}
+					yDisplayFormat={timeFormat("%Y-%m-%d")} 
+					origin={[10, 20]}
+					valueFill= "#FFFFFF"
+					/>	
 
-				</Chart>
+				<ZoomButtons onReset={this.handleReset}/>
+
+				<EdgeIndicator displayFormat={format(".4s")} itemType='last' orient='left' edgeAt='right' fill="#6BA583" yAccessor={d=> d.daiDebt}/>
+			</Chart>
+			<Chart id={2} yExtents={d => d.liquidationPrice}>
+				<LineSeries
+					yAccessor={d=> d.liquidationPrice}
+					stroke='#E6BB48'
+					interpolation={curveBasis}
+					/>
+				<MouseCoordinateY
+					at="left"
+					orient="right"
+					displayFormat={format("$.2f")} />
+			<YAxis axisAt="left" orient="right" ticks={5} tickStroke="#BDC4C7" tickFormat={format(".2s")}/>	
+			</Chart>
 			<CrossHairCursor />
 			</ChartCanvas>
 		);

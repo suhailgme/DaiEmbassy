@@ -2,7 +2,6 @@ import React from 'react'
 import { Accordion, Loader } from 'semantic-ui-react'
 import WipeDrawWidget from './WipeDrawWidget'
 import CdpDetails from './CdpDetails'
-import StatsWidget from './StatsWidget'
 import SystemStatusWidget from './SystemStatusWidget'
 
 
