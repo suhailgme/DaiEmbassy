@@ -30,7 +30,7 @@ const axios = require('axios')
 class App extends Component {
 
   state = {
-    cdpId: '',
+    cdpId: null,
     pethCollateral: '',
     usdCollateral: '',
     daiDebt: '',
@@ -43,7 +43,7 @@ class App extends Component {
     selectedMarket: 'daiOHLC',
     systemSelection: 'dailyWipeDraw',
     cdpSelection: 'pethCollateral',
-    currentTab: 0, //markets is default tab (1), cdp stats is tab 0
+    currentTab: 0, //System is default tab (1), cdp stats is tab 0
     cdpActionsTab: 0
   }
 
@@ -99,53 +99,71 @@ class App extends Component {
     const cdps = res.data.searchableCdps
     // console.log(cdps)
     // const cdps = await getCdps()
-    let mostDebt = 0
-    let cdpId
-    cdps.forEach(cdp => {
-      if (+cdp.daiDebt > mostDebt) {
-        mostDebt = +cdp.daiDebt
-        cdpId = cdp.cdpId
-      }
-    })
+
+    // let mostDebt = 0
+    // let cdpId = null
+
+    // Search for largest CDP by debt and set its cdpid to its id
+    // cdps.forEach(cdp => {
+    //   if (+cdp.daiDebt > mostDebt) {
+    //     mostDebt = +cdp.daiDebt
+    //     cdpId = cdp.cdpId
+    //   }
+    // })
+
     this.setState({ cdps })
     // console.log(cdps)
-    this.setState({ loadingMsg: `Loading CDP ${cdpId}...` })
-    const { account } = cdps.find((cdp) => {
-      return cdp.cdpId === cdpId
-    })
+
+    // After setting cdpid to lagest debtor, set loading msg for user
+    // this.setState({ loadingMsg: `Loading CDP ${cdpId}...` })
+
+    // Set account to owner of the associated cdpid. Currently account is set to 'dai embassy node'
+    // This is for use with metamask if a cdp is loaded from metamask eth account
+    // const { account } = cdps.find((cdp) => {
+    //   return cdp.cdpId === cdpId
+    // })
 
     // console.log(account, cdpId)
-    try {
-      await maker.setCdpId(cdpId)
-    } catch (error) {
-      this.setState({ currentAccount, account, maker, cdpId, error: true, loadingMsg: `Error loading CDP - Click to retry` })
-      return
-    }
-    this.setState({ cdpId })
 
-    const cdpCollateralDebtRes = await axios.get(`https://dai-embassy-server.herokuapp.com/collateralDebt?&id=${this.state.cdpId}`)
+    // Set dai.js maker instance to current cdpid. Used when loading largest debtor cdp or cdp from metamask.
+    // try {
+    //   await maker.setCdpId(cdpId)
+    // } catch (error) {
+    //   this.setState({ currentAccount, account, maker, cdpId, error: true, loadingMsg: `Error loading CDP - Click to retry` })
+    //   return
+    // }
+
+    // this.setState({ cdpId })
+
+    // Retrieve chart data for peth collateral and dai debt from server using cdpId
+    //const cdpCollateralDebtRes = await axios.get(`https://dai-embassy-server.herokuapp.com/collateralDebt?&id=${this.state.cdpId}`)
     // const cdpCollateralDebtRes = await axios.get(`http://localhost:2917/collateralDebt?&id=${this.state.cdpId}`)
 
-    let cdpCollateralDebt = cdpCollateralDebtRes.data.collateralDebt
-    cdpCollateralDebt.forEach(day => {
-      day.date = new Date(day.date)
-    })
+    // Create date object from each string date for use in cdp specific charts
+    // let cdpCollateralDebt = cdpCollateralDebtRes.data.collateralDebt
+    // cdpCollateralDebt.forEach(day => {
+    //   day.date = new Date(day.date)
+    // })
 
-    const { wipeDraw, cdpDetails, error } = await maker.getAllDetails()
+    // Get all specific CDP details for use in simulator and details widgets on the sidebar.
+    // Used when loading a cdp by default (largest debtor, or from metamask account)
+    // const { wipeDraw, cdpDetails, error } = await maker.getAllDetails()
 
-    if (error) {
-      ReactGA.event({
-        category: 'Error',
-        action: `Error on initial load`,
-        label: new Date().toString()
-      })
-      this.setState({ currentAccount, account, maker, cdpId, error: true, loadingMsg: `Error loading CDP - Click to retry` })
-      return
-    }
+    // Catch error resulting from failed api calls from wipeDraw and cdpDetails calls
+    // if (error) {
+    //   ReactGA.event({
+    //     category: 'Error',
+    //     action: `Error on initial load`,
+    //     label: new Date().toString()
+    //   })
+    //   this.setState({ currentAccount, account, maker, cdpId, error: true, loadingMsg: `Error loading CDP - Click to retry` })
+    //   return
+    // }
 
-    cdpDetails.account = account
+    // Provide cdp details widget with the owners account associated with the specific cdpid
+    // cdpDetails.account = account
 
-    this.setState({ updating: true, currentAccount, account, maker, cdpId, wipeDraw, cdpDetails, loadingMsg: '', cdpCollateralDebt })
+    this.setState({ updating: false, currentAccount, maker, loadingMsg: '', })
     // this.updateData()
     // console.log(this.state.cdpCollateralDebt)
 
@@ -162,7 +180,7 @@ class App extends Component {
           action: `Searched for CDP ${id}`,
           label: new Date().toString()
         })
-        this.setState({ error: false, wipeDraw: null, cdpDetails: null, systemStatus: null, cdpId: null, searchMsg: '', loadingMsg: `Loading CDP: ${id}`, })
+        this.setState({ error: false, wipeDraw: null, cdpDetails: null, systemStatus: null, cdpId: null, searchMsg: '', loadingMsg: `Loading CDP: ${id}`, updating: true })
 
         const maker = this.state.maker
         try {
@@ -199,12 +217,12 @@ class App extends Component {
 
         cdpDetails.account = account
 
-        if (this.state.updating) {
-          this.setState({ error: false, wipeDraw, cdpDetails, systemStatus, cdpId: id, loadingMsg: '', cdpCollateralDebt })
-        } else {
-          this.setState({ updating: true, error: false, wipeDraw, cdpDetails, systemStatus, cdpId: id, loadingMsg: '', cdpCollateralDebt })
-          // this.updateData()
-        }
+        // if (this.state.updating) {
+        this.setState({ error: false, wipeDraw, cdpDetails, systemStatus, cdpId: id, loadingMsg: '', cdpCollateralDebt, updating: false })
+        // } else {
+        //   this.setState({ updating: true, error: false, wipeDraw, cdpDetails, systemStatus, cdpId: id, loadingMsg: '', cdpCollateralDebt })
+        //   // this.updateData()
+        // }
         // console.log(cdpCollateralDebt)
         ReactGA.pageview(`/cdp/${id}`)
 
@@ -301,7 +319,7 @@ class App extends Component {
     if (!this.state.error) {
       const panes = [
         {
-          menuItem: { key: 0, icon: 'target', content: this.state.cdpId ? `CDP ${this.state.cdpId}` : 'Loading' },
+          menuItem: { key: 0, icon: 'target', content: this.state.updating ? 'Loading' : `CDP ${this.state.cdpId}` },
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
@@ -390,8 +408,8 @@ class App extends Component {
               borderTop: 0,
               borderTopRadius: 0
             }}>
-              <button style={{ background: 'none', border: 'none', paddingLeft: 0, textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='daiOHLC' onClick={this.handleMarketButton}>{`DAI/USD`}</button>
-              <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='mkrOHLC' onClick={this.handleMarketButton}>{`MKR/USD`}</button>
+              <button style={{ background: 'none', border: 'none', paddingLeft: 0, textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='daiOHLC' onClick={this.handleMarketButton}>{`DAI/USD (Global Avg.)`}</button>
+              <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='mkrOHLC' onClick={this.handleMarketButton}>{`MKR/USD (Global Avg.)`}</button>
 
               <hr style={{ opacity: '0.7' }} />
               {this.state.marketData && this.state.selectedMarket === 'daiOHLC' ? <DaiChart data={this.state.marketData} market={this.state.selectedMarket} /> : this.state.marketData && this.state.selectedMarket === 'mkrOHLC' ? <MkrChart data={this.state.marketData} market={this.state.selectedMarket} /> : <Loader active inverted inline='centered' />}
@@ -449,6 +467,8 @@ class App extends Component {
             systemStatus={this.state.systemStatus}
             account={this.state.account}
             cdpId={this.state.cdpId}
+            updating={this.state.updating}
+            loading={this.state.loadingMsg}
           />
 
           <Grid.Column width={12} tablet={10}>
@@ -457,7 +477,7 @@ class App extends Component {
               style={{ paddingBottom: '10px', }}
               defaultActiveIndex={this.state.currentTab}
               onTabChange={(e, { activeIndex }) => this.handleTabChange(e, activeIndex, panes[activeIndex].menuItem.content)}
-              panes={panes}
+              panes={this.state.cdpId || this.state.updating ? panes : panes.slice(1)}
               onMouseEnter={() => {
                 if (!this.state.loadingMsg && window.innerWidth > 768) {
                   let style = document.body.style.overflow
@@ -475,7 +495,7 @@ class App extends Component {
 
             </Tab>
 
-            <RecentActions cdpId={this.state.cdpId} />
+            {this.state.cdpId || this.state.updating ? <RecentActions cdpId={this.state.cdpId} /> : null}
             <Tab
               menu={{ attached: 'top', inverted: true, style: { backgroundColor: '#273340', border: '2px solid #38414B', display: 'flex', flexDirection: window.innerWidth > 768 ? 'row' : 'column', flexWrap: 'wrap' } }}
               style={{ paddingTop: '10px',}}
