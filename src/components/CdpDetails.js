@@ -47,10 +47,17 @@ export default class CdpDetails extends Component {
                 <Container textAlign='center'>
                 <p>Collateral</p> 
                 </Container>
-                <Statistic.Group size='mini' widths='two'>
-                    <Statistic  inverted size='mini' label='PETH' value={this.numberWithCommas(this.state.pethCollateral)}/>
-                    <Statistic inverted size='mini' label='USD' value={(this.numberWithCommas((this.state.pethCollateral * this.state.pethWethRatio) * this.state.ethPrice))} color='red'/>
+                <Statistic.Group size='mini' widths={2}>
+                    <Statistic style={{opacity:0.99}} color='green' inverted size='mini' label='PETH' value={this.numberWithCommas(this.state.pethCollateral)}/>
+                    <Statistic style={{opacity:0.99}} color='green' inverted size='mini' label='USD' value={(this.numberWithCommas((this.state.pethCollateral * this.state.pethWethRatio) * this.state.ethPrice))}/>
                 </Statistic.Group>
+                <Container style={{paddingTop:'5px'}}textAlign='center'>
+                    <p>Debt</p>
+                </Container>
+                <Container textAlign='center'>
+                    <Statistic size='mini' color='red' inverted label='DAI' value={this.numberWithCommas(this.state.daiDebt)}/>
+                </Container>
+                
                 <Form inverted>
                     <Grid columns='equal' padded='vertically'>
                         <Grid.Row style={{paddingBottom:'5px'}}>
@@ -61,10 +68,10 @@ export default class CdpDetails extends Component {
                             <Grid.Column textAlign='left'>Owner</Grid.Column>
                             <Grid.Column textAlign='right'> <a target="_blank" href={`https://etherscan.io/address/${this.state.account}`} style={{textDecoration:'underline', color:'inherit'}}>{this.truncateAddress(this.state.account)}</a></Grid.Column>
                         </Grid.Row>
-                        <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
+                        {/* <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
                             <Grid.Column textAlign='left'>Debt</Grid.Column>
                             <Grid.Column textAlign='right'>{this.numberWithCommas(this.state.daiDebt)} DAI</Grid.Column>
-                        </Grid.Row>
+                        </Grid.Row> */}
                         <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
                             <Grid.Column textAlign='left'>Accrued Fees</Grid.Column>
                             <Grid.Column textAlign='right' style={{whiteSpace:'nowrap'}}>{this.numberWithCommas(this.state.governanceFee)} USD</Grid.Column>
