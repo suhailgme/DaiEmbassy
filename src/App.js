@@ -12,6 +12,7 @@ import DailyActionsChart from './components/DailyActionsChart'
 import DailyLockFreeChart from './components/DailyLockFreeChart'
 import DailyWipeDrawChart from './components/DailyWipeDrawChart'
 import CdpCollateralChart from './components/CdpCollateralChart'
+import CumulativeDebtCollateral from './components/CumulativeDebtCollateralChart'
 import CdpDebtChart from './components/CdpDebtChart'
 
 
@@ -270,7 +271,7 @@ class App extends Component {
 
   handleSystemButton = async (e, { value }) => {
     e.preventDefault()
-    const systemOptions = {'dailyCdps': 0,'dailyActions':1, 'dailyLockFree': 2, 'dailyWipeDraw': 3}
+    const systemOptions = {'dailyCdps': 0,'dailyActions':1, 'dailyLockFree': 2, 'dailyWipeDraw': 3, 'cumulativeDebtCollateral': 4}
     const currentSelection = this.state.systemSelection
     const selection = value
     if (selection !== currentSelection) {
@@ -343,6 +344,11 @@ class App extends Component {
           text: 'DAI Repaid/Created',
           value: 'dailyWipeDraw',
         },
+        // {
+        //   key: 'Cumulative Debt & Collateral',
+        //   text: 'Cumulative Debt & Collateral',
+        //   value: 'cumulativeDebtCollateral'
+        // }
       ]
       const marketOptions = [
         {
@@ -421,7 +427,7 @@ class App extends Component {
 
 
               <hr style={{ opacity: '0.7' }} />
-              {this.state.dailyCdps && this.state.systemSelection === 'dailyCdps' ? <ChartCdp data={this.state.dailyCdps} /> : this.state.dailyActions && this.state.systemSelection === 'dailyActions' ? <DailyActionsChart data={this.state.dailyActions} /> : this.state.dailyLockFree && this.state.systemSelection === 'dailyLockFree' ? <DailyLockFreeChart data={this.state.dailyLockFree} /> : this.state.dailyWipeDraw && this.state.systemSelection === 'dailyWipeDraw' ? <DailyWipeDrawChart data={this.state.dailyWipeDraw} /> : <Loader active inverted inline='centered' />}
+              {this.state.dailyCdps && this.state.systemSelection === 'dailyCdps' ? <ChartCdp data={this.state.dailyCdps} /> : this.state.dailyActions && this.state.systemSelection === 'dailyActions' ? <DailyActionsChart data={this.state.dailyActions} /> : this.state.dailyLockFree && this.state.systemSelection === 'dailyLockFree' ? <DailyLockFreeChart data={this.state.dailyLockFree} /> : this.state.dailyWipeDraw && this.state.systemSelection === 'dailyWipeDraw' ? <DailyWipeDrawChart data={this.state.dailyWipeDraw} /> : this.state.cumulativeDebtCollateral && this.state.systemSelection === 'cumulativeDebtCollateral' ? <CumulativeDebtCollateral data={this.state.cumulativeDebtCollateral} /> : <Loader active inverted inline='centered' />}
               {(this.state.systemSelection == "dailyWipeDraw" || this.state.systemSelection == "dailyLockFree") && (this.state.dailyWipeDraw || this.state.dailyLockFree) ?
                 <Grid>
                   <Grid.Column textAlign="right" style={{ paddingRight: "27px", paddingBottom: 0, paddingTop: "12px" }}>
@@ -540,7 +546,7 @@ class App extends Component {
               style={{ paddingBottom: '10px', }}
               defaultActiveIndex={this.state.currentTab}
               onTabChange={(e, { activeIndex }) => this.handleTabChange(e, activeIndex, panes[activeIndex].menuItem.content)}
-              panes={this.state.cdpId || this.state.updating ? panes : panes.slice(1)}
+              panes={this.state.cdpId ? panes : panes.slice(1)}
               onMouseEnter={() => {
                 if (!this.state.loadingMsg && window.innerWidth > 768) {
                   let style = document.body.style.overflow
