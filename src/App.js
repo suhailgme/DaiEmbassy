@@ -17,7 +17,7 @@ import CdpDebtChart from './components/CdpDebtChart'
 
 import Footer from './components/Footer'
 import AllCdps from './components/AllCdps'
-import { Grid, Loader, Tab, Label, Icon } from 'semantic-ui-react'
+import { Grid, Loader, Tab, Dropdown } from 'semantic-ui-react'
 import './App.css';
 import MakerService from './MakerService'
 import { getCdps } from './api/daiService'
@@ -44,7 +44,9 @@ class App extends Component {
     systemSelection: 'dailyWipeDraw',
     cdpSelection: 'pethCollateral',
     currentTab: 0, //System is default tab (1), cdp stats is tab 0
-    cdpActionsTab: 0
+    cdpActionsTab: 0,
+    systemOptions: 3, //For system tab dropdown, default index 3 (dai repaid/created),
+    marketOptions: 0 //For markets tab dropdown, default index 0 (dai ohlc)
   }
 
   async componentDidMount() {
@@ -111,7 +113,6 @@ class App extends Component {
     //   }
     // })
 
-    this.setState({ cdps })
     // console.log(cdps)
 
     // After setting cdpid to lagest debtor, set loading msg for user
@@ -163,7 +164,7 @@ class App extends Component {
     // Provide cdp details widget with the owners account associated with the specific cdpid
     // cdpDetails.account = account
 
-    this.setState({ updating: false, currentAccount, maker, loadingMsg: '', })
+    this.setState({ cdps, updating: false, currentAccount, maker, loadingMsg: '', })
     // this.updateData()
     // console.log(this.state.cdpCollateralDebt)
 
@@ -249,10 +250,11 @@ class App extends Component {
     }, 30000)
   }
 
-  handleMarketButton = async (e) => {
+  handleMarketButton = async (e, { value }) => {
     e.preventDefault()
+    const marketOptions = {'daiOHLC': 0, 'mkrOHLC': 1}
     const currentSelection = this.state.selectedMarket
-    const selection = e.target.value
+    const selection = value
     if (selection !== currentSelection) {
       ReactGA.modalview(`/${selection}`);
       const marketRes = await axios.get(`https://dai-embassy-server.herokuapp.com/${selection}`)
@@ -262,14 +264,15 @@ class App extends Component {
       data.forEach(day => {
         day.date = new Date(day.date)
       })
-      this.setState({ marketData: data, selectedMarket: selection })
+      this.setState({ marketData: data, selectedMarket: selection,marketOptions: marketOptions[selection] })
     }
   }
 
-  handleSystemButton = async (e) => {
+  handleSystemButton = async (e, { value }) => {
     e.preventDefault()
+    const systemOptions = {'dailyCdps': 0,'dailyActions':1, 'dailyLockFree': 2, 'dailyWipeDraw': 3}
     const currentSelection = this.state.systemSelection
-    const selection = e.target.value
+    const selection = value
     if (selection !== currentSelection) {
       this.setState({ [selection]: null })
 
@@ -282,7 +285,8 @@ class App extends Component {
         day.date = new Date(day.date)
       })
       // console.log(selection, data)
-      this.setState({ [selection]: data, systemSelection: selection })
+
+      this.setState({ [selection]: data, systemSelection: selection, systemOptions:systemOptions[selection] })
 
     }
   }
@@ -300,6 +304,7 @@ class App extends Component {
 
 
   handleTabChange = (e, activeIndex, menuItem) => {
+    e.preventDefault()
     if (this.state.currentTab !== activeIndex) {
       this.setState({ currentTab: activeIndex })
       ReactGA.modalview(`/tab/${menuItem}`)
@@ -317,6 +322,40 @@ class App extends Component {
 
   loadContent = () => {
     if (!this.state.error) {
+      const systemOptions = [
+        {
+          key: 'CDP Creation',
+          text: 'CDP Creation',
+          value: 'dailyCdps',
+        },
+        {
+          key: 'CDP Activity',
+          text: 'CDP Activity',
+          value: 'dailyActions',
+        },
+        {
+          key: 'PETH Deposits/Withdrawals',
+          text: 'PETH Deposits/Withdrawals',
+          value: 'dailyLockFree',
+        },
+        {
+          key: 'DAI Repaid/Created',
+          text: 'DAI Repaid/Created',
+          value: 'dailyWipeDraw',
+        },
+      ]
+      const marketOptions = [
+        {
+          key: 'DAI/USD (Global Avg.)',
+          text: 'DAI/USD (Global Avg.)',
+          value: 'daiOHLC',
+        },
+        {
+          key: 'MKR/USD (Global Avg.)',
+          text: 'MKR/USD (Global Avg.)',
+          value: 'mkrOHLC',
+        },
+      ]
       const panes = [
         {
           menuItem: { key: 0, icon: 'target', content: this.state.updating ? 'Loading' : `CDP ${this.state.cdpId}` },
@@ -353,16 +392,33 @@ class App extends Component {
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
-              height: window.innerWidth > 768 ? '565px' : this.state.systemSelection == "dailyLockFree" ? '620px' : '600px',
+              height: window.innerWidth > 768 ? '565px' : this.state.systemSelection == "dailyLockFree" ? '585px' : '565px',
               border: '2px solid #38414B',
               borderTop: 0,
               borderTopRadius: 0
             }}
             >
-              <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='dailyCdps' onClick={this.handleSystemButton}>{`CDP Creation`}</button>
+              {/* <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='dailyCdps' onClick={this.handleSystemButton}>{`CDP Creation`}</button>
               <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='dailyActions' onClick={this.handleSystemButton}>{`CDP Activity`}</button>
               <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='dailyLockFree' onClick={this.handleSystemButton}>{`PETH Deposits/Withdrawals`}</button>
-              <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='dailyWipeDraw' onClick={this.handleSystemButton}>{`DAI Repaid/Created`}</button>
+              <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='dailyWipeDraw' onClick={this.handleSystemButton}>{`DAI Repaid/Created`}</button> */}
+              <Grid columns={window.innerWidth > 768 ? 2 : 1}>
+                <Grid.Column>
+                  <span style={{ color: '#FFF' }}>
+                    {`Chart Selection: `}
+                    <Dropdown
+                      options={systemOptions}
+                      value={systemOptions[this.state.systemOptions].value}
+                      onChange={this.handleSystemButton}
+                    />
+                  </span>
+                </Grid.Column>
+                {/* <Grid.Column textAlign='right' only='computer'>
+                  Download
+                </Grid.Column> */}
+              </Grid>
+
+
 
               <hr style={{ opacity: '0.7' }} />
               {this.state.dailyCdps && this.state.systemSelection === 'dailyCdps' ? <ChartCdp data={this.state.dailyCdps} /> : this.state.dailyActions && this.state.systemSelection === 'dailyActions' ? <DailyActionsChart data={this.state.dailyActions} /> : this.state.dailyLockFree && this.state.systemSelection === 'dailyLockFree' ? <DailyLockFreeChart data={this.state.dailyLockFree} /> : this.state.dailyWipeDraw && this.state.systemSelection === 'dailyWipeDraw' ? <DailyWipeDrawChart data={this.state.dailyWipeDraw} /> : <Loader active inverted inline='centered' />}
@@ -408,9 +464,16 @@ class App extends Component {
               borderTop: 0,
               borderTopRadius: 0
             }}>
-              <button style={{ background: 'none', border: 'none', paddingLeft: 0, textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='daiOHLC' onClick={this.handleMarketButton}>{`DAI/USD (Global Avg.)`}</button>
-              <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='mkrOHLC' onClick={this.handleMarketButton}>{`MKR/USD (Global Avg.)`}</button>
-
+              {/* <button style={{ background: 'none', border: 'none', paddingLeft: 0, textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='daiOHLC' onClick={this.handleMarketButton}>{`DAI/USD (Global Avg.)`}</button>
+              <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='mkrOHLC' onClick={this.handleMarketButton}>{`MKR/USD (Global Avg.)`}</button> */}
+              <span style={{color:'#FFF'}}>
+                Chart Selection:{` `}
+                <Dropdown
+                  options={marketOptions}
+                  value={marketOptions[this.state.marketOptions].value}
+                  onChange={this.handleMarketButton}
+                />
+              </span>
               <hr style={{ opacity: '0.7' }} />
               {this.state.marketData && this.state.selectedMarket === 'daiOHLC' ? <DaiChart data={this.state.marketData} market={this.state.selectedMarket} /> : this.state.marketData && this.state.selectedMarket === 'mkrOHLC' ? <MkrChart data={this.state.marketData} market={this.state.selectedMarket} /> : <Loader active inverted inline='centered' />}
             </Tab.Pane>
