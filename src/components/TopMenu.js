@@ -88,7 +88,7 @@ export default class TopMenu extends Component {
                     <span style={{fontFamily:"Roboto", fontWeight:500 }}>Dai Embassy</span>
                     </a>  */}
 
-                <Popup inverted position='right center' trigger={<Label color='red' style={{textDecoration:'underline', cursor:'help'}}>Alpha</Label>} content='Alpha 0.9.2 (26-Apr-2019)'/>
+                <Popup inverted position='right center' trigger={<Label color='red' style={{textDecoration:'underline', cursor:'help'}}>Alpha</Label>} content='Alpha 0.11.0 (17-May-2019)'/>
                 </Menu.Item>
                 {this.props.cdps ? <Menu.Item fluid inverted><Search input={{ fluid: true}} style={{width:'230px'}} fluid selectFirstResult value={this.state.value} loading={this.state.isLoading} onSearchChange={this.handleSearchChange} onResultSelect={this.handleClick} results = {this.state.results} placeholder={"Search by CDP ID or Address"} size='mini'/></Menu.Item> : null}
                 {this.props.searchMsg ? <Menu.Item><p style={{color:'#FF695E'}}>{this.props.searchMsg}</p></Menu.Item> : null}
