@@ -37,20 +37,20 @@ function tooltipContent(ys) {
 			x: dateFormat(xAccessor(currentItem)),
 			y: [
                 {
-					label: "DAI Created",
-					value: currentItem.daiCreated && numberFormat(currentItem.daiCreated),
-					stroke: '#FF0000'
+					label: "PETH Deposited",
+					value: currentItem.totalPethLocked && numberFormat(currentItem.totalPethLocked),
+					stroke: '#189F3A'
 				},
 				{
-					label: "DAI Repaid",
-					value: currentItem.daiRepaid && numberFormat(currentItem.daiRepaid),
-                    stroke: '#189F3A',
+					label: "PETH Withdrawn",
+					value: currentItem.totalPethFreed && numberFormat(currentItem.totalPethFreed),
+					stroke: '#FF0000',
                     
                 },
                 {
-					label: "Circ. DAI",
-					value: currentItem.totalDai && circFormat(currentItem.totalDai),
-					stroke: '#E6BC4C'
+					label: "PETH Liquidated",
+					value: currentItem.totalPethBitten && numberFormat(currentItem.totalPethBitten),
+					stroke: '#366b93'
 				}
 			]
 				.concat(
@@ -84,7 +84,7 @@ class AreaChartWithEdge extends React.Component {
 		} = xScaleProvider(initialData);
 
 		const start = xAccessor(last(data));
-		const end = xAccessor(data[Math.max(0, data.length - 100)]);
+		const end = xAccessor(data[Math.max(0, data.length - 500)]);
 		const xExtents = [start, end];
 		return (
 			<ChartCanvas height={490}
@@ -93,7 +93,7 @@ class AreaChartWithEdge extends React.Component {
 				width={width}
 				margin={{ left: 10, right: 10, top: 20, bottom: 30 }}
 				type={type}
-				seriesName={`CumulativeDebtCollateral${this.state.suffix}`}
+				seriesName={`CumulativeCollateral${this.state.suffix}`}
 				data={data}
 				xScale={xScale}
 				xAccessor={xAccessor}
@@ -104,7 +104,7 @@ class AreaChartWithEdge extends React.Component {
 			<Label 
 				x={width  / 2} y={100}
 				fontSize={30} 
-				text="Cumulative Debt & Collateral, 1D"
+				text="Cumulative Collateral, 1D"
 				fill='#BDC4C7'
 				opacity={0.15} 
 				fontFamily='roboto'
@@ -119,7 +119,7 @@ class AreaChartWithEdge extends React.Component {
 				fontSize={20}
 				/>
 
-			<Chart id={1} yExtents={d => d.cumulativeDai}>
+			<Chart id={1} yExtents={d => [d.totalPethLocked, 0]}>
 				<XAxis axisAt="bottom" orient="bottom"  stroke="#BDC4C7" tickStroke="#BDC4C7"/>
 				<YAxis axisAt="right" orient="left" ticks={5} tickStroke="#BDC4C7"/>
 
@@ -130,37 +130,53 @@ class AreaChartWithEdge extends React.Component {
 				<MouseCoordinateY
 					at="right"
 					orient="left"
-					displayFormat={format(".4s")} />
+					displayFormat={format("$.4s")} />
 					
-				{/* <AreaSeries yAccessor={d => d.cumulativeDai} fill='#189F3A' stroke='#189F3A' interpolation={curveMonotoneX}/>
-                <AreaSeries yAccessor={d => d.cumulativePeth} fill='#FF0000' stroke='#FF0000'interpolation={curveMonotoneX} /> */}
-				<LineSeries 
-					yAccessor={d=> d.cumulativeDai}
+				<AreaSeries yAccessor={d => d.totalPethLocked} fill='#189F3A' stroke='#189F3A' interpolation={curveMonotoneX}/>
+                <AreaSeries yAccessor={d => d.totalPethFreed} fill='#931920' stroke='#FFF' strokeOpacity={0.7} opacity={1} interpolation={curveMonotoneX} />
+                <AreaSeries yAccessor={d => d.totalPethBitten} fill='#24567E' stroke='#FFF' strokeOpacity={0.7} opacity={1} interpolation={curveMonotoneX} />
+
+				{/* <LineSeries 
+					yAccessor={d=> d.totalDaiDrawn}
                     stroke='#FF0000'
                     strokeWidth={2}
 					/>
+				<LineSeries 
+					yAccessor={d=> d.totalDaiWiped}
+                    stroke='#189F3A'
+                    strokeWidth={2}
+					/>
+				<LineSeries 
+					yAccessor={d=> d.totalDaiBitten}
+                    stroke='#1678C2'
+                    strokeWidth={2}
+					/> */}
 
 
 				<SingleValueTooltip
-					xLabel="Cumulative DAI Created" /* xLabel is optional, absence will not show the x value */ 
-					yLabel="Cumulative PETH Locked"
-					yAccessor={d => d.cumulativePeth}
-					xAccessor={d => d.cumulativeDai}
-					xDisplayFormat={format(".4s")} yDisplayFormat={format(".4s")}
+					xLabel="Cumulative PETH Deposited" /* xLabel is optional, absence will not show the x value */ 
+					yLabel="Cumulative PETH Withdrawn"
+					xAccessor={d => d.totalPethLocked}
+					yAccessor={d => d.totalPethFreed}
+					xDisplayFormat={format(".4s")} 
+					yDisplayFormat={format(".4s")}
 					origin={[10, 0]}
 					valueFill= "#FFFFFF"
 					/>	
                     
 				<SingleValueTooltip
-					yLabel="Date"
-					yAccessor={d => d.date}
-					yDisplayFormat={timeFormat("%Y-%m-%d")}
+					xLabel="Date"
+					yLabel="Cumulative PETH Liquidated"
+					xAccessor={d => d.date}
+					yAccessor={d =>d.totalPethBitten}
+					xDisplayFormat={timeFormat("%Y-%m-%d")}
+					yDisplayFormat={format(".4s")} 
 					origin={[10, 20]}
 					valueFill= "#FFFFFF"
 					/>	
     
 
-                {/* < HoverTooltip
+                < HoverTooltip
                     yAccessor = {d => d.date}
                     tooltipContent = {tooltipContent([])}
                     bgOpacity = {0.05}
@@ -168,20 +184,23 @@ class AreaChartWithEdge extends React.Component {
                     fontFill = "#FFF"
                     stroke = 'rgba(255,255,255,0.2)'
                     fontSize = {15}
-				/>  */}
+				/> 
 
 				<ZoomButtons onReset={this.handleReset}/>
-				<EdgeIndicator displayFormat={format(".4s")} itemType='last' orient='left' edgeAt='right' fill="#FF0000" yAccessor={d=> d.cumulativeDai}/>
+				<EdgeIndicator displayFormat={format(".4s")} itemType='last' orient='left' edgeAt='right' fill="#6BA583" yAccessor={d=> d.totalPethLocked}/>
+				<EdgeIndicator displayFormat={format(".4s")} itemType='last' orient='left' edgeAt='right' fill="#FF0000" yAccessor={d=> d.totalPethFreed}/>
+				<EdgeIndicator displayFormat={format(".4s")} itemType='last' orient='left' edgeAt='right' fill='#366b93' yAccessor={d=> d.totalPethBitten}/>
+
 
 
 			</Chart>
-            <Chart id={2} yExtents={d => d.cumulativePeth + 10000}>
+            {/* <Chart id={2} yExtents={d => d.totalDaiDrawn}>
 				<LineSeries 
-					yAccessor={d=> d.cumulativePeth}
+					yAccessor={d=> d.totalDaiWiped}
                     stroke='#E6BB48'
                     strokeWidth={2}
 					/>
-					{/* <AreaSeries yAccessor={d => d.cumulativePeth} fill='#189F3A' stroke='#189F3A'interpolation={curveMonotoneX} />  */}
+					<AreaSeries yAccessor={d => d.cumulativePeth} fill='#189F3A' stroke='#189F3A'interpolation={curveMonotoneX} /> 
 				<MouseCoordinateY
 					at="left"
 					orient="right"
@@ -189,7 +208,7 @@ class AreaChartWithEdge extends React.Component {
 			<YAxis axisAt="left" orient="right" ticks={5} tickStroke="#BDC4C7" tickFormat={format(".2s")}/>	
 			<EdgeIndicator displayFormat={format(".4s")} itemType='last' orient='right' edgeAt='left' fill="#6BA583" yAccessor={d=> d.cumulativePeth}/>
 
-			</Chart>
+			</Chart> */}
 
 			<CrossHairCursor />
 			</ChartCanvas>
