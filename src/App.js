@@ -12,7 +12,8 @@ import DailyActionsChart from './components/DailyActionsChart'
 import DailyLockFreeChart from './components/DailyLockFreeChart'
 import DailyWipeDrawChart from './components/DailyWipeDrawChart'
 import CdpCollateralChart from './components/CdpCollateralChart'
-import CumulativeDebtCollateral from './components/CumulativeDebtCollateralChart'
+import CumulativeDebt from './components/CumulativeDebtChart'
+import CumulativeCollateral from './components/CumulativeCollateralChart'
 import CdpDebtChart from './components/CdpDebtChart'
 
 
@@ -66,6 +67,8 @@ class App extends Component {
     // const data2 = await getDaiHistorical()
     // const dailyCdpsRes = await axios.get('https://dai-embassy-server.herokuapp.com/dailyCdps')
     const dailyWipeDrawRes = await axios.get('https://dai-embassy-server.herokuapp.com/dailywipedraw')
+    // const dailyWipeDrawRes = await axios.get('http://localhost:2917/dailywipedraw')
+
 
     const marketRes = await axios.get('https://dai-embassy-server.herokuapp.com/daiOHLC')
     // const marketRes = await axios.get('http://localhost:2917/daiOHLC')
@@ -271,7 +274,7 @@ class App extends Component {
 
   handleSystemButton = async (e, { value }) => {
     e.preventDefault()
-    const systemOptions = {'dailyCdps': 0,'dailyActions':1, 'dailyLockFree': 2, 'dailyWipeDraw': 3, 'cumulativeDebtCollateral': 4}
+    const systemOptions = {'dailyCdps': 0,'dailyActions':1, 'dailyLockFree': 2, 'dailyWipeDraw': 3, 'cumulativeDebt': 4, 'cumulativeCollateral': 5}
     const currentSelection = this.state.systemSelection
     const selection = value
     if (selection !== currentSelection) {
@@ -288,7 +291,6 @@ class App extends Component {
       // console.log(selection, data)
 
       this.setState({ [selection]: data, systemSelection: selection, systemOptions:systemOptions[selection] })
-
     }
   }
 
@@ -344,11 +346,16 @@ class App extends Component {
           text: 'DAI Repaid/Created',
           value: 'dailyWipeDraw',
         },
-        // {
-        //   key: 'Cumulative Debt & Collateral',
-        //   text: 'Cumulative Debt & Collateral',
-        //   value: 'cumulativeDebtCollateral'
-        // }
+        {
+          key: 'Cumulative Debt',
+          text: 'Cumulative Debt',
+          value: 'cumulativeDebt'
+        },
+        {
+          key: 'Cumulative Collateral',
+          text: 'Cumulative Collateral',
+          value: 'cumulativeCollateral'
+        }
       ]
       const marketOptions = [
         {
@@ -398,7 +405,7 @@ class App extends Component {
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
-              height: window.innerWidth > 768 ? '565px' : this.state.systemSelection == "dailyLockFree" ? '585px' : '565px',
+              height: window.innerWidth > 768 ? '565px' : this.state.systemSelection == "dailyLockFree" ? '585px' : this.state.systemSelection == "cumulativeDebt"  || this.state.systemSelection == "cumulativeCollateral"  ? '605px' : '565px',
               border: '2px solid #38414B',
               borderTop: 0,
               borderTopRadius: 0
@@ -427,7 +434,7 @@ class App extends Component {
 
 
               <hr style={{ opacity: '0.7' }} />
-              {this.state.dailyCdps && this.state.systemSelection === 'dailyCdps' ? <ChartCdp data={this.state.dailyCdps} /> : this.state.dailyActions && this.state.systemSelection === 'dailyActions' ? <DailyActionsChart data={this.state.dailyActions} /> : this.state.dailyLockFree && this.state.systemSelection === 'dailyLockFree' ? <DailyLockFreeChart data={this.state.dailyLockFree} /> : this.state.dailyWipeDraw && this.state.systemSelection === 'dailyWipeDraw' ? <DailyWipeDrawChart data={this.state.dailyWipeDraw} /> : this.state.cumulativeDebtCollateral && this.state.systemSelection === 'cumulativeDebtCollateral' ? <CumulativeDebtCollateral data={this.state.cumulativeDebtCollateral} /> : <Loader active inverted inline='centered' />}
+              {this.state.dailyCdps && this.state.systemSelection === 'dailyCdps' ? <ChartCdp data={this.state.dailyCdps} /> : this.state.dailyActions && this.state.systemSelection === 'dailyActions' ? <DailyActionsChart data={this.state.dailyActions} /> : this.state.dailyLockFree && this.state.systemSelection === 'dailyLockFree' ? <DailyLockFreeChart data={this.state.dailyLockFree} /> : this.state.dailyWipeDraw && this.state.systemSelection === 'dailyWipeDraw' ? <DailyWipeDrawChart data={this.state.dailyWipeDraw} /> : this.state.cumulativeDebt && this.state.systemSelection === 'cumulativeDebt' ? <CumulativeDebt data={this.state.cumulativeDebt} /> : this.state.cumulativeCollateral && this.state.systemSelection === 'cumulativeCollateral' ? <CumulativeCollateral data={this.state.cumulativeCollateral} /> : <Loader active inverted inline='centered' />}
               {(this.state.systemSelection == "dailyWipeDraw" || this.state.systemSelection == "dailyLockFree") && (this.state.dailyWipeDraw || this.state.dailyLockFree) ?
                 <Grid>
                   <Grid.Column textAlign="right" style={{ paddingRight: "27px", paddingBottom: 0, paddingTop: "12px" }}>
@@ -443,7 +450,7 @@ class App extends Component {
                         }
                       })()}
                       <div style={{ width: "10px", height: "10px", backgroundColor: "#E6BB48", display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
-                      <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>{this.state.systemSelection == "dailyWipeDraw" ? 'Circ. DAI' : 'Locked PETH'}</span>
+                      <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>{this.state.systemSelection == "dailyWipeDraw" ? 'Circulating DAI' :'Locked PETH'}</span>
                       <span style={{ display: 'inline-block' }}>
                         <div style={{ width: "10px", height: "10px", backgroundColor: "#FF0000", display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
                         <span style={{ paddingLeft: "20px", color: "#FFF", }}>{this.state.systemSelection == "dailyWipeDraw" ? `DAI Created` : `PETH Withdrawn`}</span>
@@ -456,7 +463,26 @@ class App extends Component {
                     </div>
                   </Grid.Column>
                 </Grid>
-                : null}
+
+                : (this.state.systemSelection === 'cumulativeDebt' || this.state.systemSelection === 'cumulativeCollateral') && (this.state.cumulativeDebt || this.state.cumulativeCollateral) ? 
+                <Grid>
+                <Grid.Column textAlign="right" style={{ paddingRight: "27px", paddingBottom: 0, paddingTop: "12px" }}>
+                  <div className={{ position: "relative" }}>
+                    <div style={{ width: "10px", height: "10px", backgroundColor: this.state.systemSelection === 'cumulativeDebt' ? "#FF0000" : '#189F3A', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                    <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>{this.state.systemSelection === 'cumulativeDebt' ? 'Cumulative DAI Created' : 'Cumulative PETH Deposited'}</span>
+                    <span style={{ display: 'inline-block' }}>
+                      <div style={{ width: "10px", height: "10px", backgroundColor: this.state.systemSelection === 'cumulativeDebt' ? "#189F3A" : '#FF0000', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                      <span style={{ paddingLeft: "20px", color: "#FFF", }}>{this.state.systemSelection === 'cumulativeDebt' ? 'Cumulative DAI Repaid' : 'Cumulative PETH Withdrawn'}</span>
+                    </span>
+                    <span style={{ display: 'inline-block' }}>
+                      <div style={{ width: "10px", height: "10px", backgroundColor: "#366b93", display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                      <span style={{ paddingLeft: "20px", color: "#FFF" }}>{this.state.systemSelection === 'cumulativeDebt' ? 'Cumulative DAI Liquidated' : 'Cumulative PETH Liquidated'}</span>
+                    </span>
+
+                  </div>
+                </Grid.Column>
+              </Grid> 
+              : null}
 
             </Tab.Pane>
         },
