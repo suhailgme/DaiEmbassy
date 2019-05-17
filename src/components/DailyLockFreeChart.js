@@ -88,7 +88,7 @@ class AreaChartWithEdge extends React.Component {
 		} = xScaleProvider(initialData);
 
 		const start = xAccessor(last(data));
-		const end = xAccessor(data[Math.max(0, data.length - 100)]);
+		const end = xAccessor(data[Math.max(0, data.length - 183)]);
 		const xExtents = [start, end];
 		return (
 			<ChartCanvas height={490}
