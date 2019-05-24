@@ -9,16 +9,24 @@ const Humanize = require('humanize-plus')
 export default class AllCdps extends Component{
     state = {
         cdps: this.props.cdps,
+        ...this.props.systemStatus,
         filtered: true,
         minDebt: "0.01",
         pageSize: 10
     }
 
+    componentDidMount(){
+        if(this.state.cdps && this.props.systemStatus)
+            this.processCdps()
+
+    }
 
 
     componentDidUpdate(prevProps) {
-        if(this.props.cdps !== prevProps.cdps)
+        if(this.props.cdps !== prevProps.cdps){
+            this.setState({cdps: this.props.cdps})
             this.processCdps()
+        }
         if(this.props.systemStatus !== prevProps.systemStatus){
             this.setState(this.props.systemStatus)
 
@@ -116,11 +124,10 @@ export default class AllCdps extends Component{
         const processedCdps = this.state.processedCdps
         const numberCDPs = this.state.numberCDPs
         return (
-            <div style={{color:'#FFF', borderRadius:'5px', border: '2px solid #38414B',
-            backgroundColor:'#273340', paddingTop:'10px', paddingLeft:'5px'}}>
+            <div style={{color:'#FFF',backgroundColor:'#273340', paddingTop:'10px', paddingLeft:'5px'}}>
                 <Grid columns={2} stackable>
                     <Grid.Column>
-                        <h4 ><Icon name='globe' />Open CDPs (Total {numberCDPs})</h4>
+                        <h4 >Tracking {numberCDPs} CDPs</h4>
                     </Grid.Column>
                     <Grid.Column textAlign={ window.innerWidth < 768 ? 'left' : 'right'}>
                     <h5 style={{marginTop:0,}}><span style={{display: window.innerWidth > 768 ? 'inline' : 'block', paddingRight: '5px'}}><Icon style={{marginRight:0}} name='dollar'/>{`Top ${this.state.pageSize} CDPs Debt: `}{this.truncateNumber(this.state.top100Debt)} DAI ({(this.state.top100Debt/this.state.circulatingDai*100).toFixed(2)}%)</span> <Icon style={{marginRight:0}} name='ethereum'/>{`Top ${this.state.pageSize} CDPs Collateral`}: {this.truncateNumber(this.state.top100Collateral)} PETH ({(this.state.top100Collateral/this.state.lockedPeth*100).toFixed(2)}%)</h5>
