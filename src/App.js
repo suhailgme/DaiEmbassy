@@ -23,14 +23,8 @@ import MakerService from './MakerService'
 import daiIcon from '../src/images/daiIcon.png'
 import ethIcon from '../src/images/ethIcon.png'
 import mkrIcon from '../src/images/mkrIcon.png'
-
-
-// import { getCdps } from './api/daiService'
-// import { getMarketData, getEthTicker, getDaiHistorical } from './api/marketData'
 import ReactGA from 'react-ga'
 const axios = require('axios')
-
-
 
 class App extends Component {
 
