@@ -1,6 +1,6 @@
 {
   "name": "makerdai",
-  "version": "0.7.0",
+  "version": "0.13.0",
   "private": true,
   "dependencies": {
     "@makerdao/dai": "^0.14.0",
