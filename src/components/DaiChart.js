@@ -95,6 +95,7 @@ class AreaChartWithEdge extends React.Component {
 					
 
 				<AreaSeries yAccessor={d => d.close} fill='#1678C2' stroke='#1678C2'/>
+				<LineSeries yAccessor={() => 1} strokeDasharray="ShortDot" stroke='#FF0000'/>
 				<SingleValueTooltip
 						xLabel="Market Cap."
 						yLabel="Volume (USD)"
