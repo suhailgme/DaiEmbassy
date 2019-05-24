@@ -16,4 +16,4 @@ Run Test Server:
 
 Create Build:
 
-``` npm build ```
+``` npm run build ```
