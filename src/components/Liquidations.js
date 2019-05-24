@@ -27,13 +27,14 @@ class Liquidations extends Component {
             recentActions.push(
                 {
                     time: cdp.time,//new Date(action.time).toString().slice(0,-37),
-                    cdpId: <button style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', color: '#FFF', cursor: 'pointer' }} value={cdp.cdpId} onClick={this.handleClick}>{cdp.cdpId}</button>,
+                    cdpId: cdp.shut ? cdp.cdpId : <button style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', color: '#FFF', cursor: 'pointer' }} value={cdp.cdpId} onClick={this.handleClick}>{cdp.cdpId}</button>,
                     act: cdp.act,
                     tx: <a target="_blank" href={`https://etherscan.io/tx/${cdp.tx}`} style={{ textDecoration: 'underline', color: 'inherit' }}>{this.truncateTx(cdp.tx)}</a>,
                     owner: `${this.truncateTx(owner)}`,
                     debtRepaid: `${this.numberWithCommas(cdp.debtRepaid)} DAI`,
                     pethLiquidated: `${this.numberWithCommas(cdp.pethLiquidated)} PETH`,
                     percentCollateralLiquidated: `${this.numberWithCommas(cdp.percentCollateralLiquidated)} %`,
+                    ratio: `${this.numberWithCommas(cdp.ratio)} %`,
                     liquidationPrice: `$${this.numberWithCommas(cdp.liquidationPrice)}`,
                     id: index
                 })
@@ -112,6 +113,10 @@ class Liquidations extends Component {
                             accessor: 'percentCollateralLiquidated'
                         },
                         {
+                            Header: 'Collateralization Ratio',
+                            accessor: "ratio"
+                        },
+                        {
                             Header: 'Liquidation Price',
                             accessor: "liquidationPrice"
                         },
@@ -127,6 +132,7 @@ class Liquidations extends Component {
                     nextText={<p style={{ color: '#FFF', }}>Next</p>}
                     sortable={false}
                     filterable={false}
+                    NoDataComponent={() => this.state.loading? <Loader active inverted/> : null}
                     // loading={liquidations.length === 0}
                     // LoadingComponent={() => <Loader active inverted inline='centered' />}
                 />

@@ -22,8 +22,8 @@ class AllRecentActions extends Component{
             recentActions.push(
                 {
                     time: cdp.time,//new Date(action.time).toString().slice(0,-37),
-                    cdpId: <button style={{background: 'none', border:'none', padding:0, textDecoration:'underline', color:'#FFF', cursor:'pointer'}} value={cdp.cdpId} onClick={this.handleClick}>{cdp.cdpId}</button>,
-                    act: `${cdp.act} ${cdp.act === 'OPEN' || cdp.act === 'GIVE' ? '' : cdp.act == 'DRAW' || cdp.act == 'WIPE' ? `${this.numberWithCommas(cdp.arg)} DAI` : `${this.numberWithCommas(cdp.arg)} PETH`}`,
+                    cdpId: cdp.shut ? cdp.cdpId : <button style={{background: 'none', border:'none', padding:0, textDecoration:'underline', color:'#FFF', cursor:'pointer'}} value={cdp.cdpId} onClick={this.handleClick}>{cdp.cdpId}</button>,
+                    act: `${cdp.act} ${cdp.act === 'OPEN' || cdp.act === 'GIVE' || cdp.act === 'SHUT' ? '' : cdp.act == 'DRAW' || cdp.act == 'WIPE' ? `${this.numberWithCommas(cdp.arg)} DAI` : `${this.numberWithCommas(cdp.arg)} PETH`}`,
                     tx: <a target="_blank" href={`https://etherscan.io/tx/${cdp.tx}`} style={{textDecoration:'underline', color:'inherit'}}>{this.truncateTx(cdp.tx)}</a>,
                     owner: `${this.truncateTx(owner)}`,
                     debt: `${this.numberWithCommas(cdp.debt)} DAI`,
@@ -118,7 +118,8 @@ class AllRecentActions extends Component{
                     sortable = {false}
                     filterable = {false}
                     pages = {this.state.pages}
-                    getLoadingProps = {() => <Loader active inverted inline='centered'/>}
+                    NoDataComponent={() => this.state.loading? <Loader active inverted/> : null}
+                    // LoadingComponent={() => this.state.loading? <Loader active inverted/> : null}
                     manual
                     ref={(instance) =>{ this.table=instance }}
                     onFetchData = {async (state, instance)=>{
