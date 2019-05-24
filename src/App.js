@@ -15,15 +15,18 @@ import CdpCollateralChart from './components/CdpCollateralChart'
 import CumulativeDebt from './components/CumulativeDebtChart'
 import CumulativeCollateral from './components/CumulativeCollateralChart'
 import CdpDebtChart from './components/CdpDebtChart'
-
-
 import Footer from './components/Footer'
 import AllCdps from './components/AllCdps'
 import { Grid, Loader, Tab, Dropdown } from 'semantic-ui-react'
 import './App.css';
 import MakerService from './MakerService'
-import { getCdps } from './api/daiService'
-import { getMarketData, getEthTicker, getDaiHistorical } from './api/marketData'
+import daiIcon from '../src/images/daiIcon.png'
+import ethIcon from '../src/images/ethIcon.png'
+import mkrIcon from '../src/images/mkrIcon.png'
+
+
+// import { getCdps } from './api/daiService'
+// import { getMarketData, getEthTicker, getDaiHistorical } from './api/marketData'
 import ReactGA from 'react-ga'
 const axios = require('axios')
 
@@ -32,7 +35,7 @@ const axios = require('axios')
 class App extends Component {
 
   state = {
-    cdpId: null,
+    cdpId: null, // No CDP loaded by default 
     pethCollateral: '',
     usdCollateral: '',
     daiDebt: '',
@@ -42,12 +45,17 @@ class App extends Component {
     searchMsg: '',
     error: false,
     updating: false,
-    selectedMarket: 'daiOHLC',
-    systemSelection: 'dailyWipeDraw',
+    systemSelection: 'dailyCdps',
+    daiSelection: 'dailyWipeDraw',
+    pethSelection: 'dailyLockFree',
+    mkrSelection: 'mkrOHLC',
     cdpSelection: 'pethCollateral',
-    currentTab: 0, //System is default tab (1), cdp stats is tab 0
+    currentTab: 1, //DAI is default tab (1), cdp stats is tab 0
     cdpActionsTab: 0,
-    systemOptions: 3, //For system tab dropdown, default index 3 (dai repaid/created),
+    systemOptions: 0, //For system tab dropdown, default index 0 (daily cdps created),
+    daiOptions: 0, // For dai tab dropdown, default index 0 (dai repaid/created)
+    pethOptions: 0, // For peth tab dropdown, default index 0 (peth locked/freed)
+    mkrOptions: 0, // For mkr tab dropdown, default index 0 (mkr OHLC)
     marketOptions: 0 //For markets tab dropdown, default index 0 (dai ohlc)
   }
 
@@ -69,19 +77,22 @@ class App extends Component {
     const dailyWipeDrawRes = await axios.get('https://dai-embassy-server.herokuapp.com/dailywipedraw')
     // const dailyWipeDrawRes = await axios.get('http://localhost:2917/dailywipedraw')
 
+    const dailyLockFreeRes = await axios.get('https://dai-embassy-server.herokuapp.com/dailylockfree')
 
-    const marketRes = await axios.get('https://dai-embassy-server.herokuapp.com/daiOHLC')
+    const marketRes = await axios.get('https://dai-embassy-server.herokuapp.com/mkrOHLC')
     // const marketRes = await axios.get('http://localhost:2917/daiOHLC')
+
+    const dailyCdpsRes = await axios.get('https://dai-embassy-server.herokuapp.com/dailyCdps')
+
 
     // let dailyActions = await axios.get('https://dai-embassy-server.herokuapp.com/dailyActions')
     const systemStatusRes = await axios.get('https://dai-embassy-server.herokuapp.com/systemStatus')
-
     const systemStatus = systemStatusRes.data
     // let allRecentActions = await axios.get('http://localhost:2917/allRecentActions')
     // allRecentActions = allRecentActions.data.allRecentActions
 
 
-    let data2 = marketRes.data.daiOHLC
+    let data2 = marketRes.data.mkrOHLC.reverse()
     data2.forEach(day => {
       day.date = new Date(day.date)
     })
@@ -89,19 +100,28 @@ class App extends Component {
     // data3.forEach(day =>{
     //   day.date = new Date(day.date)
     // })
+
     let dailyWipeDraw = dailyWipeDrawRes.data.dailyWipeDraw.reverse()
     dailyWipeDraw.forEach(day => {
       day.date = new Date(day.date)
     })
-    // dailyActions = (dailyActions.data.dailyActions).reverse()
-    // dailyActions.forEach(action => {
-    //   action.date = new Date(action.date)
-    // })
+
+    let dailyLockFree = dailyLockFreeRes.data.dailyLockFree.reverse()
+    dailyLockFree.forEach(day => {
+      day.date = new Date(day.date)
+    })
+
+    let dailyCdps = (dailyCdpsRes.data.dailyCdps).reverse()
+    dailyCdps.forEach(day => {
+      day.date = new Date(day.date)
+    })
 
 
-    this.setState({ marketData: data2, dailyWipeDraw, systemStatus, })
+    this.setState({ mkrOHLC: data2, dailyWipeDraw, systemStatus,dailyLockFree,dailyCdps })
     this.setState({ currentAccount, loadingMsg: 'Getting CDPs...' })
     const res = await axios.get('https://dai-embassy-server.herokuapp.com/searchableCdps')
+    // const res = await axios.get('http://localhost:2917/searchableCdps')
+
     const cdps = res.data.searchableCdps
     // console.log(cdps)
     // const cdps = await getCdps()
@@ -167,7 +187,6 @@ class App extends Component {
 
     // Provide cdp details widget with the owners account associated with the specific cdpid
     // cdpDetails.account = account
-
     this.setState({ cdps, updating: false, currentAccount, maker, loadingMsg: '', })
     // this.updateData()
     // console.log(this.state.cdpCollateralDebt)
@@ -185,7 +204,7 @@ class App extends Component {
           action: `Searched for CDP ${id}`,
           label: new Date().toString()
         })
-        this.setState({ error: false, wipeDraw: null, cdpDetails: null, systemStatus: null, cdpId: null, searchMsg: '', loadingMsg: `Loading CDP: ${id}`, updating: true })
+        this.setState({ error: false, wipeDraw: null, cdpDetails: null, systemStatus: null, cdpId: null, searchMsg: '', loadingMsg: `Loading CDP: ${id}`, updating: true,currentTab:0 })
 
         const maker = this.state.maker
         try {
@@ -223,7 +242,7 @@ class App extends Component {
         cdpDetails.account = account
 
         // if (this.state.updating) {
-        this.setState({ error: false, wipeDraw, cdpDetails, systemStatus, cdpId: id, loadingMsg: '', cdpCollateralDebt, updating: false })
+        this.setState({ error: false, wipeDraw, cdpDetails, systemStatus, cdpId: id, loadingMsg: '', cdpCollateralDebt, updating: false, })
         // } else {
         //   this.setState({ updating: true, error: false, wipeDraw, cdpDetails, systemStatus, cdpId: id, loadingMsg: '', cdpCollateralDebt })
         //   // this.updateData()
@@ -254,27 +273,9 @@ class App extends Component {
     }, 30000)
   }
 
-  handleMarketButton = async (e, { value }) => {
-    e.preventDefault()
-    const marketOptions = {'daiOHLC': 0, 'mkrOHLC': 1}
-    const currentSelection = this.state.selectedMarket
-    const selection = value
-    if (selection !== currentSelection) {
-      ReactGA.modalview(`/${selection}`);
-      const marketRes = await axios.get(`https://dai-embassy-server.herokuapp.com/${selection}`)
-      // const marketRes = await axios.get(`http://localhost:2917/${selection}`)
-
-      let data = marketRes.data[selection]
-      data.forEach(day => {
-        day.date = new Date(day.date)
-      })
-      this.setState({ marketData: data, selectedMarket: selection,marketOptions: marketOptions[selection] })
-    }
-  }
-
   handleSystemButton = async (e, { value }) => {
     e.preventDefault()
-    const systemOptions = {'dailyCdps': 0,'dailyActions':1, 'dailyLockFree': 2, 'dailyWipeDraw': 3, 'cumulativeDebt': 4, 'cumulativeCollateral': 5}
+    const systemOptions = {'dailyCdps': 0,'dailyActions':1,}
     const currentSelection = this.state.systemSelection
     const selection = value
     if (selection !== currentSelection) {
@@ -294,6 +295,68 @@ class App extends Component {
     }
   }
 
+  handleDaiButton = async (e, { value }) => {
+    e.preventDefault()
+    const daiOptions = {'dailyWipeDraw': 0, 'cumulativeDebt': 1, 'daiOHLC': 2}
+    const currentSelection = this.state.daiSelection
+    const selection = value
+    if (selection !== currentSelection) {
+      this.setState({ [selection]: null })
+
+      ReactGA.modalview(`/${selection}`);
+      const res = await axios.get(`https://dai-embassy-server.herokuapp.com/${selection}`)
+      // const res = await axios.get(`http://localhost:2917/${selection}`)
+
+      let data = res.data[selection].reverse()
+      data.forEach(day => {
+        day.date = new Date(day.date)
+      })
+      // console.log(selection, data)
+
+      this.setState({ [selection]: data, daiSelection: selection, daiOptions:daiOptions[selection] })
+    }
+  }
+
+  handlePethButton = async (e, { value }) => {
+    e.preventDefault()
+    const pethOptions = {'dailyLockFree': 0, 'cumulativeCollateral': 1,}
+    const currentSelection = this.state.pethSelection
+    const selection = value
+    if (selection !== currentSelection) {
+      this.setState({ [selection]: null })
+
+      ReactGA.modalview(`/${selection}`);
+      const res = await axios.get(`https://dai-embassy-server.herokuapp.com/${selection}`)
+      // const res = await axios.get(`http://localhost:2917/${selection}`)
+
+      let data = res.data[selection].reverse()
+      data.forEach(day => {
+        day.date = new Date(day.date)
+      })
+      // console.log(selection, data)
+
+      this.setState({ [selection]: data, pethSelection: selection, pethOptions:pethOptions[selection] })
+    }
+  }
+
+  handleMkrButton = async (e, { value }) => {
+    e.preventDefault()
+    const mkrOptions = {'mkrOHLC': 0,}
+    const currentSelection = this.state.mkrSelection
+    const selection = value
+    if (selection !== currentSelection) {
+      ReactGA.modalview(`/${selection}`);
+      const marketRes = await axios.get(`https://dai-embassy-server.herokuapp.com/${selection}`)
+      // const marketRes = await axios.get(`http://localhost:2917/${selection}`)
+
+      let data = marketRes.data[selection].reverse()
+      data.forEach(day => {
+        day.date = new Date(day.date)
+      })
+      this.setState({ [selection]: data, mkrSelection: selection,mkrOptions: mkrOptions[selection] })
+    }
+  }
+
   handleCdpButton = async (e) => {
     e.preventDefault()
     const currentSelection = this.state.cdpSelection
@@ -308,6 +371,7 @@ class App extends Component {
 
   handleTabChange = (e, activeIndex, menuItem) => {
     e.preventDefault()
+    // console.log(menuItem)
     if (this.state.currentTab !== activeIndex) {
       this.setState({ currentTab: activeIndex })
       ReactGA.modalview(`/tab/${menuItem}`)
@@ -323,24 +387,17 @@ class App extends Component {
     }
   }
 
+  clearCdp = () =>{
+    if(!this.state.updating){
+      let currentTab = this.state.currentTab === 0 ? 1 : this.state.currentTab-1
+      this.setState({cdpId:null, wipeDraw: null, cdpDetails: null, currentTab})
+    }
+  }
+
   loadContent = () => {
     if (!this.state.error) {
-      const systemOptions = [
-        {
-          key: 'CDP Creation',
-          text: 'CDP Creation',
-          value: 'dailyCdps',
-        },
-        {
-          key: 'CDP Activity',
-          text: 'CDP Activity',
-          value: 'dailyActions',
-        },
-        {
-          key: 'PETH Deposits/Withdrawals',
-          text: 'PETH Deposits/Withdrawals',
-          value: 'dailyLockFree',
-        },
+      // Options for the DAI tab chart selection dropdown
+      const daiOptions = [
         {
           key: 'DAI Repaid/Created',
           text: 'DAI Repaid/Created',
@@ -352,26 +409,49 @@ class App extends Component {
           value: 'cumulativeDebt'
         },
         {
-          key: 'Cumulative Collateral',
-          text: 'Cumulative Collateral',
-          value: 'cumulativeCollateral'
-        }
-      ]
-      const marketOptions = [
-        {
           key: 'DAI/USD (Global Avg.)',
           text: 'DAI/USD (Global Avg.)',
           value: 'daiOHLC',
         },
+      ]
+      // Options for the PETH tab chart selection dropdown
+      const pethOptions = [
+        {
+          key: 'PETH Deposits/Withdrawals',
+          text: 'PETH Deposits/Withdrawals',
+          value: 'dailyLockFree',
+        },
+        {
+          key: 'Cumulative Collateral',
+          text: 'Cumulative Collateral',
+          value: 'cumulativeCollateral'
+        },    
+      ]
+      // Options for the MKR tab chart selection dropdown
+      const mkrOptions = [
         {
           key: 'MKR/USD (Global Avg.)',
           text: 'MKR/USD (Global Avg.)',
           value: 'mkrOHLC',
         },
+      ] 
+      // Options for the System tab chart selection dropdown
+      const systemOptions = [
+        {
+          key: 'CDP Creation',
+          text: 'CDP Creation',
+          value: 'dailyCdps',
+        },
+        {
+          key: 'CDP Activity',
+          text: 'CDP Activity',
+          value: 'dailyActions',
+        },
       ]
+      // Tab panes for the charts including specific CDP graphs in addition to DAI/PETH/MKR charts
       const panes = [
         {
-          menuItem: { key: 0, icon: 'target', content: this.state.updating ? 'Loading' : `CDP ${this.state.cdpId}` },
+          menuItem: { key: 0, icon: 'target', content: this.state.updating ? 'Loading' : `CDP ${this.state.cdpId}`, name:`CDP ${this.state.cdpId}` },
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
@@ -401,11 +481,11 @@ class App extends Component {
             </Tab.Pane>
         },
         {
-          menuItem: { key: 1, icon: 'cog', content: 'System' },
+          menuItem: { key: 1, icon: 'cog', content: 'System', name:'System' },
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
-              height: window.innerWidth > 768 ? '565px' : this.state.systemSelection == "dailyLockFree" ? '585px' : this.state.systemSelection == "cumulativeDebt"  || this.state.systemSelection == "cumulativeCollateral"  ? '605px' : '565px',
+              height: window.innerWidth > 768 ? '565px' : this.state.systemSelection === "dailyCdps"  ? '585px' : '565px',
               border: '2px solid #38414B',
               borderTop: 0,
               borderTopRadius: 0
@@ -415,8 +495,6 @@ class App extends Component {
               <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='dailyActions' onClick={this.handleSystemButton}>{`CDP Activity`}</button>
               <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='dailyLockFree' onClick={this.handleSystemButton}>{`PETH Deposits/Withdrawals`}</button>
               <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='dailyWipeDraw' onClick={this.handleSystemButton}>{`DAI Repaid/Created`}</button> */}
-              <Grid columns={window.innerWidth > 768 ? 2 : 1}>
-                <Grid.Column>
                   <span style={{ color: '#FFF' }}>
                     {`Chart Selection: `}
                     <Dropdown
@@ -425,73 +503,29 @@ class App extends Component {
                       onChange={this.handleSystemButton}
                     />
                   </span>
-                </Grid.Column>
-                {/* <Grid.Column textAlign='right' only='computer'>
-                  Download
-                </Grid.Column> */}
-              </Grid>
-
-
-
               <hr style={{ opacity: '0.7' }} />
-              {this.state.dailyCdps && this.state.systemSelection === 'dailyCdps' ? <ChartCdp data={this.state.dailyCdps} /> : this.state.dailyActions && this.state.systemSelection === 'dailyActions' ? <DailyActionsChart data={this.state.dailyActions} /> : this.state.dailyLockFree && this.state.systemSelection === 'dailyLockFree' ? <DailyLockFreeChart data={this.state.dailyLockFree} /> : this.state.dailyWipeDraw && this.state.systemSelection === 'dailyWipeDraw' ? <DailyWipeDrawChart data={this.state.dailyWipeDraw} /> : this.state.cumulativeDebt && this.state.systemSelection === 'cumulativeDebt' ? <CumulativeDebt data={this.state.cumulativeDebt} /> : this.state.cumulativeCollateral && this.state.systemSelection === 'cumulativeCollateral' ? <CumulativeCollateral data={this.state.cumulativeCollateral} /> : <Loader active inverted inline='centered' />}
-              {(this.state.systemSelection == "dailyWipeDraw" || this.state.systemSelection == "dailyLockFree") && (this.state.dailyWipeDraw || this.state.dailyLockFree) ?
-                <Grid>
-                  <Grid.Column textAlign="right" style={{ paddingRight: "27px", paddingBottom: 0, paddingTop: "12px" }}>
-                    <div className={{ position: "relative" }}>
-                      {(() => {
-                        if (this.state.systemSelection == "dailyLockFree") {
-                          return (
-                            <span>
-                              <div style={{ width: "10px", height: "10px", backgroundColor: "#2a95dd", display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
-                              <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>Locked ETH</span>
-                            </span>
-                          )
-                        }
-                      })()}
-                      <div style={{ width: "10px", height: "10px", backgroundColor: "#E6BB48", display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
-                      <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>{this.state.systemSelection == "dailyWipeDraw" ? 'Circulating DAI' :'Locked PETH'}</span>
-                      <span style={{ display: 'inline-block' }}>
-                        <div style={{ width: "10px", height: "10px", backgroundColor: "#FF0000", display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
-                        <span style={{ paddingLeft: "20px", color: "#FFF", }}>{this.state.systemSelection == "dailyWipeDraw" ? `DAI Created` : `PETH Withdrawn`}</span>
-                      </span>
-                      <span style={{ display: 'inline-block' }}>
-                        <div style={{ width: "10px", height: "10px", backgroundColor: "#189F3A", display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
-                        <span style={{ paddingLeft: "20px", color: "#FFF" }}>{this.state.systemSelection == "dailyWipeDraw" ? `DAI Repaid` : `PETH Deposited`}</span>
-                      </span>
-
-                    </div>
-                  </Grid.Column>
-                </Grid>
-
-                : (this.state.systemSelection === 'cumulativeDebt' || this.state.systemSelection === 'cumulativeCollateral') && (this.state.cumulativeDebt || this.state.cumulativeCollateral) ? 
-                <Grid>
+              {this.state.dailyCdps && this.state.systemSelection === 'dailyCdps' ? <ChartCdp data={this.state.dailyCdps} /> : this.state.dailyActions && this.state.systemSelection === 'dailyActions' ? <DailyActionsChart data={this.state.dailyActions} /> : <Loader active inverted inline='centered' />}
+              {this.state.systemSelection == "dailyCdps" && this.state.dailyCdps ?              
+              <Grid>
                 <Grid.Column textAlign="right" style={{ paddingRight: "27px", paddingBottom: 0, paddingTop: "12px" }}>
                   <div className={{ position: "relative" }}>
-                    <div style={{ width: "10px", height: "10px", backgroundColor: this.state.systemSelection === 'cumulativeDebt' ? "#FF0000" : '#189F3A', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
-                    <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>{this.state.systemSelection === 'cumulativeDebt' ? 'Cumulative DAI Created' : 'Cumulative PETH Deposited'}</span>
+                    <div style={{ width: "10px", height: "10px", backgroundColor:'#1678C2', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                    <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>CDPs Created</span>
                     <span style={{ display: 'inline-block' }}>
-                      <div style={{ width: "10px", height: "10px", backgroundColor: this.state.systemSelection === 'cumulativeDebt' ? "#189F3A" : '#FF0000', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
-                      <span style={{ paddingLeft: "20px", color: "#FFF", }}>{this.state.systemSelection === 'cumulativeDebt' ? 'Cumulative DAI Repaid' : 'Cumulative PETH Withdrawn'}</span>
+                      <div style={{ width: "10px", height: "10px", backgroundColor:'#6BA583', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                      <span style={{ paddingLeft: "20px", color: "#FFF", }}>System Actions (Lock, Draw, Free, etc.)</span>
                     </span>
-                    <span style={{ display: 'inline-block' }}>
-                      <div style={{ width: "10px", height: "10px", backgroundColor: "#366b93", display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
-                      <span style={{ paddingLeft: "20px", color: "#FFF" }}>{this.state.systemSelection === 'cumulativeDebt' ? 'Cumulative DAI Liquidated' : 'Cumulative PETH Liquidated'}</span>
-                    </span>
-
                   </div>
                 </Grid.Column>
-              </Grid> 
-              : null}
-
+            </Grid> : null}
             </Tab.Pane>
         },
         {
-          menuItem: { key: 2, icon: 'area chart', content: 'Markets' },
+          menuItem: { key: 2,content: <span style={{position:'relative', top:'-3px'}}><img style={{position:'relative', top:'4px', paddingRight:'6px', width:'1.6em', opacity:'0.8'}}src={daiIcon}/>DAI</span>, name:'DAI' },
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
-              height: '555px',
+              height: window.innerWidth > 768 ? '565px' : this.state.daiSelection == "cumulativeDebt"  ? '605px' : '565px',
               border: '2px solid #38414B',
               borderTop: 0,
               borderTopRadius: 0
@@ -501,16 +535,146 @@ class App extends Component {
               <span style={{color:'#FFF'}}>
                 Chart Selection:{` `}
                 <Dropdown
-                  options={marketOptions}
-                  value={marketOptions[this.state.marketOptions].value}
-                  onChange={this.handleMarketButton}
+                  options={daiOptions}
+                  value={daiOptions[this.state.daiOptions].value}
+                  onChange={this.handleDaiButton}
                 />
               </span>
               <hr style={{ opacity: '0.7' }} />
-              {this.state.marketData && this.state.selectedMarket === 'daiOHLC' ? <DaiChart data={this.state.marketData} market={this.state.selectedMarket} /> : this.state.marketData && this.state.selectedMarket === 'mkrOHLC' ? <MkrChart data={this.state.marketData} market={this.state.selectedMarket} /> : <Loader active inverted inline='centered' />}
+              { this.state.dailyWipeDraw && this.state.daiSelection === 'dailyWipeDraw' ? <DailyWipeDrawChart data={this.state.dailyWipeDraw} /> : this.state.cumulativeDebt && this.state.daiSelection === 'cumulativeDebt' ? <CumulativeDebt data={this.state.cumulativeDebt} /> : this.state.daiOHLC && this.state.daiSelection === 'daiOHLC' ? <DaiChart data={this.state.daiOHLC}/>  : <Loader active inverted inline='centered' />}
+              {(this.state.daiSelection == "dailyWipeDraw" || this.state.daiSelection == "cumulativeDebt") && (this.state.dailyWipeDraw || this.state.cumulativeDebt) ?              
+              <Grid>
+                <Grid.Column textAlign="right" style={{ paddingRight: "27px", paddingBottom: 0, paddingTop: "12px" }}>
+                  <div className={{ position: "relative" }}>
+                    <div style={{ width: "10px", height: "10px", backgroundColor: this.state.daiSelection === 'cumulativeDebt' ? "#FF0000" : '#E6BB48', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                    <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>{this.state.daiSelection === 'cumulativeDebt' ? 'Cumulative DAI Created' : 'Circulating DAI'}</span>
+                    <span style={{ display: 'inline-block' }}>
+                      <div style={{ width: "10px", height: "10px", backgroundColor: this.state.daiSelection === 'cumulativeDebt' ? "#189F3A" : '#FF0000', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                      <span style={{ paddingLeft: "20px", color: "#FFF", }}>{this.state.daiSelection === 'cumulativeDebt' ? 'Cumulative DAI Repaid' : 'DAI Created'}</span>
+                    </span>
+                    <span style={{ display: 'inline-block' }}>
+                      <div style={{ width: "10px", height: "10px", backgroundColor: this.state.daiSelection === 'cumulativeDebt' ? "#366b93" : '#189F3A', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                      <span style={{ paddingLeft: "20px", color: "#FFF" }}>{this.state.daiSelection === 'cumulativeDebt' ? 'Cumulative DAI Liquidated' : 'DAI Repaid'}</span>
+                    </span>
+
+                  </div>
+                </Grid.Column>
+            </Grid> : this.state.daiSelection === 'daiOHLC' ? 
+                <Grid>
+                <Grid.Column textAlign="right" style={{ paddingRight: "27px", paddingBottom: 0, paddingTop: "12px" }}>
+                  <div className={{ position: "relative" }}>
+                    <div style={{ width: "10px", height: "10px", backgroundColor:'#1678C2', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                    <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>DAI Price</span>
+                    <span style={{ display: 'inline-block' }}>
+                      <div style={{ width: "10px", height: "10px", backgroundColor:'#E6BB48', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                      <span style={{ paddingLeft: "20px", color: "#FFF", }}>DAI Market Cap.</span>
+                    </span>
+                    <span style={{ display: 'inline-block' }}>
+                      <div style={{ width: "5px", height: "10px", backgroundColor: '#FF0000', display: "inline-block", position: "absolute", marginLeft: "10px", marginTop: "5px" }}></div>
+                      <div style={{ width: "5px", height: "10px", backgroundColor: '#6BA583', display: "inline-block", position: "absolute", marginLeft: "4px", marginTop: "5px" }}></div>
+                      <span style={{ paddingLeft: "20px", color: "#FFF" }}>Volume</span>
+                    </span>
+                  </div>
+                </Grid.Column>
+            </Grid>
+                      : null}
+            </Tab.Pane>
+        },
+        {
+          menuItem: { key: 3,content: <span style={{position:'relative', top:'-3px'}}><img style={{position:'relative', top:'4px', paddingRight:'6px', width:'1.6em', opacity:'0.8'}}src={ethIcon}/>PETH</span>, name:'PETH' },
+          render: () =>
+            <Tab.Pane style={{
+              backgroundColor: '#273340',
+              height: window.innerWidth > 768 ? '565px' : this.state.pethSelection == "cumulativeCollateral"  ? '605px' : '585px',
+              border: '2px solid #38414B',
+              borderTop: 0,
+              borderTopRadius: 0
+            }}>
+              <span style={{color:'#FFF'}}>
+                Chart Selection:{` `}
+                <Dropdown
+                  options={pethOptions}
+                  value={pethOptions[this.state.pethOptions].value}
+                  onChange={this.handlePethButton}
+                />
+              </span>
+              <hr style={{ opacity: '0.7' }} />
+              { this.state.dailyLockFree && this.state.pethSelection === 'dailyLockFree' ? <DailyLockFreeChart data={this.state.dailyLockFree} /> : this.state.cumulativeCollateral && this.state.pethSelection === 'cumulativeCollateral' ? <CumulativeCollateral data={this.state.cumulativeCollateral} /> : <Loader active inverted inline='centered' />}
+              {(this.state.pethSelection == "dailyLockFree" || this.state.pethSelection == "cumulativeCollateral") && (this.state.dailyLockFree || this.state.cumulativeCollateral) ?              
+              <Grid>
+                <Grid.Column textAlign="right" style={{ paddingRight: "27px", paddingBottom: 0, paddingTop: "12px" }}>
+                  <div className={{ position: "relative" }}>
+                  {(() => {
+                        if (this.state.pethSelection == "dailyLockFree") {
+                          return (
+                            <span>
+                              <div style={{ width: "10px", height: "10px", backgroundColor: "#2a95dd", display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                              <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>Locked ETH</span>
+                            </span>
+                          )
+                        }
+                      })()}
+                    <div style={{ width: "10px", height: "10px", backgroundColor: this.state.pethSelection === 'cumulativeCollateral' ? "#189F3A" : '#E6BB48', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                    <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>{this.state.pethSelection === 'cumulativeCollateral' ? 'Cumulative PETH Deposited' : 'Locked PETH'}</span>
+                    <span style={{ display: 'inline-block' }}>
+                      <div style={{ width: "10px", height: "10px", backgroundColor: this.state.pethSelection === 'cumulativeCollateral' ? "#FF0000" : '#FF0000', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                      <span style={{ paddingLeft: "20px", color: "#FFF", }}>{this.state.pethSelection === 'cumulativeCollateral' ? 'Cumulative PETH Withdrawn' : 'PETH Withdrawn'}</span>
+                    </span>
+                    <span style={{ display: 'inline-block' }}>
+                      <div style={{ width: "10px", height: "10px", backgroundColor: this.state.pethSelection === 'cumulativeCollateral' ? "#366b93" : '#189F3A', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                      <span style={{ paddingLeft: "20px", color: "#FFF" }}>{this.state.pethSelection === 'cumulativeCollateral' ? 'Cumulative PETH Liquidated' : 'PETH Deposited'}</span>
+                    </span>
+
+                  </div>
+                </Grid.Column>
+            </Grid> : null}
+            </Tab.Pane>
+        },
+        {
+          menuItem: { key: 4,content: <span style={{position:'relative', top:'-3px'}}><img style={{position:'relative', top:'4px', paddingRight:'6px', width:'1.6em', opacity:'0.8'}}src={mkrIcon}/>MKR</span>, name:'MKR' },
+          render: () =>
+            <Tab.Pane style={{
+              backgroundColor: '#273340',
+              height: '565px',
+              border: '2px solid #38414B',
+              borderTop: 0,
+              borderTopRadius: 0
+            }}>
+
+              <span style={{color:'#FFF'}}>
+                Chart Selection:{` `}
+                <Dropdown
+                  options={mkrOptions}
+                  value={mkrOptions[this.state.mkrOptions].value}
+                  onChange={this.handleMkrButton}
+                />
+              </span>
+              <hr style={{ opacity: '0.7' }} />
+              { this.state.mkrOHLC && this.state.mkrSelection === 'mkrOHLC' ? <MkrChart data={this.state.mkrOHLC}/> : <Loader active inverted inline='centered' />}
+              
+              {this.state.mkrSelection == "mkrOHLC" && this.state.mkrOHLC ?              
+              <Grid>
+                <Grid.Column textAlign="right" style={{ paddingRight: "27px", paddingBottom: 0, paddingTop: "12px" }}>
+                  <div className={{ position: "relative" }}>
+                    <div style={{ width: "10px", height: "10px", backgroundColor:'#1678C2', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                    <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>MKR Price</span>
+                    <span style={{ display: 'inline-block' }}>
+                      <div style={{ width: "10px", height: "10px", backgroundColor:'#E6BB48', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                      <span style={{ paddingLeft: "20px", color: "#FFF", }}>MKR Market Cap.</span>
+                    </span>
+                    <span style={{ display: 'inline-block' }}>
+                      <div style={{ width: "5px", height: "10px", backgroundColor: '#FF0000', display: "inline-block", position: "absolute", marginLeft: "10px", marginTop: "5px" }}></div>
+                      <div style={{ width: "5px", height: "10px", backgroundColor: '#6BA583', display: "inline-block", position: "absolute", marginLeft: "4px", marginTop: "5px" }}></div>
+                      <span style={{ paddingLeft: "20px", color: "#FFF" }}>Volume</span>
+                    </span>
+                  </div>
+                </Grid.Column>
+            </Grid> : null}
             </Tab.Pane>
         },
       ]
+
+      // Tab pane for the significant/all/liquidations/open CDPs tables
       const cdpActionsPane = [
         {
           menuItem: { key: 0, icon: 'lightning', content: 'Significant CDP Actions' },
@@ -553,7 +717,23 @@ class App extends Component {
             >
               <Liquidations handleSearchClick={this.handleSearchClick} />
             </Tab.Pane>
-        }]
+        },
+        {
+          menuItem: { key: 3, icon: 'globe', content: `Open CDPs` },
+          render: () =>
+            <Tab.Pane style={{
+              backgroundColor: '#273340',
+              border: '2px solid #38414B',
+              borderTop: 0,
+              borderTopRadius: 0,
+              padding: 0
+            }}
+            >
+              <AllCdps handleSearchClick={this.handleSearchClick} cdps={this.state.cdps}  systemStatus={this.state.systemStatus}/>
+            </Tab.Pane>
+        }
+      ]
+      // Return the actual viewable components to the render method
       return (
         <Grid.Row style={{ paddingTop: 0, paddingLeft: '2px' }} >
           <SideMenu
@@ -568,11 +748,12 @@ class App extends Component {
 
           <Grid.Column width={12} tablet={10}>
             <Tab
-              menu={{ attached: 'top', inverted: true, style: { backgroundColor: '#273340', border: '2px solid #38414B' } }}
+              menu={{ attached: 'top', inverted: true, style: { backgroundColor: '#273340', border: '2px solid #38414B', display:'flex', flexDirection:window.innerWidth > 768 ? 'row' : 'column', flexWrap:'wrap' } }}
               style={{ paddingBottom: '10px', }}
-              defaultActiveIndex={this.state.currentTab}
-              onTabChange={(e, { activeIndex }) => this.handleTabChange(e, activeIndex, panes[activeIndex].menuItem.content)}
-              panes={this.state.cdpId ? panes : panes.slice(1)}
+              // defaultActiveIndex={this.state.currentTab}
+              activeIndex={this.state.currentTab}
+              onTabChange={(e, { activeIndex }) => this.handleTabChange(e, activeIndex, (this.state.cdpId ? panes[activeIndex].menuItem.name : panes[activeIndex+1].menuItem.name))}
+              panes={this.state.cdpId || this.state.updating ? panes : panes.slice(1)}
               onMouseEnter={() => {
                 if (!this.state.loadingMsg && window.innerWidth > 768) {
                   let style = document.body.style.overflow
@@ -590,18 +771,18 @@ class App extends Component {
 
             </Tab>
 
-            {this.state.cdpId || this.state.updating ? <RecentActions cdpId={this.state.cdpId} /> : null}
+            {this.state.cdpId || this.state.updating ? <RecentActions cdpId={this.state.cdpId} clearCdp={this.clearCdp} updating={this.state.updating} /> : null}
             <Tab
               menu={{ attached: 'top', inverted: true, style: { backgroundColor: '#273340', border: '2px solid #38414B', display: 'flex', flexDirection: window.innerWidth > 768 ? 'row' : 'column', flexWrap: 'wrap' } }}
-              style={{ paddingTop: '10px',}}
+              style={{ paddingTop: '10px', paddingBottom: '10px'}}
               defaultActiveIndex ={this.state.cdpActionsTab}
               onTabChange={(e, {activeIndex}) => this.handleActionsTabChange(e, activeIndex, cdpActionsPane[activeIndex].menuItem.content)}
               panes={cdpActionsPane}
             >
         </Tab>
-              <div style={{paddingTop:'10px'}}>  
+            {/* <div style={{paddingTop:'10px'}}>  
               <AllCdps handleSearchClick={this.handleSearchClick} cdps={this.state.cdps}  systemStatus={this.state.systemStatus}/>
-            </div>
+            </div> */}
         </Grid.Column>
       </Grid.Row>
        ) 
