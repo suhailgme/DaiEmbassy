@@ -7,9 +7,7 @@ import { timeFormat } from "d3-time-format";
 import { curveMonotoneX } from "d3-shape"
 import { ChartCanvas, Chart, ZoomButtons } from "react-stockcharts";
 import {
-	BarSeries,
     AreaSeries,
-    LineSeries,
 } from "react-stockcharts/lib/series";
 import {  Label } from "react-stockcharts/lib/annotation";
 import { discontinuousTimeScaleProvider } from "react-stockcharts/lib/scale";

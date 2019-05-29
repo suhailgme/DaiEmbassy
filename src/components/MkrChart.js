@@ -9,7 +9,6 @@ import { ChartCanvas, Chart, ZoomButtons } from "react-stockcharts";
 import {
 	BarSeries,
 	AreaSeries,
-	CircleMarker,
 	LineSeries
 } from "react-stockcharts/lib/series";
 import {  Label } from "react-stockcharts/lib/annotation";

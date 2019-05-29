@@ -102,9 +102,9 @@ class AreaChartWithEdge extends React.Component {
 				opacity={0.15} 
 				fontFamily='roboto'
 				/>
+
 				<Label 
 				x={width  / 2} y={140}
-				fontSize={30} 
 				text="Dai Embassy"
 				fill='#BDC4C7'
 				opacity={0.15} 
