@@ -9,6 +9,8 @@ import DaiChart from './components/DaiChart'
 import MkrChart from './components/MkrChart'
 import ChartCdp from './components/ChartCdp'
 import DailyActionsChart from './components/DailyActionsChart'
+import DailyActionsDaiStackedChart from './components/DailyActionsDaiStackedChart'
+import DailyActionsDaiChart from './components/DailyActionsDaiChart'
 import DailyLockFreeChart from './components/DailyLockFreeChart'
 import DailyWipeDrawChart from './components/DailyWipeDrawChart'
 import CdpCollateralChart from './components/CdpCollateralChart'
@@ -35,18 +37,19 @@ class App extends Component {
     searchMsg: '',
     error: false,
     updating: false,
-    systemSelection: 'dailyCdps',
+    systemSelection: 'dailyActionsDai',
     daiSelection: 'dailyWipeDraw',
     pethSelection: 'dailyLockFree',
     mkrSelection: 'mkrOHLC',
     cdpSelection: 'pethCollateral',
     currentTab: 1, //DAI is default tab (1), cdp stats is tab 0
     cdpActionsTab: 0,
-    systemOptions: 0, //For system tab dropdown, default index 0 (daily cdps created),
+    systemOptions: 2, //For system tab dropdown, default index 0 (daily cdps created),
     daiOptions: 0, // For dai tab dropdown, default index 0 (dai repaid/created)
     pethOptions: 0, // For peth tab dropdown, default index 0 (peth locked/freed)
     mkrOptions: 0, // For mkr tab dropdown, default index 0 (mkr OHLC)
-    marketOptions: 0 //For markets tab dropdown, default index 0 (dai ohlc)
+    marketOptions: 0, //For markets tab dropdown, default index 0 (dai ohlc)
+    stackedActivityChart: false,
   }
 
   async componentDidMount() {
@@ -67,7 +70,7 @@ class App extends Component {
     const marketRes = await axios.get('https://dai-embassy-server.herokuapp.com/mkrOHLC')
     // const marketRes = await axios.get('http://localhost:2917/daiOHLC')
 
-    const dailyCdpsRes = await axios.get('https://dai-embassy-server.herokuapp.com/dailyCdps')
+    const dailyActionsDaiRes = await axios.get('https://dai-embassy-server.herokuapp.com/dailyActionsDai')
 
 
     // let dailyActions = await axios.get('https://dai-embassy-server.herokuapp.com/dailyActions')
@@ -92,12 +95,12 @@ class App extends Component {
       day.date = new Date(day.date)
     })
 
-    let dailyCdps = (dailyCdpsRes.data.dailyCdps).reverse()
-    dailyCdps.forEach(day => {
+    let dailyActionsDai = (dailyActionsDaiRes.data.dailyActionsDai).reverse()
+    dailyActionsDai.forEach(day => {
       day.date = new Date(day.date)
     })
 
-    this.setState({ mkrOHLC, dailyWipeDraw, systemStatus, dailyLockFree, dailyCdps })
+    this.setState({ mkrOHLC, dailyWipeDraw, systemStatus, dailyLockFree, dailyActionsDai, dailyCdps })
     this.setState({ currentAccount, loadingMsg: 'Getting CDPs...' })
     const res = await axios.get('https://dai-embassy-server.herokuapp.com/searchableCdps')
     // const res = await axios.get('http://localhost:2917/searchableCdps')
@@ -256,7 +259,7 @@ class App extends Component {
 
   handleSystemButton = async (e, { value }) => {
     e.preventDefault()
-    const systemOptions = { 'dailyCdps': 0, 'dailyActions': 1, }
+    const systemOptions = { 'dailyCdps': 0, 'dailyActions': 1, 'dailyActionsDai': 2 }
     const currentSelection = this.state.systemSelection
     const selection = value
     if (selection !== currentSelection) {
@@ -455,6 +458,11 @@ class App extends Component {
           text: 'CDP Activity',
           value: 'dailyActions',
         },
+        {
+          key: 'CDP Activity (Expressed in DAI)',
+          text: 'CDP Activity (Expressed in DAI)',
+          value: 'dailyActionsDai',
+        },
       ]
       /***************** Tab panes for the charts including specific CDP graphs
        ****************** and DAI/PETH/MKR charts *****************/
@@ -491,20 +499,33 @@ class App extends Component {
           menuItem: { key: 1, icon: 'cog', content: 'System', name: 'System' },
           render: () =>
             <Tab.Pane style={{
+              height: window.innerWidth > 768 ? '565px' : this.state.systemSelection === "dailyCdps" || this.state.systemSelection === "dailyActionsDai" ? '585px' : '565px',
               backgroundColor: '#333533',
-              height: window.innerWidth > 768 ? '565px' : this.state.systemSelection === "dailyCdps" ? '585px' : '565px',
-              border: 0
+              border: 0,
             }}
             >
-              <span style={{ color: '#FFF' }}>
-                {`Chart Selection: `}
-                <Dropdown
-                  options={systemOptions}
-                  value={systemOptions[this.state.systemOptions].value}
-                  onChange={this.handleSystemButton}
-                />
-              </span>
-              {this.state.dailyCdps && this.state.systemSelection === 'dailyCdps' ? <ChartCdp data={this.state.dailyCdps} /> : this.state.dailyActions && this.state.systemSelection === 'dailyActions' ? <DailyActionsChart data={this.state.dailyActions} /> : <Loader active inverted inline='centered' />}
+              <Grid columns={2} stackable>
+                <Grid.Column>
+                  <span style={{ color: '#FFF' }}>
+                    {`Chart Selection: `}
+                    <Dropdown
+                      options={systemOptions}
+                      value={systemOptions[this.state.systemOptions].value}
+                      onChange={this.handleSystemButton}
+                    />
+                  </span>
+                </Grid.Column>
+                <Grid.Column textAlign={window.innerWidth < 768 ? 'left' : 'right'}>
+                <button style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', color: '#FFF', cursor: 'pointer' }} value='stackedBar' onClick={(e)=> this.setState({stackedActivityChart: !this.state.stackedActivityChart})}>{this.state.stackedActivityChart ? 'Show Grouped Bar Chart' :'Show Stacked Bar Chart'}</button>
+                </Grid.Column>
+              </Grid>
+              {
+                this.state.dailyCdps && this.state.systemSelection === 'dailyCdps' ? <ChartCdp data={this.state.dailyCdps} /> :
+                  this.state.dailyActions && this.state.systemSelection === 'dailyActions' ? <DailyActionsChart data={this.state.dailyActions} /> :
+                    this.state.dailyActionsDai && this.state.systemSelection === 'dailyActionsDai' && this.state.stackedActivityChart ? <DailyActionsDaiStackedChart data={this.state.dailyActionsDai} /> :
+                    this.state.dailyActionsDai && this.state.systemSelection === 'dailyActionsDai' ? <DailyActionsDaiChart data={this.state.dailyActionsDai} /> :
+                      <Loader active inverted inline='centered' />
+              }
               {this.state.systemSelection == "dailyCdps" && this.state.dailyCdps ?
                 <Grid>
                   <Grid.Column textAlign="center" style={{ paddingBottom: 0, paddingTop: "20px" }}>
@@ -519,7 +540,29 @@ class App extends Component {
                       </div>
                     </div>
                   </Grid.Column>
-                </Grid> : null}
+                </Grid> :
+                this.state.systemSelection === 'dailyActionsDai' && this.state.dailyActionsDai ?
+                  <Grid>
+                    <Grid.Column textAlign="right" style={{ paddingRight: "27px", paddingBottom: 0, paddingTop: "12px" }}>
+                      <div className={{ position: "relative" }}>
+                        <div style={{ width: "10px", height: "10px", backgroundColor: '#1678C2', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                        <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>DAI Equiv. Locked</span>
+                        <span style={{ display: 'inline-block' }}>
+                          <div style={{ width: "10px", height: "10px", backgroundColor: '#FA7D0E', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                          <span style={{ paddingLeft: "20px", color: "#FFF", }}>DAI Equiv. Freed</span>
+                        </span>
+                        <span style={{ display: 'inline-block' }}>
+                          <div style={{ width: "10px", height: "10px", backgroundColor: '#2B922F', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                          <span style={{ paddingLeft: "20px", color: "#FFF", }}>DAI Wiped</span>
+                        </span>
+                        <span style={{ display: 'inline-block' }}>
+                          <div style={{ width: "10px", height: "10px", backgroundColor: '#C22324', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                          <span style={{ paddingLeft: "20px", color: "#FFF", }}>DAI Drawn</span>
+                        </span>
+                      </div>
+                    </Grid.Column>
+                  </Grid>
+                  : null}
             </Tab.Pane>
         },
         /***************** Tab for specific DAI charts cumulative and daily dai wipe/draw *****************/
