@@ -7,7 +7,6 @@ import { timeFormat } from "d3-time-format";
 import { curveMonotoneX } from "d3-shape"
 import { ChartCanvas, Chart, ZoomButtons } from "react-stockcharts";
 import {
-	BarSeries,
     AreaSeries,
     LineSeries,
 } from "react-stockcharts/lib/series";
@@ -111,7 +110,6 @@ class AreaChartWithEdge extends React.Component {
 				/>
 				<Label 
 				x={width  / 2} y={140}
-				fontSize={30} 
 				text="Dai Embassy"
 				fill='#BDC4C7'
 				opacity={0.15} 
