@@ -124,7 +124,7 @@ export default class AllCdps extends Component{
         const processedCdps = this.state.processedCdps
         const numberCDPs = this.state.numberCDPs
         return (
-            <div style={{color:'#FFF',backgroundColor:'#273340', paddingTop:'10px', paddingLeft:'5px'}}>
+            <div style={{color:'#FFF',backgroundColor:'transparent', paddingTop:'10px', paddingLeft:'5px'}}>
                 <Grid columns={2} stackable>
                     <Grid.Column>
                         <h4 >Tracking {numberCDPs} CDPs</h4>
@@ -211,8 +211,8 @@ export default class AllCdps extends Component{
           )
         }else{
             return(
-                <div style={{color:'#FFF', borderRadius:'5px', border: '2px solid #38414B',
-                backgroundColor:'#273340', paddingTop:'10px', paddingLeft:'5px', height:'494px'}}>
+                <div style={{color:'#FFF',
+                backgroundColor:'transparent', paddingTop:'10px', paddingLeft:'5px', height:'494px'}}>
                 <h4><Icon name='globe'/>Loading All Open CDPs</h4>
                 <hr style={{opacity:'0.7'}}/>
                 <Loader active inverted inline='centered'/>

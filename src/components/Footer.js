@@ -5,15 +5,19 @@ export default class Footer extends Component{
     state ={}
     render(){
         return(
-            <div className='footer' style={{color:'#FFF', backgroundColor:'#3D4853', marginTop:'5px'}}>
-                <Grid container centered columns={3}>
-                    <Grid.Column >
+            <div className='footer' style={{color:'#FFF', backgroundColor:'transparent', marginTop:'24px'}}>
+                <Grid>
+                    <Grid.Row>
+                        <Grid.Column>
                         <Icon inverted name='twitter'/>
-                        <a href="https://twitter.com/DaiEmbassy" target='_blank' style={{color:'#FFF', textDecoration:'underline'}}>Twitter</a>
-                    </Grid.Column>
-                    <Grid.Column>
+                        Follow <a href="https://twitter.com/DaiEmbassy" target='_blank' style={{color:'#FFF', textDecoration:'underline'}}>DaiEmbassy</a> on Twitter
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column>
                         <p>@cryptonomik <a href='https://chat.makerdao.com' target='_blank' style={{color:'#FFF', textDecoration:'underline'}}>(chat.makerdao.com)</a></p>
-                    </Grid.Column>
+                        </Grid.Column>
+                    </Grid.Row>
                 </Grid>
             </div>
 

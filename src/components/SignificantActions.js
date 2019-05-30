@@ -65,10 +65,9 @@ class SignificantActions extends Component {
 
             return (
                 <div style={{
-                    color: '#FFF', //borderRadius:'5px', border: '2px solid #38414B',
-                    backgroundColor: '#273340', paddingTop: '10px', paddingLeft: '5px'
+                    color: '#FFF',
+                    backgroundColor: 'transparent', paddingTop: '10px', paddingLeft: '5px'
                 }}>
-                    <hr style={{ opacity: '0.7' }} />
                     <ReactTable
                         data={recentActions}
                         columns={[

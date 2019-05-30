@@ -4,24 +4,21 @@ import WipeDrawWidget from './WipeDrawWidget'
 import CdpDetails from './CdpDetails'
 import SystemStatusWidget from './SystemStatusWidget'
 
-
-
 const WidgetAccordion = (props) => {
 
 let panel = [
   {
     key: '0',
-    title: { content: props.wipeDraw ? `Simulate CDP ${props.cdpId}` : props.updating ? `Loading CDP` : `CDP Simulator and Details` },
+    title: { content: props.wipeDraw ? `Simulate CDP ${props.cdpId}` : props.updating ? `Loading CDP` : `Instructions` },
     content: { content: props.wipeDraw ? (<WipeDrawWidget wipeDraw={props.wipeDraw} />) : props.loading ? <Loader active inverted inline='centered' /> : 
       <span>
-        <Segment inverted style={{ backgroundColor: '#273340' }}>
+        <Segment inverted style={{ backgroundColor: 'transparent' }}>
           <p>Click on a CDP ID or search to:</p>
           <ul style={{}}>
             <li style={{paddingBottom:'10px'}}>Simulate DAI or PETH actions</li>
             <li style={{paddingBottom:'10px'}}>View debt, collateral, accrued fees, and more</li>
             <li style={{paddingBottom:'10px'}}>View complete transaction history</li>
             <li>Load debt, collateral, and liquidation price charts</li>
-
           </ul>
         </Segment>
         <hr />

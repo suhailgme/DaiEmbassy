@@ -15,7 +15,6 @@ import CdpCollateralChart from './components/CdpCollateralChart'
 import CumulativeDebt from './components/CumulativeDebtChart'
 import CumulativeCollateral from './components/CumulativeCollateralChart'
 import CdpDebtChart from './components/CdpDebtChart'
-import Footer from './components/Footer'
 import AllCdps from './components/AllCdps'
 import { Grid, Loader, Tab, Dropdown } from 'semantic-ui-react'
 import './App.css';
@@ -97,7 +96,6 @@ class App extends Component {
     dailyCdps.forEach(day => {
       day.date = new Date(day.date)
     })
-
 
     this.setState({ mkrOHLC, dailyWipeDraw, systemStatus, dailyLockFree, dailyCdps })
     this.setState({ currentAccount, loadingMsg: 'Getting CDPs...' })
@@ -377,6 +375,33 @@ class App extends Component {
     }
   }
 
+  loadSidebar = () => {
+    if (!this.state.error) {
+      /***************** Return the actual viewable components to the render method *****************/
+      return (
+        <Grid.Row>
+          <SideMenu
+            wipeDraw={this.state.wipeDraw} // Data for simulator on sidebar (cdp specific)
+            cdpDetails={this.state.cdpDetails} // Data for details on sidebar (cdp specific)
+            systemStatus={this.state.systemStatus} // System status on sidebar
+            account={this.state.account} // Dai Embassy Node
+            cdpId={this.state.cdpId} // A cdpId or null
+            updating={this.state.updating} // true if app updating or getting new cdp 
+            loading={this.state.loadingMsg} // loading message when updating
+          />
+        </Grid.Row>
+      )
+    } else {
+      return (
+        <Grid.Row style={{ paddingTop: '10%', paddingBottom: '10%' }}>
+          <Grid.Column>
+            <Loader inverted active content={this.state.error ? <button onClick={this.handleError} style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', color: '#FFF', cursor: 'pointer' }}>{this.state.loadingMsg}</button> : this.state.loadingMsg} />
+          </Grid.Column>
+        </Grid.Row>
+      )
+    }
+  }
+
   loadContent = () => {
     if (!this.state.error) {
       /***************** Options for the DAI tab chart selection dropdown *****************/
@@ -439,16 +464,13 @@ class App extends Component {
           menuItem: { key: 0, icon: 'target', content: this.state.updating ? 'Loading' : `CDP ${this.state.cdpId}`, name: `CDP ${this.state.cdpId}` },
           render: () =>
             <Tab.Pane style={{
-              backgroundColor: '#273340',
+              backgroundColor: 'transparent',
               height: '565px',
-              border: '2px solid #38414B',
-              borderTop: 0,
-              borderTopRadius: 0,
+              border: 0,
               paddingBottom: 0
             }}>
               <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='pethCollateral' onClick={this.handleCdpButton}>{`PETH Collateral`}</button>
               <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='daiDebt' onClick={this.handleCdpButton}>{`DAI Debt`}</button>
-              <hr style={{ opacity: '0.7' }} />
               {this.state.cdpCollateralDebt && this.state.cdpDetails ? this.state.cdpSelection === 'pethCollateral' ? <CdpCollateralChart data={this.state.cdpCollateralDebt} cdpId={this.state.cdpId} /> : <CdpDebtChart data={this.state.cdpCollateralDebt} cdpId={this.state.cdpId} /> : <Loader active inverted inline='centered' />}
               {this.state.cdpCollateralDebt && this.state.cdpDetails ?
                 <Grid>
@@ -470,11 +492,9 @@ class App extends Component {
           menuItem: { key: 1, icon: 'cog', content: 'System', name: 'System' },
           render: () =>
             <Tab.Pane style={{
-              backgroundColor: '#273340',
+              backgroundColor: 'transparent',
               height: window.innerWidth > 768 ? '565px' : this.state.systemSelection === "dailyCdps" ? '585px' : '565px',
-              border: '2px solid #38414B',
-              borderTop: 0,
-              borderTopRadius: 0
+              border: 0,
             }}
             >
               <span style={{ color: '#FFF' }}>
@@ -485,7 +505,6 @@ class App extends Component {
                   onChange={this.handleSystemButton}
                 />
               </span>
-              <hr style={{ opacity: '0.7' }} />
               {this.state.dailyCdps && this.state.systemSelection === 'dailyCdps' ? <ChartCdp data={this.state.dailyCdps} /> : this.state.dailyActions && this.state.systemSelection === 'dailyActions' ? <DailyActionsChart data={this.state.dailyActions} /> : <Loader active inverted inline='centered' />}
               {this.state.systemSelection == "dailyCdps" && this.state.dailyCdps ?
                 <Grid>
@@ -508,11 +527,9 @@ class App extends Component {
           menuItem: { key: 2, content: <span style={{ position: 'relative', top: '-3px' }}><img style={{ position: 'relative', top: '4px', paddingRight: '6px', width: '1.6em', opacity: '0.8' }} src={daiIcon} />DAI</span>, name: 'DAI' },
           render: () =>
             <Tab.Pane style={{
-              backgroundColor: '#273340',
+              backgroundColor: 'transparent',
               height: window.innerWidth > 768 ? '565px' : this.state.daiSelection == "cumulativeDebt" ? '605px' : '565px',
-              border: '2px solid #38414B',
-              borderTop: 0,
-              borderTopRadius: 0
+              border: 0,
             }}>
               <span style={{ color: '#FFF' }}>
                 Chart Selection:{` `}
@@ -522,7 +539,6 @@ class App extends Component {
                   onChange={this.handleDaiButton}
                 />
               </span>
-              <hr style={{ opacity: '0.7' }} />
               {this.state.dailyWipeDraw && this.state.daiSelection === 'dailyWipeDraw' ? <DailyWipeDrawChart data={this.state.dailyWipeDraw} /> : this.state.cumulativeDebt && this.state.daiSelection === 'cumulativeDebt' ? <CumulativeDebt data={this.state.cumulativeDebt} /> : this.state.daiOHLC && this.state.daiSelection === 'daiOHLC' ? <DaiChart data={this.state.daiOHLC} /> : <Loader active inverted inline='centered' />}
               {(this.state.daiSelection == "dailyWipeDraw" || this.state.daiSelection == "cumulativeDebt") && (this.state.dailyWipeDraw || this.state.cumulativeDebt) ?
                 <Grid>
@@ -567,11 +583,9 @@ class App extends Component {
           menuItem: { key: 3, content: <span style={{ position: 'relative', top: '-3px' }}><img style={{ position: 'relative', top: '4px', paddingRight: '6px', width: '1.6em', opacity: '0.8' }} src={ethIcon} />PETH</span>, name: 'PETH' },
           render: () =>
             <Tab.Pane style={{
-              backgroundColor: '#273340',
+              backgroundColor: 'transparent',
               height: window.innerWidth > 768 ? '565px' : this.state.pethSelection == "cumulativeCollateral" ? '605px' : '585px',
-              border: '2px solid #38414B',
-              borderTop: 0,
-              borderTopRadius: 0
+              border: 0,
             }}>
               <span style={{ color: '#FFF' }}>
                 Chart Selection:{` `}
@@ -581,7 +595,6 @@ class App extends Component {
                   onChange={this.handlePethButton}
                 />
               </span>
-              <hr style={{ opacity: '0.7' }} />
               {this.state.dailyLockFree && this.state.pethSelection === 'dailyLockFree' ? <DailyLockFreeChart data={this.state.dailyLockFree} /> : this.state.cumulativeCollateral && this.state.pethSelection === 'cumulativeCollateral' ? <CumulativeCollateral data={this.state.cumulativeCollateral} /> : <Loader active inverted inline='centered' />}
               {(this.state.pethSelection == "dailyLockFree" || this.state.pethSelection == "cumulativeCollateral") && (this.state.dailyLockFree || this.state.cumulativeCollateral) ?
                 <Grid>
@@ -618,11 +631,9 @@ class App extends Component {
           menuItem: { key: 4, content: <span style={{ position: 'relative', top: '-3px' }}><img style={{ position: 'relative', top: '4px', paddingRight: '6px', width: '1.6em', opacity: '0.8' }} src={mkrIcon} />MKR</span>, name: 'MKR' },
           render: () =>
             <Tab.Pane style={{
-              backgroundColor: '#273340',
+              backgroundColor: 'transparent',
               height: '565px',
-              border: '2px solid #38414B',
-              borderTop: 0,
-              borderTopRadius: 0
+              border: 0,
             }}>
 
               <span style={{ color: '#FFF' }}>
@@ -633,7 +644,6 @@ class App extends Component {
                   onChange={this.handleMkrButton}
                 />
               </span>
-              <hr style={{ opacity: '0.7' }} />
               {this.state.mkrOHLC && this.state.mkrSelection === 'mkrOHLC' ? <MkrChart data={this.state.mkrOHLC} /> : <Loader active inverted inline='centered' />}
 
               {this.state.mkrSelection == "mkrOHLC" && this.state.mkrOHLC ?
@@ -665,10 +675,8 @@ class App extends Component {
           menuItem: { key: 0, icon: 'lightning', content: 'Significant CDP Actions' },
           render: () =>
             <Tab.Pane style={{
-              backgroundColor: '#273340',
-              border: '2px solid #38414B',
-              borderTop: 0,
-              borderTopRadius: 0,
+              backgroundColor: 'transparent',
+              border: 0,
               padding: 0
             }}
             >
@@ -680,10 +688,8 @@ class App extends Component {
           menuItem: { key: 1, icon: 'history', content: 'All CDP Actions' },
           render: () =>
             <Tab.Pane style={{
-              backgroundColor: '#273340',
-              border: '2px solid #38414B',
-              borderTop: 0,
-              borderTopRadius: 0,
+              backgroundColor: 'transparent',
+              border: 0,
               padding: 0
             }}
             >
@@ -695,10 +701,8 @@ class App extends Component {
           menuItem: { key: 2, icon: 'trash', content: 'Liquidations' },
           render: () =>
             <Tab.Pane style={{
-              backgroundColor: '#273340',
-              border: '2px solid #38414B',
-              borderTop: 0,
-              borderTopRadius: 0,
+              backgroundColor: 'transparent',
+              border: 0,
               padding: 0
             }}
             >
@@ -710,10 +714,8 @@ class App extends Component {
           menuItem: { key: 3, icon: 'globe', content: `Open CDPs` },
           render: () =>
             <Tab.Pane style={{
-              backgroundColor: '#273340',
-              border: '2px solid #38414B',
-              borderTop: 0,
-              borderTopRadius: 0,
+              backgroundColor: 'transparent',
+              border: 0,
               padding: 0
             }}
             >
@@ -721,23 +723,12 @@ class App extends Component {
             </Tab.Pane>
         }
       ]
-        /***************** Return the actual viewable components to the render method *****************/
+      /***************** Return the actual viewable components to the render method *****************/
       return (
-        <Grid.Row style={{ paddingTop: 0, paddingLeft: '2px' }} >
-          <SideMenu
-            wipeDraw={this.state.wipeDraw} // Data for simulator on sidebar (cdp specific)
-            cdpDetails={this.state.cdpDetails} // Data for details on sidebar (cdp specific)
-            systemStatus={this.state.systemStatus} // System status on sidebar
-            account={this.state.account} // Dai Embassy Node
-            cdpId={this.state.cdpId} // A cdpId or null
-            updating={this.state.updating} // true if app updating or getting new cdp 
-            loading={this.state.loadingMsg} // loading message when updating
-          />
-
-          <Grid.Column width={12} tablet={10}>
+        <Grid.Row>
+          <Grid.Column>
             <Tab
-              menu={{ attached: 'top', inverted: true, style: { backgroundColor: '#273340', border: '2px solid #38414B', display: 'flex', flexDirection: window.innerWidth > 768 ? 'row' : 'column', flexWrap: 'wrap' } }}
-              style={{ paddingBottom: '10px', }}
+              menu={{ attached: 'top', inverted: true, style: { backgroundColor: 'transparent', display: 'flex', flexDirection: window.innerWidth > 768 ? 'row' : 'column', flexWrap: 'wrap' } }}
               // defaultActiveIndex={this.state.currentTab}
               activeIndex={this.state.currentTab}
               onTabChange={(e, { activeIndex }) => this.handleTabChange(e, activeIndex, (this.state.cdpId ? panes[activeIndex].menuItem.name : panes[activeIndex + 1].menuItem.name))}
@@ -761,8 +752,7 @@ class App extends Component {
 
             {this.state.cdpId || this.state.updating ? <RecentActions cdpId={this.state.cdpId} clearCdp={this.clearCdp} updating={this.state.updating} /> : null}
             <Tab
-              menu={{ attached: 'top', inverted: true, style: { backgroundColor: '#273340', border: '2px solid #38414B', display: 'flex', flexDirection: window.innerWidth > 768 ? 'row' : 'column', flexWrap: 'wrap' } }}
-              style={{ paddingTop: '10px', paddingBottom: '10px' }}
+              menu={{ attached: 'top', inverted: true, style: { backgroundColor: 'transparent', display: 'flex', flexDirection: window.innerWidth > 768 ? 'row' : 'column', flexWrap: 'wrap' } }}
               defaultActiveIndex={this.state.cdpActionsTab}
               onTabChange={(e, { activeIndex }) => this.handleActionsTabChange(e, activeIndex, cdpActionsPane[activeIndex].menuItem.content)}
               panes={cdpActionsPane}
@@ -773,28 +763,29 @@ class App extends Component {
       )
     } else {
       return (
-        
         <Grid.Row style={{ paddingTop: '10%', paddingBottom: '10%' }}>
           <Grid.Column>
             <Loader inverted active content={this.state.error ? <button onClick={this.handleError} style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', color: '#FFF', cursor: 'pointer' }}>{this.state.loadingMsg}</button> : this.state.loadingMsg} />
           </Grid.Column>
         </Grid.Row>
-
       )
     }
   }
 
   render() {
     return (
-      <div className="App" style={{ backgroundColor: '#232D39' }}>
-        <Grid stackable>
-          <Grid.Row style={{ paddingBottom: 0, paddingLeft: '2px' }}>
-            <TopMenu searchMsg={this.state.searchMsg} loadingMsg={this.state.loadingMsg} handleSearchClick={this.handleSearchClick} cdps={this.state.cdps} account={this.state.currentAccount} />
+      <div className="App" style={{ backgroundColor: '#363c46'}}>
+        <Grid>
+          <Grid.Row stretched columns={2} style={{ paddingBottom: '0' }}>
+            <Grid.Column width={3}>
+              {this.loadSidebar()}
+            </Grid.Column>
+            <Grid.Column width={13}>
+              <TopMenu searchMsg={this.state.searchMsg} loadingMsg={this.state.loadingMsg} handleSearchClick={this.handleSearchClick} cdps={this.state.cdps} account={this.state.currentAccount} />
+              {this.loadContent()}
+              </Grid.Column>
           </Grid.Row>
-          {this.loadContent()}
         </Grid>
-        <Footer />
-
       </div>
     );
   }
