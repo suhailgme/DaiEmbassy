@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { Grid, Statistic, Container, Form, Popup } from 'semantic-ui-react'
-import CdpDetails from './CdpDetails';
 
 export default class SystemStatusWidget extends Component{
     
@@ -128,8 +127,14 @@ export default class SystemStatusWidget extends Component{
         const systemStatus = this.state.systemStatus
         return (
             <div>
-                <Container textAlign='center'>
-                    <Statistic size='mini' color='red' inverted label='ETH/USD' value={systemStatus.ethPrice}/>
+                <Container textAlign='center' style={{paddingBottom:'10px'}}>
+                    <Statistic.Group size='mini' widths={2}>
+                    <Statistic color='red' inverted  label='ETH/USD' value={systemStatus.ethPrice}/>
+                    <Statistic inverted>
+                        <Statistic.Value style={{color:'#E6BB48'}}>{systemStatus.daiPrice.dai_usd_price}</Statistic.Value>
+                        <Popup inverted content='DAI price provided by daiprice.info' trigger={<Statistic.Label>DAI/USD</Statistic.Label>}/>
+                    </Statistic>
+                </Statistic.Group>
                 </Container>
                 <Form>
                 <Grid columns='equal' padded='vertically'>
