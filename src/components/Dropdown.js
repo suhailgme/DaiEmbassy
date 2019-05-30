@@ -34,7 +34,7 @@ let panel = [
   },
 ]
 
-  let dropdown = <Accordion defaultActiveIndex={[0, 1, 2]} panels={panel} exclusive={false} inverted />
+  let dropdown = <Accordion defaultActiveIndex={[1, 2]} panels={panel} exclusive={false} inverted />
 
   !props.cdpDetails ? panel.splice(1,1) : null
   return dropdown

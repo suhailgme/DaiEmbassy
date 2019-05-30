@@ -101,6 +101,7 @@ class App extends Component {
     })
 
     this.setState({ mkrOHLC, dailyWipeDraw, systemStatus, dailyLockFree, dailyActionsDai, dailyCdps })
+
     this.setState({ currentAccount, loadingMsg: 'Getting CDPs...' })
     const res = await axios.get('https://dai-embassy-server.herokuapp.com/searchableCdps')
     // const res = await axios.get('http://localhost:2917/searchableCdps')
