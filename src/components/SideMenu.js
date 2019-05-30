@@ -25,7 +25,7 @@ export default class SideMenu extends Component{
         // console.log('props:', this.props)
         return(
             <Responsive onUpdate={this.handleUpdate}>
-            <Menu fluid={this.state.fluid} inverted vertical size='massive' style={{height:'100vh'}}>
+            <Menu fluid={this.state.fluid} fixed='left' inverted vertical size='huge'>
                 <Menu.Item className='logo'>
                 <a href='.'>
                     <img src={logo} alt='Logo' width='155px'/>

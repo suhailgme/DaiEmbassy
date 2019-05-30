@@ -775,15 +775,19 @@ class App extends Component {
   render() {
     return (
       <div className="App" style={{ backgroundColor: '#363c46'}}>
-        <Grid>
-          <Grid.Row stretched columns={2} style={{ paddingBottom: '0' }}>
-            <Grid.Column width={3}>
+        <Grid stackable columns={2}>
+          <Grid.Row stretched style={{ paddingBottom: '0' }}>
+            <Grid.Column>
               {this.loadSidebar()}
             </Grid.Column>
-            <Grid.Column width={13}>
-              <TopMenu searchMsg={this.state.searchMsg} loadingMsg={this.state.loadingMsg} handleSearchClick={this.handleSearchClick} cdps={this.state.cdps} account={this.state.currentAccount} />
-              {this.loadContent()}
-              </Grid.Column>
+            <Grid.Column mobile={16} tablet={12} computer={13} style={{ marginLeft: '330px' }}>
+              <Grid.Row columns={1} verticalAlign='top'>
+                <TopMenu searchMsg={this.state.searchMsg} loadingMsg={this.state.loadingMsg} handleSearchClick={this.handleSearchClick} cdps={this.state.cdps} account={this.state.currentAccount} />
+              </Grid.Row>
+              <Grid.Row columns={1} verticalAlign='middle'>
+                {this.loadContent()}
+              </Grid.Row>
+            </Grid.Column>
           </Grid.Row>
         </Grid>
       </div>
