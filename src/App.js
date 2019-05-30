@@ -49,7 +49,7 @@ class App extends Component {
     pethOptions: 0, // For peth tab dropdown, default index 0 (peth locked/freed)
     mkrOptions: 0, // For mkr tab dropdown, default index 0 (mkr OHLC)
     marketOptions: 0, //For markets tab dropdown, default index 0 (dai ohlc)
-    stackedActivityChart: false,
+    stackedActivityChart: true,
   }
 
   async componentDidMount() {
@@ -499,7 +499,7 @@ class App extends Component {
           menuItem: { key: 1, icon: 'cog', content: 'System', name: 'System' },
           render: () =>
             <Tab.Pane style={{
-              height: window.innerWidth > 768 ? '565px' : this.state.systemSelection === "dailyCdps" || this.state.systemSelection === "dailyActionsDai" ? '585px' : '565px',
+              height: window.innerWidth > 768 ? '565px' : this.state.systemSelection === "dailyCdps" || this.state.systemSelection === "dailyActionsDai" ? '630px' : '565px',
               backgroundColor: '#333533',
               border: 0,
             }}
@@ -515,8 +515,8 @@ class App extends Component {
                     />
                   </span>
                 </Grid.Column>
-                <Grid.Column textAlign={window.innerWidth < 768 ? 'left' : 'right'}>
-                <button style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', color: '#FFF', cursor: 'pointer' }} value='stackedBar' onClick={(e)=> this.setState({stackedActivityChart: !this.state.stackedActivityChart})}>{this.state.stackedActivityChart ? 'Show Grouped Bar Chart' :'Show Stacked Bar Chart'}</button>
+                <Grid.Column textAlign={window.innerWidth < 768 ? 'left' : 'right'} style={{paddingTop: window.innerWidth < 768 ? 0 : '14px'}}>
+                {this.state.systemSelection === 'dailyActionsDai' ? <button style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', color: '#FFF', cursor: 'pointer' }} value='stackedBar' onClick={(e)=> this.setState({stackedActivityChart: !this.state.stackedActivityChart})}>{this.state.stackedActivityChart ? 'Show Grouped Bar Chart' :'Show Stacked Bar Chart'}</button> : null}
                 </Grid.Column>
               </Grid>
               {
