@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { Grid, Statistic, Container, Form, Popup, Segment, List } from 'semantic-ui-react'
-import CdpDetails from './CdpDetails';
 
 export default class SystemStatusWidget extends Component{
     
@@ -13,8 +12,6 @@ export default class SystemStatusWidget extends Component{
         displayDaiAvg: 1,
         displayCollaterAvg: 1
     }
-
-
 
     // componentDidUpdate(prevProps, prevState) {
     //     if (prevState.systemStatus !== this.state.systemStatus) {
@@ -46,8 +43,6 @@ export default class SystemStatusWidget extends Component{
             return number.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
         return null
       }
-    
-
 
     onMouseOverDai(e) {
         this.setState({
