@@ -50,7 +50,7 @@ class App extends Component {
     pethOptions: 0, // For peth tab dropdown, default index 0 (peth locked/freed)
     mkrOptions: 0, // For mkr tab dropdown, default index 0 (mkr OHLC)
     marketOptions: 0, //For markets tab dropdown, default index 0 (dai ohlc)
-    stackedActivityChart: false,
+    stackedActivityChart: true,
   }
 
   async componentDidMount() {
@@ -460,7 +460,7 @@ class App extends Component {
               {this.state.cdpCollateralDebt && this.state.cdpDetails ? this.state.cdpSelection === 'pethCollateral' ? <CdpCollateralChart data={this.state.cdpCollateralDebt} cdpId={this.state.cdpId} /> : <CdpDebtChart data={this.state.cdpCollateralDebt} cdpId={this.state.cdpId} /> : <Loader active inverted inline='centered' />}
               {this.state.cdpCollateralDebt && this.state.cdpDetails ?
                 <Grid>
-                  <Grid.Column textAlign="right" style={{ paddingRight: "27px", paddingBottom: 0, paddingTop: "12px" }}>
+                  <Grid.Column textAlign="right">
                     <div className={{ position: "relative" }}>
                       <div style={{ width: "10px", height: "10px", backgroundColor: "#E6BB48", display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
                       <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>Liquidation Price</span>
@@ -479,7 +479,7 @@ class App extends Component {
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
-              height: window.innerWidth > 768 ? '565px' : this.state.systemSelection === "dailyCdps" || this.state.systemSelection === "dailyActionsDai" ? '585px' : '565px',
+              height: window.innerWidth > 768 ? '565px' : this.state.systemSelection === "dailyCdps" || this.state.systemSelection === "dailyActionsDai" ? '630px' : '565px',
               border: '2px solid #38414B',
               borderTop: 0,
               borderTopRadius: 0
@@ -496,8 +496,8 @@ class App extends Component {
                     />
                   </span>
                 </Grid.Column>
-                <Grid.Column textAlign={window.innerWidth < 768 ? 'left' : 'right'}>
-                <button style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', color: '#FFF', cursor: 'pointer' }} value='stackedBar' onClick={(e)=> this.setState({stackedActivityChart: !this.state.stackedActivityChart})}>{this.state.stackedActivityChart ? 'Show Grouped Bar Chart' :'Show Stacked Bar Chart'}</button>
+                <Grid.Column textAlign={window.innerWidth < 768 ? 'left' : 'right'} style={{paddingTop: window.innerWidth < 768 ? 0 : '14px'}}>
+                {this.state.systemSelection === 'dailyActionsDai' ? <button style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', color: '#FFF', cursor: 'pointer' }} value='stackedBar' onClick={(e)=> this.setState({stackedActivityChart: !this.state.stackedActivityChart})}>{this.state.stackedActivityChart ? 'Show Grouped Bar Chart' :'Show Stacked Bar Chart'}</button> : null}
                 </Grid.Column>
               </Grid>
 
