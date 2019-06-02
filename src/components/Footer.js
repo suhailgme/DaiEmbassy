@@ -10,7 +10,7 @@ export default class Footer extends Component{
                     <Grid.Row>
                         <Grid.Column>
                         <Icon inverted name='twitter'/>
-                        Follow <a href="https://twitter.com/DaiEmbassy" target='_blank' style={{color:'#FFF', textDecoration:'underline'}}>DaiEmbassy</a> on Twitter
+                        <a href="https://twitter.com/DaiEmbassy" target='_blank' style={{color:'#FFF', textDecoration:'underline'}}>Follow DaiEmbassy</a>
                         </Grid.Column>
                     </Grid.Row>
                     <Grid.Row>

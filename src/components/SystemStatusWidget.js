@@ -43,7 +43,7 @@ export default class SystemStatusWidget extends Component{
             return number.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
         return null
       }
-
+    
     onMouseOverDai(e) {
         this.setState({
             displayDaiAvg: !this.state.displayDaiAvg,
@@ -151,6 +151,14 @@ export default class SystemStatusWidget extends Component{
                                 <List.Item><List.Content>
                                     <List.Header>Total CDPs</List.Header>
                                     {systemStatus.totalCdps}
+                                </List.Content></List.Item>
+                                <List.Item><List.Content>
+                                    <Popup inverted trigger={<a href="#" style={{textDecoration:'underline', fontSize:'11px', color:'inherit', fontWeight:'bold', cursor:'help'}}>DAI/USD Price</a>} on='hover'>
+                                    <Popup.Content>
+                                        Dai price provided by daiprice.info
+                                    </Popup.Content>  
+                                    </Popup>
+                                    <br/>{systemStatus.daiPrice.dai_usd_price}
                                 </List.Content></List.Item>
                             </List>
                         </Grid.Column>
