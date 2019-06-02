@@ -197,7 +197,7 @@ class AreaChartWithEdge extends React.Component {
             {/* <Chart id={2} yExtents={d => d.totalDaiDrawn}>
 				<LineSeries 
 					yAccessor={d=> d.totalDaiWiped}
-                    stroke='#E6BB48'
+                    stroke='#eca94b'
                     strokeWidth={2}
 					/>
 					<AreaSeries yAccessor={d => d.cumulativePeth} fill='#189F3A' stroke='#189F3A'interpolation={curveMonotoneX} /> 

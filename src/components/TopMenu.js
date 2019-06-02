@@ -70,7 +70,7 @@ export default class TopMenu extends Component {
 
     render(){
         return(
-            <Menu fluid inverted stackable borderless attached size='huge' style={{backgroundColor:'transparent'}}>
+            <Menu fluid stackable borderless attached size='large' style={{backgroundColor:'transparent', paddingTop: '2px', paddingBottom: '5px', border:'0'}}>
                 {this.props.cdps ? <Menu.Item fluid inverted><Search input={{ fluid: true}} style={{width:'420px'}} fluid selectFirstResult value={this.state.value} loading={this.state.isLoading} onSearchChange={this.handleSearchChange} onResultSelect={this.handleClick} results = {this.state.results} placeholder={"Search by CDP ID or Address"} size='large'/></Menu.Item> : null}
                 {this.props.searchMsg ? <Menu.Item><p style={{color:'#FF695E'}}>{this.props.searchMsg}</p></Menu.Item> : null}
                 <Menu.Item position='right'><ConnectionStatus loadingMsg = {this.props.loadingMsg} account={this.props.account}/> </Menu.Item> 

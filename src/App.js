@@ -379,7 +379,7 @@ class App extends Component {
     if (!this.state.error) {
       /***************** Return the actual viewable components to the render method *****************/
       return (
-        <Grid.Row>
+        <Grid.Row style={{paddingTop:'0'}}>
           <SideMenu
             wipeDraw={this.state.wipeDraw} // Data for simulator on sidebar (cdp specific)
             cdpDetails={this.state.cdpDetails} // Data for details on sidebar (cdp specific)
@@ -464,22 +464,21 @@ class App extends Component {
           menuItem: { key: 0, icon: 'target', content: this.state.updating ? 'Loading' : `CDP ${this.state.cdpId}`, name: `CDP ${this.state.cdpId}` },
           render: () =>
             <Tab.Pane style={{
-              backgroundColor: 'transparent',
+              backgroundColor: '#333533',
               height: '565px',
-              border: 0,
-              paddingBottom: 0
+              border: 0
             }}>
               <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='pethCollateral' onClick={this.handleCdpButton}>{`PETH Collateral`}</button>
               <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='daiDebt' onClick={this.handleCdpButton}>{`DAI Debt`}</button>
               {this.state.cdpCollateralDebt && this.state.cdpDetails ? this.state.cdpSelection === 'pethCollateral' ? <CdpCollateralChart data={this.state.cdpCollateralDebt} cdpId={this.state.cdpId} /> : <CdpDebtChart data={this.state.cdpCollateralDebt} cdpId={this.state.cdpId} /> : <Loader active inverted inline='centered' />}
               {this.state.cdpCollateralDebt && this.state.cdpDetails ?
                 <Grid>
-                  <Grid.Column textAlign="right" style={{ paddingRight: "27px", paddingBottom: 0, paddingTop: "12px" }}>
+                  <Grid.Column textAlign="center" style={{ paddingRight: "24px", paddingBottom: 0, paddingTop: "20px" }}>
                     <div className={{ position: "relative" }}>
-                      <div style={{ width: "10px", height: "10px", backgroundColor: "#E6BB48", display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
-                      <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>Liquidation Price</span>
-                      <div style={{ width: "10px", height: "10px", backgroundColor: this.state.cdpSelection == "pethCollateral" ? "#189F3A" : "#FF0000", display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
-                      <span style={{ paddingLeft: "20px", color: "#FFF" }}>{this.state.cdpSelection == "pethCollateral" ? `PETH Collateral` : `DAI Debt`}</span>
+                      <div style={{ width: "12px", height: "12px", backgroundColor: "#eca94b", display: "inline-block", position: "absolute", marginTop: "4px" }}></div>
+                      <span style={{ paddingLeft: "24px", color: "#FFF", paddingRight: "12px" }}>Liquidation Price</span>
+                      <div style={{ width: "12px", height: "12px", backgroundColor: this.state.cdpSelection == "pethCollateral" ? "#189F3A" : "#FF0000", display: "inline-block", position: "absolute", marginTop: "4px" }}></div>
+                      <span style={{ paddingLeft: "24px", color: "#FFF" }}>{this.state.cdpSelection == "pethCollateral" ? `PETH Collateral` : `DAI Debt`}</span>
                     </div>
                   </Grid.Column>
                 </Grid>
@@ -492,9 +491,9 @@ class App extends Component {
           menuItem: { key: 1, icon: 'cog', content: 'System', name: 'System' },
           render: () =>
             <Tab.Pane style={{
-              backgroundColor: 'transparent',
+              backgroundColor: '#333533',
               height: window.innerWidth > 768 ? '565px' : this.state.systemSelection === "dailyCdps" ? '585px' : '565px',
-              border: 0,
+              border: 0
             }}
             >
               <span style={{ color: '#FFF' }}>
@@ -508,14 +507,16 @@ class App extends Component {
               {this.state.dailyCdps && this.state.systemSelection === 'dailyCdps' ? <ChartCdp data={this.state.dailyCdps} /> : this.state.dailyActions && this.state.systemSelection === 'dailyActions' ? <DailyActionsChart data={this.state.dailyActions} /> : <Loader active inverted inline='centered' />}
               {this.state.systemSelection == "dailyCdps" && this.state.dailyCdps ?
                 <Grid>
-                  <Grid.Column textAlign="right" style={{ paddingRight: "27px", paddingBottom: 0, paddingTop: "12px" }}>
-                    <div className={{ position: "relative" }}>
-                      <div style={{ width: "10px", height: "10px", backgroundColor: '#1678C2', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
-                      <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>CDPs Created</span>
-                      <span style={{ display: 'inline-block' }}>
-                        <div style={{ width: "10px", height: "10px", backgroundColor: '#6BA583', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                  <Grid.Column textAlign="center" style={{ paddingBottom: 0, paddingTop: "20px" }}>
+                    <div style={{ position: "relative" }}>
+                      <div style={{ display: "inline-block", paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>
+                        <i style={{ width: "12px", height: "12px", backgroundColor: '#2690bc', position: "absolute", marginTop: "4px" }}></i>
+                        <span style={{ paddingLeft: "20px", color: "#FFF", }}>CDPs Created</span>
+                      </div>
+                      <div style={{ display: "inline-block", paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>
+                        <i style={{ width: "12px", height: "12px", backgroundColor: '#6BA583', position: "absolute", marginTop: "4px" }}></i>
                         <span style={{ paddingLeft: "20px", color: "#FFF", }}>System Actions (Lock, Draw, Free, etc.)</span>
-                      </span>
+                      </div>
                     </div>
                   </Grid.Column>
                 </Grid> : null}
@@ -527,9 +528,9 @@ class App extends Component {
           menuItem: { key: 2, content: <span style={{ position: 'relative', top: '-3px' }}><img style={{ position: 'relative', top: '4px', paddingRight: '6px', width: '1.6em', opacity: '0.8' }} src={daiIcon} />DAI</span>, name: 'DAI' },
           render: () =>
             <Tab.Pane style={{
-              backgroundColor: 'transparent',
+              backgroundColor: '#333533',
               height: window.innerWidth > 768 ? '565px' : this.state.daiSelection == "cumulativeDebt" ? '605px' : '565px',
-              border: 0,
+              border: 0
             }}>
               <span style={{ color: '#FFF' }}>
                 Chart Selection:{` `}
@@ -542,36 +543,42 @@ class App extends Component {
               {this.state.dailyWipeDraw && this.state.daiSelection === 'dailyWipeDraw' ? <DailyWipeDrawChart data={this.state.dailyWipeDraw} /> : this.state.cumulativeDebt && this.state.daiSelection === 'cumulativeDebt' ? <CumulativeDebt data={this.state.cumulativeDebt} /> : this.state.daiOHLC && this.state.daiSelection === 'daiOHLC' ? <DaiChart data={this.state.daiOHLC} /> : <Loader active inverted inline='centered' />}
               {(this.state.daiSelection == "dailyWipeDraw" || this.state.daiSelection == "cumulativeDebt") && (this.state.dailyWipeDraw || this.state.cumulativeDebt) ?
                 <Grid>
-                  <Grid.Column textAlign="right" style={{ paddingRight: "27px", paddingBottom: 0, paddingTop: "12px" }}>
-                    <div className={{ position: "relative" }}>
-                      <div style={{ width: "10px", height: "10px", backgroundColor: this.state.daiSelection === 'cumulativeDebt' ? "#FF0000" : '#E6BB48', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
-                      <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>{this.state.daiSelection === 'cumulativeDebt' ? 'Cumulative DAI Created' : 'Circulating DAI'}</span>
-                      <span style={{ display: 'inline-block' }}>
-                        <div style={{ width: "10px", height: "10px", backgroundColor: this.state.daiSelection === 'cumulativeDebt' ? "#189F3A" : '#FF0000', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                  <Grid.Column textAlign="center" style={{ paddingRight: "24px", paddingBottom: 0, paddingTop: "20px" }}>
+                    <div style={{ position: "relative" }}>
+                      <div style={{ display: "inline-block", paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>
+                        <i style={{ width: "12px", height: "12px", backgroundColor: this.state.daiSelection === 'cumulativeDebt' ? "#FF0000" : '#eca94b', position: "absolute", marginTop: "4px" }}></i>
+                        <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>{this.state.daiSelection === 'cumulativeDebt' ? 'Cumulative DAI Created' : 'Circulating DAI'}</span>
+                      </div>
+
+                      <div style={{ display: "inline-block", paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>
+                        <i style={{ width: "12px", height: "12px", backgroundColor: this.state.daiSelection === 'cumulativeDebt' ? "#189F3A" : '#FF0000', position: "absolute", marginTop: "4px" }}></i>
                         <span style={{ paddingLeft: "20px", color: "#FFF", }}>{this.state.daiSelection === 'cumulativeDebt' ? 'Cumulative DAI Repaid' : 'DAI Created'}</span>
-                      </span>
-                      <span style={{ display: 'inline-block' }}>
-                        <div style={{ width: "10px", height: "10px", backgroundColor: this.state.daiSelection === 'cumulativeDebt' ? "#366b93" : '#189F3A', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                      </div>
+
+                      <div style={{ display: "inline-block", paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>
+                        <i style={{ width: "12px", height: "12px", backgroundColor: this.state.daiSelection === 'cumulativeDebt' ? "#366b93" : '#189F3A', position: "absolute", marginTop: "4px" }}></i>
                         <span style={{ paddingLeft: "20px", color: "#FFF" }}>{this.state.daiSelection === 'cumulativeDebt' ? 'Cumulative DAI Liquidated' : 'DAI Repaid'}</span>
-                      </span>
+                      </div>
 
                     </div>
                   </Grid.Column>
                 </Grid> : this.state.daiSelection === 'daiOHLC' ?
                   <Grid>
-                    <Grid.Column textAlign="right" style={{ paddingRight: "27px", paddingBottom: 0, paddingTop: "12px" }}>
-                      <div className={{ position: "relative" }}>
-                        <div style={{ width: "10px", height: "10px", backgroundColor: '#1678C2', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
-                        <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>DAI Price</span>
-                        <span style={{ display: 'inline-block' }}>
-                          <div style={{ width: "10px", height: "10px", backgroundColor: '#E6BB48', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                    <Grid.Column textAlign="center" style={{ paddingRight: "24px", paddingBottom: 0, paddingTop: "20px" }}>
+                      <div style={{ position: "relative" }}>
+                        <div style={{ display: "inline-block", paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>
+                          <i style={{ width: "12px", height: "12px", backgroundColor: '#1678C2', position: "absolute", marginTop: "4px" }}></i>
+                          <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>DAI Price</span>
+                        </div>
+                        <div style={{ display: "inline-block", paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>
+                          <i style={{ width: "12px", height: "12px", backgroundColor: '#eca94b', position: "absolute", marginTop: "4px" }}></i>
                           <span style={{ paddingLeft: "20px", color: "#FFF", }}>DAI Market Cap.</span>
-                        </span>
-                        <span style={{ display: 'inline-block' }}>
-                          <div style={{ width: "5px", height: "10px", backgroundColor: '#FF0000', display: "inline-block", position: "absolute", marginLeft: "10px", marginTop: "5px" }}></div>
-                          <div style={{ width: "5px", height: "10px", backgroundColor: '#6BA583', display: "inline-block", position: "absolute", marginLeft: "4px", marginTop: "5px" }}></div>
+                        </div>
+                        <div style={{ display: "inline-block", paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>
+                          <i style={{ width: "6px", height: "12px", backgroundColor: '#FF0000', position: "absolute", marginTop: "4px" }}></i>
+                          <i style={{ width: "6px", height: "12px", backgroundColor: '#6BA583', position: "absolute", marginLeft: "6px", marginTop: "4px" }}></i>
                           <span style={{ paddingLeft: "20px", color: "#FFF" }}>Volume</span>
-                        </span>
+                        </div>
                       </div>
                     </Grid.Column>
                   </Grid>
@@ -583,9 +590,9 @@ class App extends Component {
           menuItem: { key: 3, content: <span style={{ position: 'relative', top: '-3px' }}><img style={{ position: 'relative', top: '4px', paddingRight: '6px', width: '1.6em', opacity: '0.8' }} src={ethIcon} />PETH</span>, name: 'PETH' },
           render: () =>
             <Tab.Pane style={{
-              backgroundColor: 'transparent',
+              backgroundColor: '#333533',
               height: window.innerWidth > 768 ? '565px' : this.state.pethSelection == "cumulativeCollateral" ? '605px' : '585px',
-              border: 0,
+              border: 0
             }}>
               <span style={{ color: '#FFF' }}>
                 Chart Selection:{` `}
@@ -598,29 +605,30 @@ class App extends Component {
               {this.state.dailyLockFree && this.state.pethSelection === 'dailyLockFree' ? <DailyLockFreeChart data={this.state.dailyLockFree} /> : this.state.cumulativeCollateral && this.state.pethSelection === 'cumulativeCollateral' ? <CumulativeCollateral data={this.state.cumulativeCollateral} /> : <Loader active inverted inline='centered' />}
               {(this.state.pethSelection == "dailyLockFree" || this.state.pethSelection == "cumulativeCollateral") && (this.state.dailyLockFree || this.state.cumulativeCollateral) ?
                 <Grid>
-                  <Grid.Column textAlign="right" style={{ paddingRight: "27px", paddingBottom: 0, paddingTop: "12px" }}>
-                    <div className={{ position: "relative" }}>
+                  <Grid.Column textAlign="center" style={{ paddingRight: "24px", paddingBottom: 0, paddingTop: "20px" }}>
+                    <div style={{ position: "relative" }}>
                       {(() => {
                         if (this.state.pethSelection == "dailyLockFree") {
                           return (
-                            <span>
-                              <div style={{ width: "10px", height: "10px", backgroundColor: "#2a95dd", display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
-                              <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>Locked ETH</span>
-                            </span>
+                            <div style={{ display: "inline-block", paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>
+                              <i style={{ width: "12px", height: "12px", backgroundColor: "#2a95dd", position: "absolute", marginTop: "4px" }}></i>
+                              <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>Locked ETH</span>
+                            </div>
                           )
                         }
                       })()}
-                      <div style={{ width: "10px", height: "10px", backgroundColor: this.state.pethSelection === 'cumulativeCollateral' ? "#189F3A" : '#E6BB48', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
-                      <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>{this.state.pethSelection === 'cumulativeCollateral' ? 'Cumulative PETH Deposited' : 'Locked PETH'}</span>
-                      <span style={{ display: 'inline-block' }}>
-                        <div style={{ width: "10px", height: "10px", backgroundColor: this.state.pethSelection === 'cumulativeCollateral' ? "#FF0000" : '#FF0000', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                      <div style={{ display: "inline-block", paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>
+                        <i style={{ width: "12px", height: "12px", backgroundColor: this.state.pethSelection === 'cumulativeCollateral' ? "#189F3A" : '#eca94b', position: "absolute", marginTop: "4px" }}></i>
+                        <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>{this.state.pethSelection === 'cumulativeCollateral' ? 'Cumulative PETH Deposited' : 'Locked PETH'}</span>
+                      </div>
+                      <div style={{ display: "inline-block", paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>
+                        <i style={{ width: "12px", height: "12px", backgroundColor: this.state.pethSelection === 'cumulativeCollateral' ? "#FF0000" : '#FF0000', position: "absolute", marginTop: "4px" }}></i>
                         <span style={{ paddingLeft: "20px", color: "#FFF", }}>{this.state.pethSelection === 'cumulativeCollateral' ? 'Cumulative PETH Withdrawn' : 'PETH Withdrawn'}</span>
-                      </span>
-                      <span style={{ display: 'inline-block' }}>
-                        <div style={{ width: "10px", height: "10px", backgroundColor: this.state.pethSelection === 'cumulativeCollateral' ? "#366b93" : '#189F3A', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                      </div>
+                      <div style={{ display: "inline-block", paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>
+                        <i style={{ width: "12px", height: "12px", backgroundColor: this.state.pethSelection === 'cumulativeCollateral' ? "#366b93" : '#189F3A', position: "absolute", marginTop: "4px" }}></i>
                         <span style={{ paddingLeft: "20px", color: "#FFF" }}>{this.state.pethSelection === 'cumulativeCollateral' ? 'Cumulative PETH Liquidated' : 'PETH Deposited'}</span>
-                      </span>
-
+                      </div>
                     </div>
                   </Grid.Column>
                 </Grid> : null}
@@ -631,9 +639,9 @@ class App extends Component {
           menuItem: { key: 4, content: <span style={{ position: 'relative', top: '-3px' }}><img style={{ position: 'relative', top: '4px', paddingRight: '6px', width: '1.6em', opacity: '0.8' }} src={mkrIcon} />MKR</span>, name: 'MKR' },
           render: () =>
             <Tab.Pane style={{
-              backgroundColor: 'transparent',
+              backgroundColor: '#333533',
               height: '565px',
-              border: 0,
+              border: 0
             }}>
 
               <span style={{ color: '#FFF' }}>
@@ -648,19 +656,21 @@ class App extends Component {
 
               {this.state.mkrSelection == "mkrOHLC" && this.state.mkrOHLC ?
                 <Grid>
-                  <Grid.Column textAlign="right" style={{ paddingRight: "27px", paddingBottom: 0, paddingTop: "12px" }}>
-                    <div className={{ position: "relative" }}>
-                      <div style={{ width: "10px", height: "10px", backgroundColor: '#1678C2', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
-                      <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "5px" }}>MKR Price</span>
-                      <span style={{ display: 'inline-block' }}>
-                        <div style={{ width: "10px", height: "10px", backgroundColor: '#E6BB48', display: "inline-block", position: "absolute", marginLeft: "5px", marginTop: "5px" }}></div>
+                  <Grid.Column textAlign="center" style={{ paddingRight: "24px", paddingBottom: 0, paddingTop: "12px" }}>
+                    <div style={{ position: "relative" }}>
+                      <div style={{ display: "inline-block", paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>
+                        <i style={{ width: "12px", height: "12px", backgroundColor: '#1678C2', position: "absolute", marginTop: "4px" }}></i>
+                        <span style={{ paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>MKR Price</span>
+                      </div>
+                      <div style={{ display: "inline-block", paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>
+                        <div style={{ width: "12px", height: "12px", backgroundColor: '#eca94b', display: "inline-block", position: "absolute", marginTop: "4px" }}></div>
                         <span style={{ paddingLeft: "20px", color: "#FFF", }}>MKR Market Cap.</span>
-                      </span>
-                      <span style={{ display: 'inline-block' }}>
-                        <div style={{ width: "5px", height: "10px", backgroundColor: '#FF0000', display: "inline-block", position: "absolute", marginLeft: "10px", marginTop: "5px" }}></div>
-                        <div style={{ width: "5px", height: "10px", backgroundColor: '#6BA583', display: "inline-block", position: "absolute", marginLeft: "4px", marginTop: "5px" }}></div>
+                      </div>
+                      <div style={{ display: "inline-block", paddingLeft: "20px", color: "#FFF", paddingRight: "8px" }}>
+                        <i style={{ width: "6px", height: "12px", backgroundColor: '#FF0000', position: "absolute", marginTop: "4px" }}></i>
+                        <i style={{ width: "6px", height: "12px", backgroundColor: '#6BA583', position: "absolute", marginLeft: "6px", marginTop: "4px" }}></i>
                         <span style={{ paddingLeft: "20px", color: "#FFF" }}>Volume</span>
-                      </span>
+                      </div>
                     </div>
                   </Grid.Column>
                 </Grid> : null}
@@ -675,7 +685,7 @@ class App extends Component {
           menuItem: { key: 0, icon: 'lightning', content: 'Significant CDP Actions' },
           render: () =>
             <Tab.Pane style={{
-              backgroundColor: 'transparent',
+              backgroundColor: '#333533',
               border: 0,
               padding: 0
             }}
@@ -688,7 +698,7 @@ class App extends Component {
           menuItem: { key: 1, icon: 'history', content: 'All CDP Actions' },
           render: () =>
             <Tab.Pane style={{
-              backgroundColor: 'transparent',
+              backgroundColor: '#333533',
               border: 0,
               padding: 0
             }}
@@ -701,7 +711,7 @@ class App extends Component {
           menuItem: { key: 2, icon: 'trash', content: 'Liquidations' },
           render: () =>
             <Tab.Pane style={{
-              backgroundColor: 'transparent',
+              backgroundColor: '#333533',
               border: 0,
               padding: 0
             }}
@@ -714,7 +724,7 @@ class App extends Component {
           menuItem: { key: 3, icon: 'globe', content: `Open CDPs` },
           render: () =>
             <Tab.Pane style={{
-              backgroundColor: 'transparent',
+              backgroundColor: '#333533',
               border: 0,
               padding: 0
             }}
@@ -725,10 +735,10 @@ class App extends Component {
       ]
       /***************** Return the actual viewable components to the render method *****************/
       return (
-        <Grid.Row>
-          <Grid.Column>
+        <Grid.Column>
+          <Grid.Row>
             <Tab
-              menu={{ attached: 'top', inverted: true, style: { backgroundColor: 'transparent', display: 'flex', flexDirection: window.innerWidth > 768 ? 'row' : 'column', flexWrap: 'wrap' } }}
+              menu={{ borderless: true, attached: 'top', style: { backgroundColor: '#DBDBCC', borderBottom: '4px solid #eca94b', display: 'flex', flexDirection: window.innerWidth > 768 ? 'row' : 'column', flexWrap: 'wrap' } }}
               // defaultActiveIndex={this.state.currentTab}
               activeIndex={this.state.currentTab}
               onTabChange={(e, { activeIndex }) => this.handleTabChange(e, activeIndex, (this.state.cdpId ? panes[activeIndex].menuItem.name : panes[activeIndex + 1].menuItem.name))}
@@ -749,17 +759,18 @@ class App extends Component {
             >
 
             </Tab>
-
+          </Grid.Row>
+          <Grid.Row className="cdp-data-table">
             {this.state.cdpId || this.state.updating ? <RecentActions cdpId={this.state.cdpId} clearCdp={this.clearCdp} updating={this.state.updating} /> : null}
             <Tab
-              menu={{ attached: 'top', inverted: true, style: { backgroundColor: 'transparent', display: 'flex', flexDirection: window.innerWidth > 768 ? 'row' : 'column', flexWrap: 'wrap' } }}
+              menu={{ borderless: true, attached: 'top', style: { backgroundColor: '#DBDBCC', borderBottom: '4px solid #eca94b', display: 'flex', flexDirection: window.innerWidth > 768 ? 'row' : 'column', flexWrap: 'wrap', marginTop: '32px' } }}
               defaultActiveIndex={this.state.cdpActionsTab}
               onTabChange={(e, { activeIndex }) => this.handleActionsTabChange(e, activeIndex, cdpActionsPane[activeIndex].menuItem.content)}
               panes={cdpActionsPane}
             >
             </Tab>
-          </Grid.Column>
-        </Grid.Row>
+          </Grid.Row>
+        </Grid.Column>
       )
     } else {
       return (
@@ -774,20 +785,16 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App" style={{ backgroundColor: '#363c46'}}>
-        <Grid stackable columns={2}>
-          <Grid.Row stretched style={{ paddingBottom: '0' }}>
-            <Grid.Column>
-              {this.loadSidebar()}
-            </Grid.Column>
-            <Grid.Column mobile={16} tablet={12} computer={13} style={{ marginLeft: '330px' }}>
-              <Grid.Row columns={1} verticalAlign='top'>
-                <TopMenu searchMsg={this.state.searchMsg} loadingMsg={this.state.loadingMsg} handleSearchClick={this.handleSearchClick} cdps={this.state.cdps} account={this.state.currentAccount} />
-              </Grid.Row>
-              <Grid.Row columns={1} verticalAlign='middle'>
-                {this.loadContent()}
-              </Grid.Row>
-            </Grid.Column>
+      <div className="App" style={{ backgroundColor: '#E8EDE5', marginRight: '40px'}}>
+        <Grid columns={1}>
+          {this.loadSidebar()}
+        </Grid>
+        <Grid stackable columns={1} style={{marginLeft:'340px'}}>
+          <Grid.Row columns={1} verticalAlign='top' style={{paddingTop:'0'}}>
+            <TopMenu searchMsg={this.state.searchMsg} loadingMsg={this.state.loadingMsg} handleSearchClick={this.handleSearchClick} cdps={this.state.cdps} account={this.state.currentAccount} />
+          </Grid.Row>
+          <Grid.Row columns={1} verticalAlign='middle'>
+            {this.loadContent()}
           </Grid.Row>
         </Grid>
       </div>

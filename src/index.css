@@ -4,7 +4,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: 'Roboto', sans-serif;
-  background-color: #3D4853;
+  background-color: #E8EDE5;
 }
 
 .ReactTable .rt-thead .rt-th {
@@ -20,12 +20,53 @@ body {
   box-shadow: inset 0 3px 0 0 #B2B5B9 !important;
 }
 
-.logo:hover{
-  background:#3D4853!important;
-}
-
 .ui.search > .results {
   overflow-y: auto;
   max-height: 550px;
 }
 
+.ui.menu .active.item {
+  background: #eca94b !important;
+  color: #242423 !important;
+}
+
+.ui.menu .active.item:hover {
+  color: #242423 !important;
+}
+
+.search input {
+  border-radius: .28571429rem !important;
+  background: #DBDBCC !important;
+}
+
+.react-stockcharts-tooltip .react-stockcharts-tooltip-label {
+  fill: #eca94b;
+}
+
+.fixed.huge.menu {
+  font-size: 16px;
+}
+
+.ui.inverted.list .list>.item .header,
+.ui.inverted.list>.item .header {
+  font-size: 11px;
+}
+
+.footer,
+.footer a {
+  text-align: center;
+  font-size: 14px;
+}
+
+.footer a {
+  color: #eca94b !important;
+  text-decoration: none !important;
+}
+
+.footer a:hover {
+  text-decoration: underline !important;
+}
+
+.footer .row {
+  padding-bottom: 0 !important;
+}

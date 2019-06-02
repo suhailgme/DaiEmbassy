@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Grid, Statistic, Container, Form, Popup } from 'semantic-ui-react'
+import { Grid, Statistic, Container, Form, Popup, Segment, List } from 'semantic-ui-react'
 import CdpDetails from './CdpDetails';
 
 export default class SystemStatusWidget extends Component{
@@ -127,66 +127,75 @@ export default class SystemStatusWidget extends Component{
     render(){
         const systemStatus = this.state.systemStatus
         return (
-            <div>
-                <Container textAlign='center'>
-                    <Statistic size='mini' color='red' inverted label='ETH/USD' value={systemStatus.ethPrice}/>
-                </Container>
+            <Segment inverted>
                 <Form>
-                <Grid columns='equal' padded='vertically'>
-                    <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
-                        <Grid.Column textAlign='left'>MKR Price</Grid.Column>
-                        <Grid.Column textAlign='right' style={{color:'#6abf69'}}>{systemStatus.mkrPrice} USD</Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
-                        <Grid.Column textAlign='left' style={{whiteSpace:'nowrap' }}>ETH Supply Locked</Grid.Column>
-                        <Grid.Column textAlign='right' style={{color:'#6abf69'}}>{systemStatus.lockedEthSupply} %</Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
+                <Grid columns='equal'>
+                    <Grid.Row>
                         <Grid.Column textAlign='left'>
-                        <Popup inverted trigger={<a href="#" style={{textDecoration:'underline', color:'inherit', cursor:'help'}}> Locked ETH</a>} on='hover'>
-                            <Popup.Header>Locked PETH{this.state.cdpId}</Popup.Header>
-                            <Popup.Content>
-                            {`${this.numberWithCommas(systemStatus.lockedPeth)}`}
-                            </Popup.Content>  
-                            </Popup> 
+                            <List divided inverted relaxed>
+                                <List.Item><List.Content>
+                                    <List.Header>ETH Price</List.Header>
+                                    ${systemStatus.ethPrice} USD
+                                </List.Content></List.Item>
+                                <List.Item><List.Content>
+                                    <List.Header>ETH Supply Locked</List.Header>
+                                    {systemStatus.lockedEthSupply} %
+                                </List.Content></List.Item>
+                                <List.Item><List.Content>
+                                    <List.Header>PETH/ETH</List.Header>
+                                    {systemStatus.pethWethRatio}
+                                </List.Content></List.Item>
+                                <List.Item><List.Content style={{cursor:'help'}} onMouseEnter={this.onMouseOverDai.bind(this)} onMouseLeave={this.onMouseoutDai.bind(this)} id='dai'>
+                                    <List.Header style={{textDecoration:'underline'}}>{this.state.displayDai}</List.Header>
+                                    {this.state.displayDaiAvg ? `${this.numberWithCommas(systemStatus.avgDebt)} DAI` : `${this.numberWithCommas(systemStatus.medianDebt)} DAI`}
+                                </List.Content></List.Item>
+                                <List.Item><List.Content>
+                                    <List.Header>Collateralization</List.Header>
+                                    {systemStatus.systemCollateralization} %
+                                </List.Content></List.Item>
+                                <List.Item><List.Content>
+                                    <List.Header>Total CDPs</List.Header>
+                                    {systemStatus.totalCdps}
+                                </List.Content></List.Item>
+                            </List>
                         </Grid.Column>
-                        <Grid.Column textAlign='right' style={{color:'#FF695E', whiteSpace:'nowrap'}}> {`${this.numberWithCommas(systemStatus.lockedEth)}`}</Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
-                        <Grid.Column textAlign='left'>PETH/ETH</Grid.Column>
-                        <Grid.Column textAlign='right'>{systemStatus.pethWethRatio}</Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
-                        <Grid.Column textAlign='left'>Circ. DAI</Grid.Column>
-                        <Grid.Column textAlign='right' style={{color:'#FF695E', whiteSpace:'nowrap'}}>{`${this.numberWithCommas(systemStatus.circulatingDai)}`}</Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row style={{paddingTop:'0',paddingBottom:'5px', cursor:'help'}} onMouseEnter={this.onMouseOverDai.bind(this)} onMouseLeave={this.onMouseoutDai.bind(this)} id='dai'>
-                        <Grid.Column textAlign='left' style={{whiteSpace:'nowrap', textDecoration:'underline', color:'inherit', }}>{this.state.displayDai}</Grid.Column>
-                        <Grid.Column textAlign='right' style={{ color: this.state.displayDaiAvg ?'#6abf69' : '#FF695E'}} >{this.state.displayDaiAvg ? `${this.numberWithCommas(systemStatus.avgDebt)} DAI` : `${this.numberWithCommas(systemStatus.medianDebt)} DAI`}</Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row style={{paddingTop:'0',paddingBottom:'5px', cursor:'help'}} onMouseEnter={this.onMouseOverPeth.bind(this)} onMouseLeave={this.onMouseoutPeth.bind(this)} id='peth'>
-                        <Grid.Column textAlign='left' style={{whiteSpace:'nowrap', textDecoration:'underline'}}>{this.state.displayPeth}</Grid.Column>
-                        <Grid.Column textAlign='right' style={{color: this.state.displayCollaterAvg ?'#6abf69' : '#FF695E'}}>{this.state.displayCollaterAvg ? `${this.numberWithCommas(systemStatus.avgCollateral)} PETH` : `${parseFloat(systemStatus.medianCollateral).toFixed(2)} PETH`}</Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
-                        <Grid.Column textAlign='left'>Collateralization</Grid.Column>
-                        <Grid.Column textAlign='right' style={{color:'#6abf69'}}>{systemStatus.systemCollateralization} %</Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
-                        <Grid.Column textAlign='left'>Stability Fee</Grid.Column>
-                        <Grid.Column textAlign='right' style={{color:'#FF695E'}}>{systemStatus.stabilityFee} %</Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
-                        <Grid.Column textAlign='left'>Total CDPs</Grid.Column>
-                        <Grid.Column textAlign='right'>{systemStatus.totalCdps}</Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
-                        <Grid.Column textAlign='left'>Updated</Grid.Column>
-                        <Grid.Column textAlign='right'>{Date().toString().slice(4,-47) + Date().toString().slice(16,-37)}</Grid.Column>
+                        <Grid.Column textAlign='right'>
+                            <List divided inverted relaxed>
+                                <List.Item><List.Content>
+                                    <List.Header>MKR Price</List.Header>
+                                    ${systemStatus.mkrPrice} USD
+                                </List.Content></List.Item>
+                                <List.Item><List.Content>
+                                    <Popup inverted trigger={<a href="#" style={{textDecoration:'underline', fontSize:'11px', color:'inherit', fontWeight:'bold', cursor:'help'}}> Locked ETH</a>} on='hover'>
+                                    <Popup.Header>Locked PETH{this.state.cdpId}</Popup.Header>
+                                    <Popup.Content>
+                                        {`${this.numberWithCommas(systemStatus.lockedPeth)}`}
+                                    </Popup.Content>  
+                                    </Popup>
+                                    <br/>{`${this.numberWithCommas(systemStatus.lockedEth)}`}
+                                </List.Content></List.Item>
+                                <List.Item><List.Content>
+                                    <List.Header>Circulating DAI</List.Header>
+                                    {`${this.numberWithCommas(systemStatus.circulatingDai)}`}
+                                </List.Content></List.Item>
+                                <List.Item><List.Content style={{cursor:'help'}} onMouseEnter={this.onMouseOverPeth.bind(this)} onMouseLeave={this.onMouseoutPeth.bind(this)} id='peth'>
+                                    <List.Header style={{textDecoration:'underline'}}>{this.state.displayPeth}</List.Header>
+                                    {this.state.displayCollaterAvg ? `${this.numberWithCommas(systemStatus.avgCollateral)} PETH` : `${parseFloat(systemStatus.medianCollateral).toFixed(2)} PETH`}
+                                </List.Content></List.Item>
+                                <List.Item><List.Content>
+                                    <List.Header>Stability Fee</List.Header>
+                                    {systemStatus.stabilityFee} %
+                                </List.Content></List.Item>
+                                <List.Item><List.Content>
+                                    <List.Header>Updated</List.Header>
+                                    {Date().toString().slice(4,-47) + Date().toString().slice(16,-37)}
+                                </List.Content></List.Item>
+                            </List>
+                        </Grid.Column>
                     </Grid.Row>
                 </Grid>
                 </Form>
-            </div>
+            </Segment>
         )
     }
 }

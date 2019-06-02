@@ -49,7 +49,7 @@ function tooltipContent(ys) {
 				{
 					label: "Locked PETH",
 					value: currentItem.totalPeth && numberFormat(currentItem.totalPeth),
-					stroke: '#E6BB48'
+					stroke: '#eca94b'
 				},
 				{
 					label: "Locked ETH",
@@ -185,7 +185,7 @@ class AreaChartWithEdge extends React.Component {
             <Chart id={2} yExtents={d => d.totalEth}>
 				<LineSeries 
 					yAccessor={d=> d.totalPeth}
-                    stroke='#E6BB48'
+                    stroke='#eca94b'
                     strokeWidth={2}
 					/>
 					<LineSeries 

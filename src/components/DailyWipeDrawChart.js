@@ -175,7 +175,7 @@ class AreaChartWithEdge extends React.Component {
             <Chart id={2} yExtents={d => d.totalDai + 2000000}>
 				<LineSeries 
 					yAccessor={d=> d.totalDai}
-                    stroke='#E6BB48'
+                    stroke='#eca94b'
                     strokeWidth={2}
 					/>
 				<MouseCoordinateY

@@ -66,7 +66,7 @@ class AreaChartWithEdge extends React.Component {
 				x={width  / 2} y={100}
 				fontSize={28} 
 				text= 'DAI / USD + DAI MCAP, 1D'
-				fill='#BDC4C7'
+				fill='#E8EDE5'
 				opacity={0.15} 
 				fontFamily='roboto'
 				/>
@@ -74,15 +74,15 @@ class AreaChartWithEdge extends React.Component {
 				<Label 
 				x={width  / 2} y={140}
 				text= "Dai Embassy"
-				fill='#BDC4C7'
+				fill='#E8EDE5'
 				opacity={0.15} 
 				fontFamily='roboto'
 				fontSize={20}
 				/>
 
 			<Chart id={1} yExtents={d => [d.high, d.low]}>
-				<XAxis axisAt="bottom" orient="bottom"  stroke="#BDC4C7" tickStroke="#BDC4C7"/>
-				<YAxis axisAt="right" orient="left" ticks={5} tickStroke="#BDC4C7"/>
+				<XAxis axisAt="bottom" orient="bottom"  stroke="#E8EDE5" tickStroke="#E8EDE5"/>
+				<YAxis axisAt="right" orient="left" ticks={5} tickStroke="#E8EDE5"/>
 
 				<MouseCoordinateX
 					at="bottom"
@@ -124,7 +124,7 @@ class AreaChartWithEdge extends React.Component {
 				id={2}
 				yExtents={d => d.volume}
 				height={150} origin={(w, h) => [0, h - 150]}>
-			{/* <YAxis axisAt="left" orient="right" ticks={5} tickStroke="#BDC4C7" tickFormat={format(".2s")}/> */}
+			{/* <YAxis axisAt="left" orient="right" ticks={5} tickStroke="#E8EDE5" tickFormat={format(".2s")}/> */}
 
 			{/* <MouseCoordinateY
 				at="left"
@@ -141,13 +141,13 @@ class AreaChartWithEdge extends React.Component {
 			<Chart id={3} yExtents={d => d.mcap}>
 				<LineSeries
 					yAccessor={d=> d.mcap}
-					stroke='#E6BB48'
+					stroke='#eca94b'
 					/>
 				<MouseCoordinateY
 					at="left"
 					orient="right"
 					displayFormat={format("$.4s")} />
-			<YAxis axisAt="left" orient="right" ticks={5} tickStroke="#BDC4C7" tickFormat={format(".2s")}/>	
+			<YAxis axisAt="left" orient="right" ticks={5} tickStroke="#E8EDE5" tickFormat={format(".2s")}/>	
 			</Chart>
 			<CrossHairCursor />
 			</ChartCanvas>

@@ -130,7 +130,7 @@ class AreaChartWithEdge extends React.Component {
 			<Chart id={2} yExtents={d => d.liquidationPrice}>
 				<LineSeries
 					yAccessor={d=> d.liquidationPrice}
-					stroke='#E6BB48'
+					stroke='#eca94b'
 					interpolation={curveBasis}
 					/>
 				<MouseCoordinateY

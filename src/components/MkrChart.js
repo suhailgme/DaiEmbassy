@@ -138,7 +138,7 @@ class AreaChartWithEdge extends React.Component {
 			<Chart id={3} yExtents={d => d.mcap}>
 				<LineSeries
 					yAccessor={d=> d.mcap}
-					stroke='#E6BB48'
+					stroke='#eca94b'
 					/>
 				<MouseCoordinateY
 					at="left"

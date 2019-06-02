@@ -1,5 +1,5 @@
 import React from 'react'
-import { Accordion, Loader, Segment, } from 'semantic-ui-react'
+import { Accordion, Loader, Segment, List } from 'semantic-ui-react'
 import WipeDrawWidget from './WipeDrawWidget'
 import CdpDetails from './CdpDetails'
 import SystemStatusWidget from './SystemStatusWidget'
@@ -11,24 +11,21 @@ let panel = [
     key: '0',
     title: { content: props.wipeDraw ? `Simulate CDP ${props.cdpId}` : props.updating ? `Loading CDP` : `Instructions` },
     content: { content: props.wipeDraw ? (<WipeDrawWidget wipeDraw={props.wipeDraw} />) : props.loading ? <Loader active inverted inline='centered' /> : 
-      <span>
-        <Segment inverted style={{ backgroundColor: 'transparent' }}>
-          <p>Click on a CDP ID or search to:</p>
-          <ul style={{}}>
-            <li style={{paddingBottom:'10px'}}>Simulate DAI or PETH actions</li>
-            <li style={{paddingBottom:'10px'}}>View debt, collateral, accrued fees, and more</li>
-            <li style={{paddingBottom:'10px'}}>View complete transaction history</li>
-            <li>Load debt, collateral, and liquidation price charts</li>
-          </ul>
-        </Segment>
-        <hr />
-      </span>
+      <Segment inverted>
+        <p>Click on a CDP ID or Search for a CDP to do any of the following:</p>
+        <List inverted>
+          <List.Item>&bull; Simulate DAI or PETH actions</List.Item>
+          <List.Item>&bull; View debt, collateral, accrued fees, and more</List.Item>
+          <List.Item>&bull; View complete transaction history</List.Item>
+          <List.Item>&bull; Load debt, collateral, and liquidation price charts</List.Item>
+        </List>
+      </Segment>
     }
   },
   {
     key: '1',
     title: { content: props.cdpDetails ? `Details CDP ${props.cdpId}` : props.updating ? `Loading CDP Details` : `CDP Details` },
-    content: { content: props.cdpDetails ? (<CdpDetails cdpDetails={props.cdpDetails} />) : props.loading ? <Loader active inverted inline='centered' /> : <span><Segment inverted style={{ backgroundColor: '#273340' }} >Click on a CDP ID or Search for a CDP to See More Details</Segment><hr /></span> },
+    content: { content: props.cdpDetails ? (<CdpDetails cdpDetails={props.cdpDetails} />) : props.loading ? <Loader active inverted inline='centered' /> : <span><Segment inverted style={{ backgroundColor: '#273340' }} >Click on a CDP ID or Search for a CDP to see more details.</Segment></span> },
   },
   {
     key: '2',
