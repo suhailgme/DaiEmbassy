@@ -128,9 +128,13 @@ export default class SystemStatusWidget extends Component{
                     <Grid.Row>
                         <Grid.Column textAlign='left'>
                             <List divided inverted relaxed>
+                                <List.Item className='em-item'><List.Content>
+                                    <List.Header>{systemStatus.ethPrice}</List.Header>
+                                    ETH/USD
+                                </List.Content></List.Item>
                                 <List.Item><List.Content>
-                                    <List.Header>ETH Price</List.Header>
-                                    ${systemStatus.ethPrice} USD
+                                    <List.Header>MKR Price</List.Header>
+                                    ${systemStatus.mkrPrice} USD
                                 </List.Content></List.Item>
                                 <List.Item><List.Content>
                                     <List.Header>ETH Supply Locked</List.Header>
@@ -148,25 +152,21 @@ export default class SystemStatusWidget extends Component{
                                     <List.Header>Collateralization</List.Header>
                                     {systemStatus.systemCollateralization} %
                                 </List.Content></List.Item>
-                                <List.Item><List.Content>
-                                    <List.Header>Total CDPs</List.Header>
-                                    {systemStatus.totalCdps}
-                                </List.Content></List.Item>
-                                <List.Item><List.Content>
-                                    <Popup inverted trigger={<a href="#" style={{textDecoration:'underline', fontSize:'11px', color:'inherit', fontWeight:'bold', cursor:'help'}}>DAI/USD Price</a>} on='hover'>
-                                    <Popup.Content>
-                                        Dai price provided by daiprice.info
-                                    </Popup.Content>  
-                                    </Popup>
-                                    <br/>{systemStatus.daiPrice.dai_usd_price}
-                                </List.Content></List.Item>
                             </List>
                         </Grid.Column>
                         <Grid.Column textAlign='right'>
                             <List divided inverted relaxed>
+                                <List.Item  className='em-item'><List.Content>
+                                    <List.Header>{systemStatus.daiPrice.dai_usd_price}</List.Header>
+                                    <Popup inverted trigger={<a href="#" style={{textDecoration:'none', color:'inherit'}}>DAI/USD</a>} on='hover'>
+                                        <Popup.Content>
+                                            DAI price provided by daiprice.info
+                                        </Popup.Content>  
+                                    </Popup>
+                                </List.Content></List.Item>
                                 <List.Item><List.Content>
-                                    <List.Header>MKR Price</List.Header>
-                                    ${systemStatus.mkrPrice} USD
+                                    <List.Header>Circulating DAI</List.Header>
+                                    {`${this.numberWithCommas(systemStatus.circulatingDai)}`}
                                 </List.Content></List.Item>
                                 <List.Item><List.Content>
                                     <Popup inverted trigger={<a href="#" style={{textDecoration:'underline', fontSize:'11px', color:'inherit', fontWeight:'bold', cursor:'help'}}> Locked ETH</a>} on='hover'>
@@ -177,10 +177,6 @@ export default class SystemStatusWidget extends Component{
                                     </Popup>
                                     <br/>{`${this.numberWithCommas(systemStatus.lockedEth)}`}
                                 </List.Content></List.Item>
-                                <List.Item><List.Content>
-                                    <List.Header>Circulating DAI</List.Header>
-                                    {`${this.numberWithCommas(systemStatus.circulatingDai)}`}
-                                </List.Content></List.Item>
                                 <List.Item><List.Content style={{cursor:'help'}} onMouseEnter={this.onMouseOverPeth.bind(this)} onMouseLeave={this.onMouseoutPeth.bind(this)} id='peth'>
                                     <List.Header style={{textDecoration:'underline'}}>{this.state.displayPeth}</List.Header>
                                     {this.state.displayCollaterAvg ? `${this.numberWithCommas(systemStatus.avgCollateral)} PETH` : `${parseFloat(systemStatus.medianCollateral).toFixed(2)} PETH`}
@@ -190,8 +186,17 @@ export default class SystemStatusWidget extends Component{
                                     {systemStatus.stabilityFee} %
                                 </List.Content></List.Item>
                                 <List.Item><List.Content>
-                                    <List.Header>Updated</List.Header>
-                                    {Date().toString().slice(4,-47) + Date().toString().slice(16,-37)}
+                                    <List.Header>Total CDPs</List.Header>
+                                    {systemStatus.totalCdps}
+                                </List.Content></List.Item>
+                            </List>
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row>
+                        <Grid.Column textAlign='center'>
+                            <List divided inverted relaxed>
+                                <List.Item><List.Content>
+                                    Updated: {Date().toString().slice(4,-47) + Date().toString().slice(16,-37)}
                                 </List.Content></List.Item>
                             </List>
                         </Grid.Column>

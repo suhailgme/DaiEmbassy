@@ -25,7 +25,7 @@ let panel = [
   {
     key: '1',
     title: { content: props.cdpDetails ? `Details CDP ${props.cdpId}` : props.updating ? `Loading CDP Details` : `CDP Details` },
-    content: { content: props.cdpDetails ? (<CdpDetails cdpDetails={props.cdpDetails} />) : props.loading ? <Loader active inverted inline='centered' /> : <span><Segment inverted style={{ backgroundColor: '#273340' }} >Click on a CDP ID or Search for a CDP to see more details.</Segment></span> },
+    content: { content: props.cdpDetails ? (<CdpDetails cdpDetails={props.cdpDetails} />) : props.loading ? <Loader active inverted inline='centered' /> : <Segment inverted style={{ backgroundColor: '#273340' }} >Click on a CDP ID or Search for a CDP to see more details.</Segment> },
   },
   {
     key: '2',

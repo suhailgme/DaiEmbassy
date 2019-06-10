@@ -104,22 +104,22 @@ class AreaChartWithEdge extends React.Component {
 				x={width  / 2} y={100}
 				fontSize={30} 
 				text="DAI Repayment and Creation, 1D"
-				fill='#BDC4C7'
+				fill='#E8EDE5'
 				opacity={0.15} 
 				fontFamily='roboto'
 				/>
 				<Label 
 				x={width  / 2} y={140}
 				text="Dai Embassy"
-				fill='#BDC4C7'
+				fill='#E8EDE5'
 				opacity={0.15} 
 				fontFamily='roboto'
 				fontSize={20}
 				/>
 
 			<Chart id={1} yExtents={d => [d.daiCreated > d.daiRepaid ? d.daiCreated : d.daiRepaid, 0]}>
-				<XAxis axisAt="bottom" orient="bottom"  stroke="#BDC4C7" tickStroke="#BDC4C7"/>
-				<YAxis axisAt="right" orient="left" ticks={5} tickStroke="#BDC4C7"/>
+				<XAxis axisAt="bottom" orient="bottom"  stroke="#E8EDE5" tickStroke="#E8EDE5"/>
+				<YAxis axisAt="right" orient="left" ticks={5} tickStroke="#E8EDE5"/>
 
 				<MouseCoordinateX
 					at="bottom"

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Statistic, Form, Grid, Container, Popup, Icon } from 'semantic-ui-react'
+import { Statistic, Form, Grid, Container, Popup, Icon, Segment } from 'semantic-ui-react'
 import MakerService from '../MakerService'
 const Humanize = require('humanize-plus')
 
@@ -43,7 +43,7 @@ export default class CdpDetails extends Component {
 
     render(){
         return (
-            <div>
+            <Segment inverted>
                 <Container textAlign='center'>
                 <p>Collateral</p> 
                 </Container>
@@ -93,9 +93,8 @@ export default class CdpDetails extends Component {
                             <Grid.Column textAlign='right' style={{color: this.state.collateralizationRatio == "Infinity" ? '#FFF' : this.state.collateralizationRatio < 170 ? '#FF695E' : this.state.collateralizationRatio < 200 ? '#EFBC72' : '#6ABF69' }}>{this.state.collateralizationRatio } %</Grid.Column>
                         </Grid.Row>
                     </Grid>
-                    <hr/>
                 </Form>
-            </div> 
+            </Segment> 
 
         )
     }

@@ -26,7 +26,7 @@ body {
 }
 
 .ui.menu .active.item {
-  background: #eca94b !important;
+  background: rgba(0,0,0,0.1) !important;
   color: #242423 !important;
 }
 
@@ -50,6 +50,21 @@ body {
 .ui.inverted.list .list>.item .header,
 .ui.inverted.list>.item .header {
   font-size: 11px;
+}
+
+.ui.inverted.list .item.em-item {
+  margin-bottom: 4px;
+  padding: 12px 4px !important;
+  border-radius: .28571429rem !important;  
+  text-align: center !important;
+  background: rgba(255,255,255,0.1) !important;
+}
+
+.ui.inverted.list .em-item .header {
+  margin-bottom: 4px;
+  font-size: 20px !important;
+  font-weight: normal !important;
+  color: #eca94b !important;
 }
 
 .footer,

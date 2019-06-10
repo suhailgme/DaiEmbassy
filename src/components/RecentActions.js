@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import {  Loader, Icon, Grid } from 'semantic-ui-react'
+import {  Loader, Icon, Grid, Segment } from 'semantic-ui-react'
 import ReactTable from "react-table";
 import "react-table/react-table.css";
 const Humanize = require('humanize-plus')
@@ -82,8 +82,7 @@ class RecentActions extends Component{
         if(loaded){
         const actions = this.getActions()
         return (
-            <div style={{color:'#FFF', borderRadius:'5px', border: '2px solid #38414B',
-            backgroundColor:'#273340', paddingTop:'10px', paddingLeft:'5px'}}>
+            <Segment inverted style={{backgroundColor:'#233142', marginTop:'32px'}}>
                 {/* <Grid columns={2}>
                     <Grid.Column>
                         <h4 ><Icon name='target'/>CDP {this.state.cdpId} Actions</h4>
@@ -93,9 +92,7 @@ class RecentActions extends Component{
                     <span style={{cursor:'pointer'}}onClick={this.props.clearCdp}><Icon name='close'/></span>
                     </Grid.Column>
                 </Grid> */}
-                 <h4><Icon name='target'/>CDP {this.state.cdpId} Actions</h4>
-                <button style={{ background: 'none', border:'none', padding:0, textDecoration:'underline', color:'#FFF', cursor:'pointer'}} onClick={this.props.clearCdp}>Clear CDP</button>
-                <hr style={{opacity:'0.7'}}/>
+                 <h4><Icon name='target'/>CDP {this.state.cdpId} Actions / <button style={{ background: 'none', border:'none', padding:0, textDecoration:'underline', color:'#FFF', cursor:'pointer'}} onClick={this.props.clearCdp}>Clear CDP</button></h4>
               <ReactTable
                 data = {actions}
                 columns= {[
@@ -139,7 +136,7 @@ class RecentActions extends Component{
                 defaultPageSize = {actions.length}
                 sortable = {false}
               />
-            </div>
+            </Segment>
           )
         }else{
             return (

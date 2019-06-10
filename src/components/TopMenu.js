@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Menu, Label, Popup, Search } from 'semantic-ui-react'
+import { Menu, Label, Popup, Search, Button } from 'semantic-ui-react'
 import ConnectionStatus from './ConnectionStatus'
 const Humanize = require('humanize-plus')
 
@@ -70,10 +70,10 @@ export default class TopMenu extends Component {
 
     render(){
         return(
-            <Menu fluid stackable borderless attached size='large' style={{backgroundColor:'transparent', paddingTop: '2px', paddingBottom: '5px', border:'0'}}>
+            <Menu fluid stackable borderless attached style={{backgroundColor:'transparent', paddingTop: '2px', paddingBottom: '5px', border:'0'}}>
                 {this.props.cdps ? <Menu.Item fluid inverted><Search input={{ fluid: true}} style={{width:'420px'}} fluid selectFirstResult value={this.state.value} loading={this.state.isLoading} onSearchChange={this.handleSearchChange} onResultSelect={this.handleClick} results = {this.state.results} placeholder={"Search by CDP ID or Address"} size='large'/></Menu.Item> : null}
                 {this.props.searchMsg ? <Menu.Item><p style={{color:'#FF695E'}}>{this.props.searchMsg}</p></Menu.Item> : null}
-                <Menu.Item position='right'><ConnectionStatus loadingMsg = {this.props.loadingMsg} account={this.props.account}/> </Menu.Item> 
+                <Menu.Item position='right'><Button><ConnectionStatus loadingMsg = {this.props.loadingMsg} account={this.props.account}/></Button></Menu.Item> 
 
             </Menu>
         )
