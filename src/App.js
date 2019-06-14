@@ -5,6 +5,7 @@ import RecentActions from './components/RecentActions'
 import AllRecentActions from './components/AllRecentActions'
 import SignificantActions from './components/SignificantActions'
 import Liquidations from './components/Liquidations'
+import LargestDailyActions from './components/LargestDailyActions'
 import DaiChart from './components/DaiChart'
 import MkrChart from './components/MkrChart'
 import ChartCdp from './components/ChartCdp'
@@ -72,6 +73,8 @@ class App extends Component {
     // const marketRes = await axios.get('http://localhost:2917/daiOHLC')
 
     const dailyActionsDaiRes = await axios.get('https://dai-embassy-server.herokuapp.com/dailyActionsDai')
+    // const dailyActionsDaiRes = await axios.get('http://localhost:2917/dailyActionsDai')
+
 
 
     // let dailyActions = await axios.get('https://dai-embassy-server.herokuapp.com/dailyActions')
@@ -79,12 +82,19 @@ class App extends Component {
     const systemStatus = systemStatusRes.data
     // let allRecentActions = await axios.get('http://localhost:2917/allRecentActions')
     // allRecentActions = allRecentActions.data.allRecentActions
+    
+    // Temporary client-side fix for API error. Error with coinpaprika api needs to be debugged
+    // on server.
+    let mkrOHLC
+    if(marketRes.data.mkrOHLC.length){
+      mkrOHLC = marketRes.data.mkrOHLC.reverse()
+      mkrOHLC.forEach(day => {
+        day.date = new Date(day.date)
+      })
+    }else{
+      mkrOHLC = null
+    }
 
-
-    let mkrOHLC = marketRes.data.mkrOHLC.reverse()
-    mkrOHLC.forEach(day => {
-      day.date = new Date(day.date)
-    })
 
     let dailyWipeDraw = dailyWipeDrawRes.data.dailyWipeDraw.reverse()
     dailyWipeDraw.forEach(day => {
@@ -719,9 +729,24 @@ class App extends Component {
               <SignificantActions handleSearchClick={this.handleSearchClick} />
             </Tab.Pane>
         },
+        /***************** Tab for Largest Daily CDP Actions table *****************/
+        {
+          menuItem: { key: 1, icon: 'trophy', content: 'Largest Daily CDP Actions' },
+          render: () =>
+            <Tab.Pane style={{
+              backgroundColor: '#273340',
+              border: '2px solid #38414B',
+              borderTop: 0,
+              borderTopRadius: 0,
+              padding: 0
+            }}
+            >
+              <LargestDailyActions handleSearchClick={this.handleSearchClick} />
+            </Tab.Pane>
+        },
         /***************** Tab for All CDP Actions table *****************/
         {
-          menuItem: { key: 1, icon: 'history', content: 'All CDP Actions' },
+          menuItem: { key: 2, icon: 'history', content: 'All CDP Actions' },
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
@@ -736,7 +761,7 @@ class App extends Component {
         },
         /***************** Tab for Liquidations table *****************/
         {
-          menuItem: { key: 2, icon: 'trash', content: 'Liquidations' },
+          menuItem: { key: 3, icon: 'trash', content: 'Liquidations' },
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
@@ -749,9 +774,10 @@ class App extends Component {
               <Liquidations handleSearchClick={this.handleSearchClick} />
             </Tab.Pane>
         },
+
         /***************** Tab for Open CDPs table *****************/
         {
-          menuItem: { key: 3, icon: 'globe', content: `Open CDPs` },
+          menuItem: { key: 4, icon: 'globe', content: `Open CDPs` },
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
