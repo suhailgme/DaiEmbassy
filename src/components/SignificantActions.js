@@ -22,7 +22,7 @@ class SignificantActions extends Component {
             recentActions.push(
                 {
                     time: cdp.time,//new Date(action.time).toString().slice(0,-37),
-                    cdpId: cdp.shut ? cdp.cdpId : <button style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', color: '#FFF', cursor: 'pointer' }} value={cdp.cdpId} onClick={this.handleClick}>{cdp.cdpId}</button>,
+                    cdpId: cdp.shut ? <span style={{color: cdp.cdpId < 2000 ? '#FF695E' : cdp.cdpId < 5000 ? '#FA9473' : cdp.cdpId < 10000 ? '#E6BB48' : cdp.cdpId < 15000 ? '#dbea98' :'#6abf69'}}>{cdp.cdpId}</span> : <button style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', color: cdp.cdpId < 2000 ? '#FF695E' : cdp.cdpId < 5000 ? '#FA9473' : cdp.cdpId < 10000 ? '#E6BB48' : cdp.cdpId < 15000 ? '#dbea98' :'#6abf69', cursor: 'pointer' }} value={cdp.cdpId} onClick={this.handleClick}>{cdp.cdpId}</button>,
                     act: `${cdp.act} ${cdp.act === 'OPEN' || cdp.act === 'GIVE' ? '' : cdp.act == 'DRAW' || cdp.act == 'WIPE' ? `${this.numberWithCommas(cdp.arg)} DAI` : `${this.numberWithCommas(cdp.arg)} PETH`}`,
                     tx: <a target="_blank" href={`https://etherscan.io/tx/${cdp.tx}`} style={{ textDecoration: 'underline', color: 'inherit' }}>{this.truncateTx(cdp.tx)}</a>,
                     owner: `${this.truncateTx(owner)}`,

@@ -70,7 +70,7 @@ export default class AllCdps extends Component{
             if(this.state.filtered){
             if(this.numberWithCommas(cdp.daiDebt) >= this.state.minDebt)
             processedCdps.push({
-                cdpId: <button style={{background: 'none', border:'none', padding:0, textDecoration:'underline', color:'#FFF', cursor:'pointer'}} value={cdp.cdpId} onClick={this.handleClick}>{cdp.cdpId}</button>,
+                cdpId: <button style={{background: 'none', border:'none', padding:0, textDecoration:'underline', color: cdp.cdpId < 2000 ? '#FF695E' : cdp.cdpId < 5000 ? '#FA9473' : cdp.cdpId < 10000 ? '#E6BB48' : cdp.cdpId < 15000 ? '#dbea98' :'#6abf69', cursor:'pointer'}} value={cdp.cdpId} onClick={this.handleClick}>{cdp.cdpId}</button>,
                 account: <span><Icon name='external'/> <a target="_blank" href={`https://etherscan.io/address/${cdp.account}`} style={{textDecoration:'underline', color:'inherit'}}>{cdp.account}</a></span>,
                 daiDebt: this.numberWithCommas(cdp.daiDebt),
                 pethCollateral: this.numberWithCommas(cdp.pethCollateral),
@@ -79,7 +79,7 @@ export default class AllCdps extends Component{
             }) 
         }else{
             processedCdps.push({
-                cdpId: <button style={{background: 'none', border:'none', padding:0, textDecoration:'underline', color:'#FFF', cursor:'pointer'}} value={cdp.cdpId} onClick={this.handleClick}>{cdp.cdpId}</button>,
+                cdpId: <button style={{background: 'none', border:'none', padding:0, textDecoration:'underline', color: cdp.cdpId < 2000 ? '#FF695E' : cdp.cdpId < 5000 ? '#FA9473' : cdp.cdpId < 10000 ? '#E6BB48' : cdp.cdpId < 15000 ? '#dbea98' :'#6abf69', cursor:'pointer'}} value={cdp.cdpId} onClick={this.handleClick}>{cdp.cdpId}</button>,
                 account: <span><Icon name='external'/> <a target="_blank" href={`https://etherscan.io/address/${cdp.account}`} style={{textDecoration:'underline', color:'inherit'}}>{cdp.account}</a></span>,
                 daiDebt: this.numberWithCommas(cdp.daiDebt),
                 pethCollateral: this.numberWithCommas(cdp.pethCollateral),
