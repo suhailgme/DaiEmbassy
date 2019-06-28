@@ -121,7 +121,7 @@ class AreaChartWithEdge extends React.Component {
 				fontSize={20}
 				/>
 
-			<Chart id={1} yExtents={d => [d.pethDeposited, 0]}>
+			<Chart id={1} yExtents={d => [d.pethDeposited > d.pethWithdrawn ? d.pethDeposited : d.pethWithdrawn, 0]}> 
 				<XAxis axisAt="bottom" orient="bottom"  stroke="#BDC4C7" tickStroke="#BDC4C7"/>
 				<YAxis axisAt="right" orient="left" ticks={5} tickStroke="#BDC4C7"/>
 
