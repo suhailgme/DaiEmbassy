@@ -30,9 +30,8 @@ export default class LargestDailyActions extends Component {
         return Humanize.compactInteger(number, 2)
     }
 
-    handleClick = (e) => {
-        e.preventDefault()
-        this.props.handleSearchClick(null, { value: e.target.value })
+    handleClick = (cdpId) => {
+        this.props.handleSearchClick(null, { value: cdpId })
     }
 
     // processActions = () => {
@@ -72,12 +71,26 @@ export default class LargestDailyActions extends Component {
                     <ReactTable
                         data={dailyActionsDai}
                         columns={[
+
                             {
                                 Header: 'Date',
                                 columns: [
                                     {
                                         accessor: 'date',
-                                        PivotValue: props => props.value
+                                        width: 160,
+                                        Pivot: ({ row, isExpanded }) => {
+                                            return (
+                                                <div>
+                                                    <Grid style={{ paddingTop: '13px' }}>
+                                                        {isExpanded
+                                                            ? <span><Icon name='minus circle' /></span>
+                                                            : <span><Icon name='plus circle' /></span>
+                                                        }
+                                                        {row.date}
+                                                    </Grid>
+                                                </div>
+                                            )
+                                        },
                                     },
                                 ]
                             },
@@ -88,57 +101,89 @@ export default class LargestDailyActions extends Component {
                                     {
                                         Header: 'CDP ID',
                                         id: 'Lock CDP ID',
-                                        accessor: d => d.topLock.length ? <div style={{
-                                            color:
-                                                d.topLock[0].cdpId < 2000 ? '#FF695E' :
-                                                    d.topLock[0].cdpId < 5000 ? '#FA9473' :
-                                                        d.topLock[0].cdpId < 10000 ? '#E6BB48' :
-                                                            d.topLock[0].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                        }}>
-                                            {d.topLock[0].cdpId}</div> : null,
+                                        accessor: d => d.topLock.length ? <div>
+                                            <button style={{
+                                                color:
+                                                    d.topLock[0].cdpId < 2000 ? '#FF695E' :
+                                                        d.topLock[0].cdpId < 5000 ? '#FA9473' :
+                                                            d.topLock[0].cdpId < 10000 ? '#E6BB48' :
+                                                                d.topLock[0].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                textDecoration: 'underline',
+                                                cursor: 'pointer',
+                                                background: 'none',
+                                                border: 'none',
+                                                padding: 0,
+                                            }}
+                                                onClick={() => this.handleClick(d.topLock[0].cdpId)}>{d.topLock[0].cdpId}
+                                            </button>
+                                        </div> : null,
 
                                         Cell: d => {
                                             return (
                                                 <div>
-                                                    <div style={{
-                                                        paddingBottom: '15px',
-                                                        color:
-                                                            d.original.topLock[1].cdpId < 2000 ? '#FF695E' :
-                                                                d.original.topLock[1].cdpId < 5000 ? '#FA9473' :
-                                                                    d.original.topLock[1].cdpId < 10000 ? '#E6BB48' :
-                                                                        d.original.topLock[1].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                                    }}>
-                                                        {d.original.topLock[1].cdpId}
+                                                    <div style={{ paddingBottom: '15px', }}>
+                                                        <button style={{
+                                                            color:
+                                                                d.original.topLock[1].cdpId < 2000 ? '#FF695E' :
+                                                                    d.original.topLock[1].cdpId < 5000 ? '#FA9473' :
+                                                                        d.original.topLock[1].cdpId < 10000 ? '#E6BB48' :
+                                                                            d.original.topLock[1].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                            textDecoration: 'underline',
+                                                            cursor: 'pointer',
+                                                            background: 'none',
+                                                            border: 'none',
+                                                            padding: 0,
+                                                        }}
+                                                            onClick={() => this.handleClick(d.original.topLock[1].cdpId)}>{d.original.topLock[1].cdpId}
+                                                        </button>
                                                     </div>
-                                                    <div style={{
-                                                        paddingBottom: '15px',
-                                                        color:
-                                                            d.original.topLock[2].cdpId < 2000 ? '#FF695E' :
-                                                                d.original.topLock[2].cdpId < 5000 ? '#FA9473' :
-                                                                    d.original.topLock[2].cdpId < 10000 ? '#E6BB48' :
-                                                                        d.original.topLock[2].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                                    }}>
-                                                        {d.original.topLock[2].cdpId}
+                                                    <div style={{ paddingBottom: '15px', }}>
+                                                        <button style={{
+                                                            color:
+                                                                d.original.topLock[2].cdpId < 2000 ? '#FF695E' :
+                                                                    d.original.topLock[2].cdpId < 5000 ? '#FA9473' :
+                                                                        d.original.topLock[2].cdpId < 10000 ? '#E6BB48' :
+                                                                            d.original.topLock[2].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                            textDecoration: 'underline',
+                                                            cursor: 'pointer',
+                                                            background: 'none',
+                                                            border: 'none',
+                                                            padding: 0,
+                                                        }}
+                                                            onClick={() => this.handleClick(d.original.topLock[2].cdpId)}>{d.original.topLock[2].cdpId}
+                                                        </button>
                                                     </div>
-                                                    <div style={{
-                                                        paddingBottom: '15px',
-                                                        color:
-                                                            d.original.topLock[3].cdpId < 2000 ? '#FF695E' :
-                                                                d.original.topLock[3].cdpId < 5000 ? '#FA9473' :
-                                                                    d.original.topLock[3].cdpId < 10000 ? '#E6BB48' :
-                                                                        d.original.topLock[3].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                                    }}>
-                                                        {d.original.topLock[3].cdpId}
+                                                    <div style={{ paddingBottom: '15px', }}>
+                                                        <button style={{
+                                                            color:
+                                                                d.original.topLock[3].cdpId < 2000 ? '#FF695E' :
+                                                                    d.original.topLock[3].cdpId < 5000 ? '#FA9473' :
+                                                                        d.original.topLock[3].cdpId < 10000 ? '#E6BB48' :
+                                                                            d.original.topLock[3].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                            textDecoration: 'underline',
+                                                            cursor: 'pointer',
+                                                            background: 'none',
+                                                            border: 'none',
+                                                            padding: 0,
+                                                        }}
+                                                            onClick={() => this.handleClick(d.original.topLock[3].cdpId)}>{d.original.topLock[3].cdpId}
+                                                        </button>
                                                     </div>
-                                                    <div style={{
-                                                        paddingBottom: '15px',
-                                                        color:
-                                                            d.original.topLock[4].cdpId < 2000 ? '#FF695E' :
-                                                                d.original.topLock[4].cdpId < 5000 ? '#FA9473' :
-                                                                    d.original.topLock[4].cdpId < 10000 ? '#E6BB48' :
-                                                                        d.original.topLock[4].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                                    }}>
-                                                        {d.original.topLock[4].cdpId}
+                                                    <div style={{ paddingBottom: '15px', }}>
+                                                        <button style={{
+                                                            color:
+                                                                d.original.topLock[4].cdpId < 2000 ? '#FF695E' :
+                                                                    d.original.topLock[4].cdpId < 5000 ? '#FA9473' :
+                                                                        d.original.topLock[4].cdpId < 10000 ? '#E6BB48' :
+                                                                            d.original.topLock[4].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                            textDecoration: 'underline',
+                                                            cursor: 'pointer',
+                                                            background: 'none',
+                                                            border: 'none',
+                                                            padding: 0,
+                                                        }}
+                                                            onClick={() => this.handleClick(d.original.topLock[4].cdpId)}>{d.original.topLock[4].cdpId}
+                                                        </button>
                                                     </div>
                                                     <hr />
                                                     <div style={{ paddingBottom: '15px', }}>Top {d.original.topLock.length}</div>
@@ -222,57 +267,91 @@ export default class LargestDailyActions extends Component {
                                     {
                                         Header: 'CDP ID',
                                         id: 'Draw CDP ID',
-                                        accessor: d => d.topDraw.length ? <div style={{
-                                            color:
-                                                d.topDraw[0].cdpId < 2000 ? '#FF695E' :
-                                                    d.topDraw[0].cdpId < 5000 ? '#FA9473' :
-                                                        d.topDraw[0].cdpId < 10000 ? '#E6BB48' :
-                                                            d.topDraw[0].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                        }}>
-                                            {d.topDraw[0].cdpId}</div> : null,
+                                        accessor: d => d.topDraw.length ? <div>
+                                            <button style={{
+                                                color:
+                                                    d.topDraw[0].cdpId < 2000 ? '#FF695E' :
+                                                        d.topDraw[0].cdpId < 5000 ? '#FA9473' :
+                                                            d.topDraw[0].cdpId < 10000 ? '#E6BB48' :
+                                                                d.topDraw[0].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                textDecoration: 'underline',
+                                                cursor: 'pointer',
+                                                background: 'none',
+                                                border: 'none',
+                                                padding: 0,
+                                            }}
+                                                onClick={() => this.handleClick(d.topDraw[0].cdpId)}>{d.topDraw[0].cdpId}
+                                            </button>
+                                        </div> : null,
+
                                         Cell: d => {
                                             return (
                                                 <div>
-                                                    <div style={{
-                                                        paddingBottom: '15px',
-                                                        color:
-                                                            d.original.topDraw[1].cdpId < 2000 ? '#FF695E' :
-                                                                d.original.topDraw[1].cdpId < 5000 ? '#FA9473' :
-                                                                    d.original.topDraw[1].cdpId < 10000 ? '#E6BB48' :
-                                                                        d.original.topDraw[1].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                                    }}>
-                                                        {d.original.topDraw[1].cdpId}
+                                                    <div style={{ paddingBottom: '15px', }}>
+                                                        <button style={{
+                                                            color:
+                                                                d.original.topDraw[1].cdpId < 2000 ? '#FF695E' :
+                                                                    d.original.topDraw[1].cdpId < 5000 ? '#FA9473' :
+                                                                        d.original.topDraw[1].cdpId < 10000 ? '#E6BB48' :
+                                                                            d.original.topDraw[1].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                            textDecoration: 'underline',
+                                                            cursor: 'pointer',
+                                                            background: 'none',
+                                                            border: 'none',
+                                                            padding: 0,
+                                                        }}
+                                                            onClick={() => this.handleClick(d.original.topDraw[1].cdpId)}>{d.original.topDraw[1].cdpId}
+                                                        </button>
                                                     </div>
-                                                    <div style={{
-                                                        paddingBottom: '15px',
-                                                        color:
-                                                            d.original.topDraw[2].cdpId < 2000 ? '#FF695E' :
-                                                                d.original.topDraw[2].cdpId < 5000 ? '#FA9473' :
-                                                                    d.original.topDraw[2].cdpId < 10000 ? '#E6BB48' :
-                                                                        d.original.topDraw[2].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                                    }}>
-                                                        {d.original.topDraw[2].cdpId}
+                                                    <div style={{ paddingBottom: '15px', }}>
+                                                        <button style={{
+                                                            color:
+                                                                d.original.topDraw[2].cdpId < 2000 ? '#FF695E' :
+                                                                    d.original.topDraw[2].cdpId < 5000 ? '#FA9473' :
+                                                                        d.original.topDraw[2].cdpId < 10000 ? '#E6BB48' :
+                                                                            d.original.topDraw[2].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                            textDecoration: 'underline',
+                                                            cursor: 'pointer',
+                                                            background: 'none',
+                                                            border: 'none',
+                                                            padding: 0,
+                                                        }}
+                                                            onClick={() => this.handleClick(d.original.topDraw[2].cdpId)}>{d.original.topDraw[2].cdpId}
+                                                        </button>
                                                     </div>
-                                                    <div style={{
-                                                        paddingBottom: '15px',
-                                                        color:
-                                                            d.original.topDraw[3].cdpId < 2000 ? '#FF695E' :
-                                                                d.original.topDraw[3].cdpId < 5000 ? '#FA9473' :
-                                                                    d.original.topDraw[3].cdpId < 10000 ? '#E6BB48' :
-                                                                        d.original.topDraw[3].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                                    }}>
-                                                        {d.original.topDraw[3].cdpId}
+                                                    <div style={{ paddingBottom: '15px', }}>
+                                                        <button style={{
+                                                            color:
+                                                                d.original.topDraw[3].cdpId < 2000 ? '#FF695E' :
+                                                                    d.original.topDraw[3].cdpId < 5000 ? '#FA9473' :
+                                                                        d.original.topDraw[3].cdpId < 10000 ? '#E6BB48' :
+                                                                            d.original.topDraw[3].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                            textDecoration: 'underline',
+                                                            cursor: 'pointer',
+                                                            background: 'none',
+                                                            border: 'none',
+                                                            padding: 0,
+                                                        }}
+                                                            onClick={() => this.handleClick(d.original.topDraw[3].cdpId)}>{d.original.topDraw[3].cdpId}
+                                                        </button>
                                                     </div>
-                                                    <div style={{
-                                                        paddingBottom: '15px',
-                                                        color:
-                                                            d.original.topDraw[4].cdpId < 2000 ? '#FF695E' :
-                                                                d.original.topDraw[4].cdpId < 5000 ? '#FA9473' :
-                                                                    d.original.topDraw[4].cdpId < 10000 ? '#E6BB48' :
-                                                                        d.original.topDraw[4].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                                    }}>
-                                                        {d.original.topDraw[4].cdpId}
+                                                    <div style={{ paddingBottom: '15px', }}>
+                                                        <button style={{
+                                                            color:
+                                                                d.original.topDraw[4].cdpId < 2000 ? '#FF695E' :
+                                                                    d.original.topDraw[4].cdpId < 5000 ? '#FA9473' :
+                                                                        d.original.topDraw[4].cdpId < 10000 ? '#E6BB48' :
+                                                                            d.original.topDraw[4].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                            textDecoration: 'underline',
+                                                            cursor: 'pointer',
+                                                            background: 'none',
+                                                            border: 'none',
+                                                            padding: 0,
+                                                        }}
+                                                            onClick={() => this.handleClick(d.original.topDraw[4].cdpId)}>{d.original.topDraw[4].cdpId}
+                                                        </button>
                                                     </div>
+
                                                     <hr />
                                                     <div style={{ paddingBottom: '15px', }}>Top {d.original.topDraw.length}</div>
                                                 </div>
@@ -353,67 +432,94 @@ export default class LargestDailyActions extends Component {
                                     {
                                         Header: 'CDP ID',
                                         id: 'Free CDP ID',
-                                        accessor: d => d.topFree.length ? <div style={{
-                                            color:
-                                                d.topFree[0].cdpId < 2000 ? '#FF695E' :
-                                                    d.topFree[0].cdpId < 5000 ? '#FA9473' :
-                                                        d.topFree[0].cdpId < 10000 ? '#E6BB48' :
-                                                            d.topFree[0].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                        }}>
-                                            {d.topFree[0].cdpId}</div> : null,
+                                        accessor: d => d.topFree.length ? <div>
+                                            <button style={{
+                                                color:
+                                                    d.topFree[0].cdpId < 2000 ? '#FF695E' :
+                                                        d.topFree[0].cdpId < 5000 ? '#FA9473' :
+                                                            d.topFree[0].cdpId < 10000 ? '#E6BB48' :
+                                                                d.topFree[0].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                textDecoration: 'underline',
+                                                cursor: 'pointer',
+                                                background: 'none',
+                                                border: 'none',
+                                                padding: 0,
+                                            }}
+                                                onClick={() => this.handleClick(d.topFree[0].cdpId)}>{d.topFree[0].cdpId}
+                                            </button>
+                                        </div> : null,
                                         Cell: d => {
                                             return (
                                                 <div>
                                                     {d.original.topFree[1] ?
-                                                        <div style={{
-                                                            paddingBottom: '15px',
-                                                            color:
-                                                                d.original.topFree[1].cdpId < 2000 ? '#FF695E' :
-                                                                    d.original.topFree[1].cdpId < 5000 ? '#FA9473' :
-                                                                        d.original.topFree[1].cdpId < 10000 ? '#E6BB48' :
-                                                                            d.original.topFree[1].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                                        }}>
-                                                            {d.original.topFree[1].cdpId}
-                                                        </div> : null
-                                                    }
+                                                        <div style={{ paddingBottom: '15px', }}>
+                                                            <button style={{
+                                                                color:
+                                                                    d.original.topFree[1].cdpId < 2000 ? '#FF695E' :
+                                                                        d.original.topFree[1].cdpId < 5000 ? '#FA9473' :
+                                                                            d.original.topFree[1].cdpId < 10000 ? '#E6BB48' :
+                                                                                d.original.topFree[1].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                                textDecoration: 'underline',
+                                                                cursor: 'pointer',
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                padding: 0,
+                                                            }}
+                                                                onClick={() => this.handleClick(d.original.topFree[1].cdpId)}>{d.original.topFree[1].cdpId}
+                                                            </button>
+                                                        </div> : null}
                                                     {d.original.topFree[2] ?
-                                                        <div style={{
-                                                            paddingBottom: '15px',
-                                                            color:
-                                                                d.original.topFree[2].cdpId < 2000 ? '#FF695E' :
-                                                                    d.original.topFree[2].cdpId < 5000 ? '#FA9473' :
-                                                                        d.original.topFree[2].cdpId < 10000 ? '#E6BB48' :
-                                                                            d.original.topFree[2].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                                        }}>
-                                                            {d.original.topFree[2].cdpId}
-                                                        </div> : null
-                                                    }
+                                                        <div style={{ paddingBottom: '15px', }}>
+                                                            <button style={{
+                                                                color:
+                                                                    d.original.topFree[2].cdpId < 2000 ? '#FF695E' :
+                                                                        d.original.topFree[2].cdpId < 5000 ? '#FA9473' :
+                                                                            d.original.topFree[2].cdpId < 10000 ? '#E6BB48' :
+                                                                                d.original.topFree[2].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                                textDecoration: 'underline',
+                                                                cursor: 'pointer',
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                padding: 0,
+                                                            }}
+                                                                onClick={() => this.handleClick(d.original.topFree[2].cdpId)}>{d.original.topFree[2].cdpId}
+                                                            </button>
+                                                        </div> : null}
                                                     {d.original.topFree[3] ?
-
-                                                        <div style={{
-                                                            paddingBottom: '15px',
-                                                            color:
-                                                                d.original.topFree[3].cdpId < 2000 ? '#FF695E' :
-                                                                    d.original.topFree[3].cdpId < 5000 ? '#FA9473' :
-                                                                        d.original.topFree[3].cdpId < 10000 ? '#E6BB48' :
-                                                                            d.original.topFree[3].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                                        }}>
-                                                            {d.original.topFree[3].cdpId}
-                                                        </div> : null
-                                                    }
+                                                        <div style={{ paddingBottom: '15px', }}>
+                                                            <button style={{
+                                                                color:
+                                                                    d.original.topFree[3].cdpId < 2000 ? '#FF695E' :
+                                                                        d.original.topFree[3].cdpId < 5000 ? '#FA9473' :
+                                                                            d.original.topFree[3].cdpId < 10000 ? '#E6BB48' :
+                                                                                d.original.topFree[3].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                                textDecoration: 'underline',
+                                                                cursor: 'pointer',
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                padding: 0,
+                                                            }}
+                                                                onClick={() => this.handleClick(d.original.topFree[3].cdpId)}>{d.original.topFree[3].cdpId}
+                                                            </button>
+                                                        </div> : null}
                                                     {d.original.topFree[4] ?
+                                                        <div style={{ paddingBottom: '15px', }}>
+                                                            <button style={{
+                                                                color:
+                                                                    d.original.topFree[4].cdpId < 2000 ? '#FF695E' :
+                                                                        d.original.topFree[4].cdpId < 5000 ? '#FA9473' :
+                                                                            d.original.topFree[4].cdpId < 10000 ? '#E6BB48' :
+                                                                                d.original.topFree[4].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                                textDecoration: 'underline',
+                                                                cursor: 'pointer',
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                padding: 0,
+                                                            }}
+                                                                onClick={() => this.handleClick(d.original.topFree[4].cdpId)}>{d.original.topFree[4].cdpId}
+                                                            </button>
+                                                        </div> : null}
 
-                                                        <div style={{
-                                                            paddingBottom: '15px',
-                                                            color:
-                                                                d.original.topFree[4].cdpId < 2000 ? '#FF695E' :
-                                                                    d.original.topFree[4].cdpId < 5000 ? '#FA9473' :
-                                                                        d.original.topFree[4].cdpId < 10000 ? '#E6BB48' :
-                                                                            d.original.topFree[4].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                                        }}>
-                                                            {d.original.topFree[4].cdpId}
-                                                        </div> : null
-                                                    }
                                                     <hr />
                                                     <div style={{ paddingBottom: '15px', }}>Top {d.original.topFree.length}</div>
                                                 </div>
@@ -506,66 +612,94 @@ export default class LargestDailyActions extends Component {
                                     {
                                         Header: 'CDP ID',
                                         id: 'Wipe CDP ID',
-                                        accessor: d => d.topWipe.length ? <div style={{
-                                            color:
-                                                d.topWipe[0].cdpId < 2000 ? '#FF695E' :
-                                                    d.topWipe[0].cdpId < 5000 ? '#FA9473' :
-                                                        d.topWipe[0].cdpId < 10000 ? '#E6BB48' :
-                                                            d.topWipe[0].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                        }}>
-                                            {d.topWipe[0].cdpId}</div> : null,
+                                        accessor: d => d.topWipe.length ? <div>
+                                            <button style={{
+                                                color:
+                                                    d.topWipe[0].cdpId < 2000 ? '#FF695E' :
+                                                        d.topWipe[0].cdpId < 5000 ? '#FA9473' :
+                                                            d.topWipe[0].cdpId < 10000 ? '#E6BB48' :
+                                                                d.topWipe[0].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                textDecoration: 'underline',
+                                                cursor: 'pointer',
+                                                background: 'none',
+                                                border: 'none',
+                                                padding: 0,
+                                            }}
+                                                onClick={() => this.handleClick(d.topWipe[0].cdpId)}>{d.topWipe[0].cdpId}
+                                            </button>
+                                        </div> : null,
+
                                         Cell: d => {
                                             return (
                                                 <div>
                                                     {d.original.topWipe[1] ?
-                                                        <div style={{
-                                                            paddingBottom: '15px',
-                                                            color:
-                                                                d.original.topWipe[1].cdpId < 2000 ? '#FF695E' :
-                                                                    d.original.topWipe[1].cdpId < 5000 ? '#FA9473' :
-                                                                        d.original.topWipe[1].cdpId < 10000 ? '#E6BB48' :
-                                                                            d.original.topWipe[1].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                                        }}>
-                                                            {d.original.topWipe[1].cdpId}
-                                                        </div> : null
-                                                    }
+                                                        <div style={{ paddingBottom: '15px', }}>
+                                                            <button style={{
+                                                                color:
+                                                                    d.original.topWipe[1].cdpId < 2000 ? '#FF695E' :
+                                                                        d.original.topWipe[1].cdpId < 5000 ? '#FA9473' :
+                                                                            d.original.topWipe[1].cdpId < 10000 ? '#E6BB48' :
+                                                                                d.original.topWipe[1].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                                textDecoration: 'underline',
+                                                                cursor: 'pointer',
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                padding: 0,
+                                                            }}
+                                                                onClick={() => this.handleClick(d.original.topWipe[1].cdpId)}>{d.original.topWipe[1].cdpId}
+                                                            </button>
+                                                        </div> : null}
                                                     {d.original.topWipe[2] ?
-                                                        <div style={{
-                                                            paddingBottom: '15px',
-                                                            color:
-                                                                d.original.topWipe[2].cdpId < 2000 ? '#FF695E' :
-                                                                    d.original.topWipe[2].cdpId < 5000 ? '#FA9473' :
-                                                                        d.original.topWipe[2].cdpId < 10000 ? '#E6BB48' :
-                                                                            d.original.topWipe[2].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                                        }}>
-                                                            {d.original.topWipe[2].cdpId}
-                                                        </div> : null
-                                                    }
+                                                        <div style={{ paddingBottom: '15px', }}>
+                                                            <button style={{
+                                                                color:
+                                                                    d.original.topWipe[2].cdpId < 2000 ? '#FF695E' :
+                                                                        d.original.topWipe[2].cdpId < 5000 ? '#FA9473' :
+                                                                            d.original.topWipe[2].cdpId < 10000 ? '#E6BB48' :
+                                                                                d.original.topWipe[2].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                                textDecoration: 'underline',
+                                                                cursor: 'pointer',
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                padding: 0,
+                                                            }}
+                                                                onClick={() => this.handleClick(d.original.topWipe[2].cdpId)}>{d.original.topWipe[2].cdpId}
+                                                            </button>
+                                                        </div> : null}
                                                     {d.original.topWipe[3] ?
-
-                                                        <div style={{
-                                                            paddingBottom: '15px',
-                                                            color:
-                                                                d.original.topWipe[3].cdpId < 2000 ? '#FF695E' :
-                                                                    d.original.topWipe[3].cdpId < 5000 ? '#FA9473' :
-                                                                        d.original.topWipe[3].cdpId < 10000 ? '#E6BB48' :
-                                                                            d.original.topWipe[3].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                                        }}>
-                                                            {d.original.topWipe[3].cdpId}
-                                                        </div> : null
-                                                    }
+                                                        <div style={{ paddingBottom: '15px', }}>
+                                                            <button style={{
+                                                                color:
+                                                                    d.original.topWipe[3].cdpId < 2000 ? '#FF695E' :
+                                                                        d.original.topWipe[3].cdpId < 5000 ? '#FA9473' :
+                                                                            d.original.topWipe[3].cdpId < 10000 ? '#E6BB48' :
+                                                                                d.original.topWipe[3].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                                textDecoration: 'underline',
+                                                                cursor: 'pointer',
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                padding: 0,
+                                                            }}
+                                                                onClick={() => this.handleClick(d.original.topWipe[3].cdpId)}>{d.original.topWipe[3].cdpId}
+                                                            </button>
+                                                        </div> : null}
                                                     {d.original.topWipe[4] ?
-                                                        <div style={{
-                                                            paddingBottom: '15px',
-                                                            color:
-                                                                d.original.topWipe[4].cdpId < 2000 ? '#FF695E' :
-                                                                    d.original.topWipe[4].cdpId < 5000 ? '#FA9473' :
-                                                                        d.original.topWipe[4].cdpId < 10000 ? '#E6BB48' :
-                                                                            d.original.topWipe[4].cdpId < 15000 ? '#dbea98' : '#6abf69'
-                                                        }}>
-                                                            {d.original.topWipe[4].cdpId}
-                                                        </div> : null
-                                                    }
+                                                        <div style={{ paddingBottom: '15px', }}>
+                                                            <button style={{
+                                                                color:
+                                                                    d.original.topWipe[4].cdpId < 2000 ? '#FF695E' :
+                                                                        d.original.topWipe[4].cdpId < 5000 ? '#FA9473' :
+                                                                            d.original.topWipe[4].cdpId < 10000 ? '#E6BB48' :
+                                                                                d.original.topWipe[4].cdpId < 15000 ? '#dbea98' : '#6abf69',
+                                                                textDecoration: 'underline',
+                                                                cursor: 'pointer',
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                padding: 0,
+                                                            }}
+                                                                onClick={() => this.handleClick(d.original.topWipe[4].cdpId)}>{d.original.topWipe[4].cdpId}
+                                                            </button>
+                                                        </div> : null}
                                                     <hr />
                                                     <div style={{ paddingBottom: '15px', }}>Top {d.original.topWipe.length}</div>
                                                 </div>
@@ -653,7 +787,7 @@ export default class LargestDailyActions extends Component {
 
 
                         ]}
-                        defaultPageSize={7}
+                        defaultPageSize={14}
                         pageSizeOptions={[7, 14, 21, 28, 35]}
                         rowsText='days'
                         pivotBy={['date']}
@@ -670,7 +804,7 @@ export default class LargestDailyActions extends Component {
                 <div style={{
                     color: '#FFF', borderRadius: '5px', border: '2px solid #38414B',
                     backgroundColor: '#273340', paddingTop: '10px', paddingLeft: '5px', height: '494px'
-                }}>
+                }} >
                     <h4><Icon name='globe' />Loading Largest Daily CDP Actions</h4>
                     <hr style={{ opacity: '0.7' }} />
                     <Loader active inverted inline='centered' />
