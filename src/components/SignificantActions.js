@@ -120,7 +120,7 @@ class SignificantActions extends Component {
                         ref={(instance) => { this.table = instance }}
                         onFetchData={async (state, instance) => {
                             this.setState({ loading: true })
-                            const allRecentActionsRes = await axios.get(`https://dai-embassy-server.herokuapp.com/significantTransactions?page=${state.page + 1}&pageSize=${state.pageSize}`)
+                            const allRecentActionsRes = await axios.get(`https://api.daiembassy.com/significantTransactions?page=${state.page + 1}&pageSize=${state.pageSize}`)
                             const recentActions = this.processActions(allRecentActionsRes.data.page)
                             this.setState({ recentActions, pages: allRecentActionsRes.data.numPages, loading: false, reload: false })
                         }}

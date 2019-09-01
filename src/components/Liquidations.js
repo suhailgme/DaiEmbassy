@@ -14,7 +14,7 @@ class Liquidations extends Component {
 
     async componentDidMount(){
         this.setState({ loading: true })
-        const liquidationsRes = await axios.get(`https://dai-embassy-server.herokuapp.com/liquidations`)
+        const liquidationsRes = await axios.get(`https://api.daiembassy.com/liquidations`)
         const liquidations = this.processActions(liquidationsRes.data.liquidations)
         this.setState({ liquidations, loading: false,})
     }

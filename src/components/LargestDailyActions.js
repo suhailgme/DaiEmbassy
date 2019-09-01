@@ -11,7 +11,7 @@ export default class LargestDailyActions extends Component {
     state = {}
 
     async componentDidMount() {
-        const dailyActionsDaiRes = await axios.get('https://dai-embassy-server.herokuapp.com/dailyactionsdai')
+        const dailyActionsDaiRes = await axios.get('https://api.daiembassy.com/dailyactionsdai')
         let dailyActionsDai = dailyActionsDaiRes.data.dailyActionsDai
         this.setState({ dailyActionsDai })
         // console.log(dailyActionsDai)

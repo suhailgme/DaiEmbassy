@@ -64,21 +64,21 @@ class App extends Component {
 
     this.setState({ loadingMsg: 'Getting Market Data...' })
 
-    const dailyWipeDrawRes = await axios.get('https://dai-embassy-server.herokuapp.com/dailywipedraw')
+    const dailyWipeDrawRes = await axios.get('https://api.daiembassy.com/dailywipedraw')
     // const dailyWipeDrawRes = await axios.get('http://localhost:2917/dailywipedraw')
 
-    const dailyLockFreeRes = await axios.get('https://dai-embassy-server.herokuapp.com/dailylockfree')
+    const dailyLockFreeRes = await axios.get('https://api.daiembassy.com/dailylockfree')
 
-    const marketRes = await axios.get('https://dai-embassy-server.herokuapp.com/mkrOHLC')
+    const marketRes = await axios.get('https://api.daiembassy.com/mkrOHLC')
     // const marketRes = await axios.get('http://localhost:2917/daiOHLC')
 
-    const dailyActionsDaiRes = await axios.get('https://dai-embassy-server.herokuapp.com/dailyActionsDai')
+    const dailyActionsDaiRes = await axios.get('https://api.daiembassy.com/dailyActionsDai')
     // const dailyActionsDaiRes = await axios.get('http://localhost:2917/dailyActionsDai')
 
 
 
-    // let dailyActions = await axios.get('https://dai-embassy-server.herokuapp.com/dailyActions')
-    const systemStatusRes = await axios.get('https://dai-embassy-server.herokuapp.com/systemStatus')
+    // let dailyActions = await axios.get('https://api.daiembassy.com/dailyActions')
+    const systemStatusRes = await axios.get('https://api.daiembassy.com/systemStatus')
     const systemStatus = systemStatusRes.data
     // let allRecentActions = await axios.get('http://localhost:2917/allRecentActions')
     // allRecentActions = allRecentActions.data.allRecentActions
@@ -114,7 +114,7 @@ class App extends Component {
 
     this.setState({ mkrOHLC, dailyWipeDraw, systemStatus, dailyLockFree, dailyActionsDai })
     this.setState({ currentAccount, loadingMsg: 'Getting CDPs...' })
-    const res = await axios.get('https://dai-embassy-server.herokuapp.com/searchableCdps')
+    const res = await axios.get('https://api.daiembassy.com/searchableCdps')
     // const res = await axios.get('http://localhost:2917/searchableCdps')
 
     const cdps = res.data.searchableCdps
@@ -157,7 +157,7 @@ class App extends Component {
     // this.setState({ cdpId })
 
     // Retrieve chart data for peth collateral and dai debt from server using cdpId
-    //const cdpCollateralDebtRes = await axios.get(`https://dai-embassy-server.herokuapp.com/collateralDebt?&id=${this.state.cdpId}`)
+    //const cdpCollateralDebtRes = await axios.get(`https://api.daiembassy.com/collateralDebt?&id=${this.state.cdpId}`)
     // const cdpCollateralDebtRes = await axios.get(`http://localhost:2917/collateralDebt?&id=${this.state.cdpId}`)
 
     // Create date object from each string date for use in cdp specific charts
@@ -210,7 +210,7 @@ class App extends Component {
           this.setState({ error: true, loadingMsg: `Error loading CDP ${id} - Please wait a few seconds before retrying.`, searchMsg: `Error loading CDP ${id}` })
           return
         }
-        const cdpCollateralDebtRes = await axios.get(`https://dai-embassy-server.herokuapp.com/collateralDebt?&id=${this.state.cdpId}`)
+        const cdpCollateralDebtRes = await axios.get(`https://api.daiembassy.com/collateralDebt?&id=${this.state.cdpId}`)
         // const cdpCollateralDebtRes = await axios.get(`http://localhost:2917/collateralDebt?&id=${this.state.cdpId}`)
 
         let cdpCollateralDebt = cdpCollateralDebtRes.data.collateralDebt
@@ -218,7 +218,7 @@ class App extends Component {
           day.date = new Date(day.date)
         })
 
-        const systemStatusRes = await axios.get('https://dai-embassy-server.herokuapp.com/systemStatus')
+        const systemStatusRes = await axios.get('https://api.daiembassy.com/systemStatus')
         const systemStatus = systemStatusRes.data
         const { wipeDraw, cdpDetails, error } = await maker.getAllDetails()
         // console.log('Wipe draw after click: ', wipeDraw,cdpDetails,systemStatus, error)
@@ -278,7 +278,7 @@ class App extends Component {
       this.setState({ [selection]: null })
 
       ReactGA.modalview(`/${selection}`);
-      const res = await axios.get(`https://dai-embassy-server.herokuapp.com/${selection}`)
+      const res = await axios.get(`https://api.daiembassy.com/${selection}`)
       // const res = await axios.get(`http://localhost:2917/${selection}`)
 
       let data = res.data[selection].reverse()
@@ -300,7 +300,7 @@ class App extends Component {
       this.setState({ [selection]: null })
 
       ReactGA.modalview(`/${selection}`);
-      const res = await axios.get(`https://dai-embassy-server.herokuapp.com/${selection}`)
+      const res = await axios.get(`https://api.daiembassy.com/${selection}`)
       // const res = await axios.get(`http://localhost:2917/${selection}`)
 
       let data = res.data[selection].reverse()
@@ -322,7 +322,7 @@ class App extends Component {
       this.setState({ [selection]: null })
 
       ReactGA.modalview(`/${selection}`);
-      const res = await axios.get(`https://dai-embassy-server.herokuapp.com/${selection}`)
+      const res = await axios.get(`https://api.daiembassy.com/${selection}`)
       // const res = await axios.get(`http://localhost:2917/${selection}`)
 
       let data = res.data[selection].reverse()
@@ -342,7 +342,7 @@ class App extends Component {
     const selection = value
     if (selection !== currentSelection) {
       ReactGA.modalview(`/${selection}`);
-      const marketRes = await axios.get(`https://dai-embassy-server.herokuapp.com/${selection}`)
+      const marketRes = await axios.get(`https://api.daiembassy.com/${selection}`)
       // const marketRes = await axios.get(`http://localhost:2917/${selection}`)
 
       let data = marketRes.data[selection].reverse()
@@ -787,7 +787,7 @@ class App extends Component {
               padding: 0
             }}
             >
-              <AllCdps handleSearchClick={this.handleSearchClick} cdps={this.state.cdps} systemStatus={this.state.systemStatus} />
+              <AllCdps handleSearchClick={this.handleSearchClick} systemStatus={this.state.systemStatus} />
             </Tab.Pane>
         }
       ]

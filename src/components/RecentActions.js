@@ -18,7 +18,7 @@ class RecentActions extends Component{
         // console.log(this.props)
         // const cdpId = this.state.cdpId
         // if (cdpId) {
-        //     const cdpRes = await axios.get(`https://dai-embassy-server.herokuapp.com/cdp?id=${cdpId}`)
+        //     const cdpRes = await axios.get(`https://api.daiembassy.com/cdp?id=${cdpId}`)
         //     const recentActions = cdpRes.data.actions
         //     console.log(recentActions)
         //     this.setState({ recentActions })
@@ -26,7 +26,7 @@ class RecentActions extends Component{
     }
     async componentDidUpdate(prevProps) {
         if (this.props.cdpId && this.props.cdpId !== prevProps.cdpId) {
-                const cdpRes = await axios.get(`https://dai-embassy-server.herokuapp.com/cdp?id=${this.props.cdpId}`)
+                const cdpRes = await axios.get(`https://api.daiembassy.com/cdp?id=${this.props.cdpId}`)
                 const recentActions = cdpRes.data.actions
                 this.setState({ recentActions })
         }
