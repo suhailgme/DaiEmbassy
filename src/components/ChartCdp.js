@@ -86,7 +86,7 @@ class AreaChartWithEdge extends React.Component {
 				width={width}
 				margin={{ left: 10, right: 10, top: 20, bottom: 30 }}
 				type={type}
-				seriesName={`DAIUSD_${this.state.suffix}`}
+				seriesName={`CDP_CREATION_${this.state.suffix}`}
 				data={data}
 				xScale={xScale}
 				xAccessor={xAccessor}
