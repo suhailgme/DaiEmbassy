@@ -49,8 +49,23 @@ export default class AllCdps extends Component {
         this.props.handleSearchClick(null, { value: e.target.value })
     }
 
+    colorCdpId = (cdpId) => {
+        const colors = {
+            veryLow: '#FF695E',
+            low: '#FA9473',
+            med: '#E6BB48',
+            high: '#dbea98',
+            veryHigh: '#6abf69'
+        }
+        if (cdpId < 2000) return colors.veryLow
+        if (cdpId < 5000) return colors.low
+        if (cdpId < 10000) return colors.med
+        if (cdpId < 15000) return colors.high
+        if (cdpId > 15000) return colors.veryHigh
+    }
+
     processCdps = (pageSize = 10) => {
-        console.log('processing open cdps...')
+        // console.log('processing open cdps...')
         const cdps = this.state.cdps
         let top100Debt = 0
         let top100Collateral = 0
@@ -59,8 +74,8 @@ export default class AllCdps extends Component {
             if (this.state.filtered) {
                 if (this.numberWithCommas(cdp.daiDebt) >= this.state.minDebt)
                     processedCdps.push({
-                        cdpId: <button style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', color: cdp.cdpId < 2000 ? '#FF695E' : cdp.cdpId < 5000 ? '#FA9473' : cdp.cdpId < 10000 ? '#E6BB48' : cdp.cdpId < 15000 ? '#dbea98' : '#6abf69', cursor: 'pointer' }} value={cdp.cdpId} onClick={this.handleClick}>{cdp.cdpId}</button>,
-                        account: <span><Icon name='external' /> <a target="_blank" href={`https://etherscan.io/address/${cdp.account}`} style={{ textDecoration: 'underline', color: 'inherit' }}>{cdp.account}</a></span>,
+                        cdpId: <button style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', color: this.colorCdpId(cdp.cdpId), cursor: 'pointer' }} value={cdp.cdpId} onClick={this.handleClick}>{cdp.cdpId}</button>,
+                        account: <a target="_blank" href={`https://etherscan.io/address/${cdp.account}`} style={{ textDecoration: 'underline', color: 'inherit' }}>{this.truncateTx(cdp.account)}</a>,
                         daiDebt: this.numberWithCommas(cdp.daiDebt),
                         pethCollateral: this.numberWithCommas(cdp.pethCollateral),
                         usdCollateral: this.numberWithCommas(cdp.usdCollateral),
@@ -68,8 +83,8 @@ export default class AllCdps extends Component {
                     })
             } else {
                 processedCdps.push({
-                    cdpId: <button style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', color: cdp.cdpId < 2000 ? '#FF695E' : cdp.cdpId < 5000 ? '#FA9473' : cdp.cdpId < 10000 ? '#E6BB48' : cdp.cdpId < 15000 ? '#dbea98' : '#6abf69', cursor: 'pointer' }} value={cdp.cdpId} onClick={this.handleClick}>{cdp.cdpId}</button>,
-                    account: <span><Icon name='external' /> <a target="_blank" href={`https://etherscan.io/address/${cdp.account}`} style={{ textDecoration: 'underline', color: 'inherit' }}>{cdp.account}</a></span>,
+                    cdpId: <button style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', color: this.colorCdpId(cdp.cdpId), cursor: 'pointer' }} value={cdp.cdpId} onClick={this.handleClick}>{cdp.cdpId}</button>,
+                    account: <a target="_blank" href={`https://etherscan.io/address/${cdp.account}`} style={{ textDecoration: 'underline', color: 'inherit' }}>{this.truncateTx(cdp.account)}</a>,
                     daiDebt: this.numberWithCommas(cdp.daiDebt),
                     pethCollateral: this.numberWithCommas(cdp.pethCollateral),
                     usdCollateral: this.numberWithCommas(cdp.usdCollateral),
@@ -137,7 +152,7 @@ export default class AllCdps extends Component {
                         {
                             Header: <span>Owner <Icon inverted name='sort' /></span>,
                             accessor: 'account',
-                            Cell: row => <div style={{ textAlign: 'left' }}>{row.value}</div>
+                            Cell: row => <div style={{ textAlign: 'center' }}>{row.value}</div>
                         },
                         {
                             Header: <span>Debt (DAI) <Icon inverted name='sort' /></span>,
