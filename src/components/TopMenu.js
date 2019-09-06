@@ -30,7 +30,7 @@ export default class TopMenu extends Component {
                 cdps.push({
                     title:`ID: ${cdp.cdpId}`, 
                     description: `Owner: ${cdp.account.slice(0,8)}...${cdp.account.slice(-6)}`,
-                    price:  `${this.numberWithCommas(cdp.daiDebt)} DAI`
+                    // price:  `${this.numberWithCommas(cdp.daiDebt)} DAI`
                 })
             })
             this.setState({cdps:cdps})
