@@ -55,7 +55,7 @@ class RecentActions extends Component{
             recentActions.push(
                 {
                     time: action.time,//new Date(action.time).toString().slice(0,-37),
-                    act: `${action.act} ${action.act === 'OPEN' || action.act === 'GIVE' ? '' : action.act == 'DRAW' || action.act == 'WIPE' ? `${this.numberWithCommas(action.arg)} DAI` : `${this.numberWithCommas(action.arg)} PETH`}`,
+                    act: `${action.act} ${action.act === 'OPEN' || action.act === 'GIVE' ? '' : action.act == 'DRAW' || action.act == 'WIPE' ? `${this.numberWithCommas(action.arg)} DAI` : action.act == 'LOCK' || action.act == 'FREE' ? `${this.numberWithCommas(action.arg)} PETH`: ''}`,
                     tx: <a target="_blank" href={`https://etherscan.io/tx/${action.tx}`} style={{textDecoration:'underline', color:'inherit'}}>{this.truncateTx(action.tx)}</a>,
                     price: `$${this.numberWithCommas(action.pip)}`,
                     debt: `${this.numberWithCommas(action.art)} DAI`,
