@@ -51,10 +51,11 @@ export default class MakerService {
             this.cdpId = cdpId
             this.cdp = await this.maker.getCdp(this.cdpId)
             console.log('set cdp to id: ', this.cdpId)
+            return true
         }
         catch(e){
-            console.error('Maker Service: Unable to get CDP ', this.cdpId, e)
-            return e
+            console.error('Maker Service: Unable to get CDP ', this.cdpId) //, e)
+            return false 
         }
     }
 
