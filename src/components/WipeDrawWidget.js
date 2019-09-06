@@ -107,9 +107,9 @@ export default class WipeDrawWidget extends Component {
                     </Form.Field>
                     <Form.Field>
                         <Button.Group fluid>
-                            <Button positive id='positiveButton'onClick={this.handleClick} style={this.state.positiveButton ? {opacity:0.9} : {opacity:0.3}}>{this.state.selected === 'DAI' ? 'Repay' : 'Deposit'}</Button>
+                            <Button positive id='positiveButton'onClick={this.handleClick} style={this.state.positiveButton ? {opacity:0.9} : {opacity:0.3}}>{this.state.selected === 'DAI' ? 'Pay Back' : 'Deposit'}</Button>
                             <Button.Or />
-                            <Button negative id='negativeButton' onClick={this.handleClick} style={this.state.negativeButton ? {opacity:0.9} : {opacity:0.3}}>{this.state.selected === 'DAI' ? 'Create' : 'Withdraw'}</Button>
+                            <Button negative id='negativeButton' onClick={this.handleClick} style={this.state.negativeButton ? {opacity:0.9} : {opacity:0.3}}>{this.state.selected === 'DAI' ? 'Generate' : 'Withdraw'}</Button>
                         </Button.Group>
                     </Form.Field>
                     <Form.Field>
