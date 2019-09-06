@@ -20,7 +20,9 @@ let panel = [
             <li style={{paddingBottom:'10px'}}>Simulate DAI or PETH actions</li>
             <li style={{paddingBottom:'10px'}}>View debt, collateral, accrued fees, and more</li>
             <li style={{paddingBottom:'10px'}}>View complete transaction history</li>
-            <li>Load debt, collateral, and liquidation price charts</li>
+            <li style={{paddingBottom:'10px'}}>Load debt, collateral, and liquidation price charts</li>
+            <li>Shut CDPs do not have sidebar content</li>
+
 
           </ul>
         </Segment>
