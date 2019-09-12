@@ -42,7 +42,7 @@ class AllRecentActions extends Component{
                     owner: `${this.truncateTx(owner)}`,
                     debt: `${this.numberWithCommas(cdp.debt)} DAI`,
                     collateral: `${this.numberWithCommas(cdp.collateral)} PETH`,
-                    ratio: `${this.numberWithCommas(cdp.ratio)}`,
+                    ratio: `${this.numberWithCommas(cdp.ratio,2)}`,
                     id: index
                 })
         })
@@ -56,8 +56,8 @@ class AllRecentActions extends Component{
         return `${tx.slice(0,6)}...${tx.slice(-6)}` 
     }
 
-    numberWithCommas = (number) => {
-        return Humanize.formatNumber(number,2)
+    numberWithCommas = (number, commas = 3) => {
+        return Humanize.formatNumber(number,commas)
         // return number.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
       }
 
