@@ -19,8 +19,9 @@ import CumulativeDebt from './components/CumulativeDebtChart'
 import CumulativeCollateral from './components/CumulativeCollateralChart'
 import CdpDebtChart from './components/CdpDebtChart'
 import Footer from './components/Footer'
-import AllCdps from './components/AllCdps'
-import { Grid, Loader, Tab, Dropdown } from 'semantic-ui-react'
+import OpenCdps from './components/OpenCdps'
+import ShutCdps from './components/ShutCdps'
+import { Grid, Loader, Tab, Dropdown, Button, Icon, Popup } from 'semantic-ui-react'
 import './App.css';
 import MakerService from './MakerService'
 import daiIcon from '../src/images/daiIcon.png'
@@ -28,6 +29,8 @@ import ethIcon from '../src/images/ethIcon.png'
 import mkrIcon from '../src/images/mkrIcon.png'
 import ReactGA from 'react-ga'
 const axios = require('axios')
+const Url = require('url-parse')
+
 
 class App extends Component {
 
@@ -46,11 +49,10 @@ class App extends Component {
     cdpSelection: 'pethCollateral',
     currentTab: 1, //DAI is default tab (1), cdp stats is tab 0
     cdpActionsTab: 0,
-    systemOptions: 2, //For system tab dropdown, default index 0 (daily cdps created),
+    systemOptions: 2, //For system tab dropdown, default index 2 (daily cdps activity expressed in dai),
     daiOptions: 0, // For dai tab dropdown, default index 0 (dai repaid/created)
     pethOptions: 0, // For peth tab dropdown, default index 0 (peth locked/freed)
     mkrOptions: 0, // For mkr tab dropdown, default index 0 (mkr OHLC)
-    marketOptions: 0, //For markets tab dropdown, default index 0 (dai ohlc)
     stackedActivityChart: true,
   }
 
@@ -82,16 +84,16 @@ class App extends Component {
     const systemStatus = systemStatusRes.data
     // let allRecentActions = await axios.get('http://localhost:2917/allRecentActions')
     // allRecentActions = allRecentActions.data.allRecentActions
-    
+
     // Temporary client-side fix for API error. Error with coinpaprika api needs to be debugged
     // on server.
     let mkrOHLC
-    if(marketRes.data.mkrOHLC.length){
+    if (marketRes.data.mkrOHLC.length) {
       mkrOHLC = marketRes.data.mkrOHLC.reverse()
       mkrOHLC.forEach(day => {
         day.date = new Date(day.date)
       })
-    }else{
+    } else {
       mkrOHLC = null
     }
 
@@ -183,9 +185,74 @@ class App extends Component {
 
     // Provide cdp details widget with the owners account associated with the specific cdpid
     // cdpDetails.account = account
-    this.setState({ cdps, updating: false, currentAccount, maker, loadingMsg: '', })
+
+
+    this.setState({ cdps, updating: false, currentAccount, maker, loadingMsg: '' })
+
+    let path = window.location.href
+    let url = new Url(path, true)
+    if (url.pathname === '/cdp') {
+      let cdpId = parseInt(url.query.id)
+      const cdpExists = cdps.find(cdp => {
+        return cdp.cdpId === cdpId
+      })
+      if (cdpExists) this.handleSearchClick(null, { value: cdpId })
+      else this.setState({ searchMsg: `CDP ${cdpId} does not exist!`, cdpId: null })
+    }
+    
+    // if(url.pathname ==='/chart'){
+    //   let chartName = url.query.id.toLocaleLowerCase()
+    //   switch(chartName){
+    //     case 'cumulativedebt': {
+    //       this.handleDaiButton(null, {value:'cumulativeDebt'})
+    //       break;
+    //     }
+    //     case 'circulatingdai':{
+    //       this.handleDaiButton(null, {value:'dailyWipeDraw'})
+    //       break;
+    //     }
+    //     case 'daiprice':{
+    //       this.handleDaiButton(null, {value:'daiOHLC'})
+    //       break;
+    //     }
+    //     default: break;
+    //   }
+    // }
+
+    window.onpopstate = () => {
+      let path = window.location.href
+      let url = new Url(path, true)
+      // console.log(url)
+      if (url.pathname === '/cdp') {
+        let cdpId = parseInt(url.query.id)
+        const cdpExists = cdps.find(cdp => {
+          return cdp.cdpId === cdpId
+        })
+        if (cdpExists) this.handleSearchClick(null, { value: cdpId })
+        else this.setState({ searchMsg: `CDP ${cdpId} does not exist!`, cdpId: null, currentTab: 1 })
+      }
+      if (url.pathname === '/' && this.state.cdpId !== null)
+        this.clearCdp()
+    }
+    // console.log(url)
+
+
+
+    // let path = window.location.pathname.toLocaleLowerCase()
+    // console.log(path.lastIndexOf('/cdp/'))
+    // if(path === '/cdp/2796'){
+    //   this.handleSearchClick(null, { value: 2796 })
+    //   // window.location.pathname = '/chart/lockedsomethingorother'
+    // }
+
+    // console.log(window.location.pathname + window.location.href)
+
     // this.updateData()
     // console.log(this.state.cdpCollateralDebt)
+
+  }
+
+  setInitalState = () => {
 
   }
 
@@ -200,19 +267,40 @@ class App extends Component {
           action: `Searched for CDP ${id}`,
           label: new Date().toString()
         })
-        this.setState({ error: false, wipeDraw: null, cdpDetails: null, systemStatus: null, cdpId: null, searchMsg: '', loadingMsg: `Loading CDP: ${id}`, updating: true, currentTab: 0 })
+        window.history.pushState({}, 'CDP ' + id, '/cdp?id=' + id)
+        this.setState({ error: false, cdpCollateralDebt: null, wipeDraw: null, cdpDetails: null, cdpId: null, searchMsg: '', loadingMsg: `Loading CDP: ${id}`, updating: true, currentTab: 0 })
 
         const maker = this.state.maker
-        try {
-          await maker.setCdpId(id) // needs error handling! If error occurs, site loads properly with last CDP info (not accurate)
-          this.setState({ cdpId: id })
-        } catch (error) {
-          this.setState({ error: true, loadingMsg: `Error loading CDP ${id} - Please wait a few seconds before retrying.`, searchMsg: `Error loading CDP ${id}` })
-          return
+        // try {
+        const cdpExists = await maker.setCdpId(id) // needs error handling! If error occurs, site loads properly with last CDP info (not accurate)
+        this.setState({ cdpId: id })
+        if (cdpExists) {
+          const { wipeDraw, cdpDetails, error } = await maker.getAllDetails()
+          const { account } = this.state.cdps.find((cdp) => {
+            return cdp.cdpId === id
+          })
+          cdpDetails.account = account
+          this.setState({ wipeDraw, cdpDetails, })
+          // console.log('Wipe draw after click: ', wipeDraw,cdpDetails,systemStatus, error)
+          // if (error) {
+          //   ReactGA.event({
+          //     category: this.state.currentAccount,
+          //     action: `encountered error searching for CDP ${id}`,
+          //     label: new Date().toString()
+          //   })
+          //   this.setState({ error: true, loadingMsg: `Error loading CDP ${id} - Please wait a few seconds before retrying.`, searchMsg: `Error loading CDP ${id}` })
+          //   return
+          // }
         }
+        // } catch (error) {
+        //   console.log('error')
+        // this.setState({ cdpId: null })
+        // this.setState({ error: true, loadingMsg: `Error loading CDP ${id} - Please wait a few seconds before retrying.`, searchMsg: `Error loading CDP ${id}` })
+        // return
+        // }
+
         const cdpCollateralDebtRes = await axios.get(`https://api.daiembassy.com/collateralDebt?&id=${this.state.cdpId}`)
         // const cdpCollateralDebtRes = await axios.get(`http://localhost:2917/collateralDebt?&id=${this.state.cdpId}`)
-
         let cdpCollateralDebt = cdpCollateralDebtRes.data.collateralDebt
         cdpCollateralDebt.forEach(day => {
           day.date = new Date(day.date)
@@ -220,32 +308,17 @@ class App extends Component {
 
         const systemStatusRes = await axios.get('https://api.daiembassy.com/systemStatus')
         const systemStatus = systemStatusRes.data
-        const { wipeDraw, cdpDetails, error } = await maker.getAllDetails()
-        // console.log('Wipe draw after click: ', wipeDraw,cdpDetails,systemStatus, error)
-        if (error) {
-          ReactGA.event({
-            category: this.state.currentAccount,
-            action: `encountered error searching for CDP ${id}`,
-            label: new Date().toString()
-          })
-          this.setState({ error: true, loadingMsg: `Error loading CDP ${id} - Please wait a few seconds before retrying.`, searchMsg: `Error loading CDP ${id}` })
-          return
-        }
-        const { account } = this.state.cdps.find((cdp) => {
-          return cdp.cdpId === id
-        })
 
-        cdpDetails.account = account
+
 
         // if (this.state.updating) {
-        this.setState({ error: false, wipeDraw, cdpDetails, systemStatus, cdpId: id, loadingMsg: '', cdpCollateralDebt, updating: false, })
+        this.setState({ error: false, systemStatus, cdpId: id, loadingMsg: '', cdpCollateralDebt, updating: false, })
         // } else {
         //   this.setState({ updating: true, error: false, wipeDraw, cdpDetails, systemStatus, cdpId: id, loadingMsg: '', cdpCollateralDebt })
         //   // this.updateData()
         // }
         // console.log(cdpCollateralDebt)
         ReactGA.pageview(`/cdp/${id}`)
-
       }
     }
   }
@@ -292,7 +365,7 @@ class App extends Component {
   }
 
   handleDaiButton = async (e, { value }) => {
-    e.preventDefault()
+    // e.preventDefault()
     const daiOptions = { 'dailyWipeDraw': 0, 'cumulativeDebt': 1, 'daiOHLC': 2 }
     const currentSelection = this.state.daiSelection
     const selection = value
@@ -375,16 +448,18 @@ class App extends Component {
     }
   }
 
-  handleActionsTabChange = (e, activeIndex, menuItem) => {
+  handleActionsTabChange = (e, activeIndex) => {
+    const tabs = ['Significant CDP Actions', 'Largest Daily CDP Actions', 'All CDP Actions', 'Liquidations', 'Open CDPs', 'Shut CDPs']
     if (this.state.cdpActionsTab !== activeIndex) {
       this.setState({ cdpActionsTab: activeIndex })
-      ReactGA.modalview(`/table/${menuItem}`)
-      // console.log(menuItem)
+      ReactGA.modalview(`/table/${tabs[activeIndex]}`)
+      // console.log(tabs[activeIndex])
     }
   }
 
   clearCdp = () => {
     if (!this.state.updating) {
+      window.history.pushState({}, null, '/')
       let currentTab = this.state.currentTab === 0 ? 1 : this.state.currentTab - 1
       this.setState({ cdpId: null, wipeDraw: null, cdpDetails: null, currentTab })
     }
@@ -458,17 +533,19 @@ class App extends Component {
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
-              height: '565px',
+              height: '575px',
               border: '2px solid #38414B',
               borderTop: 0,
               borderTopRadius: 0,
               paddingBottom: 0
             }}>
-              <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='pethCollateral' onClick={this.handleCdpButton}>{`PETH Collateral`}</button>
-              <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='daiDebt' onClick={this.handleCdpButton}>{`DAI Debt`}</button>
+              <Button compact value='pethCollateral' onClick={this.handleCdpButton}>{`PETH Collateral`}</Button>
+              <Button compact value='daiDebt' onClick={this.handleCdpButton}>{`DAI Debt`}</Button>
+              {/* <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='pethCollateral' onClick={this.handleCdpButton}>{`PETH Collateral`}</button> */}
+              {/* <button style={{ background: 'none', border: 'none', textDecoration: 'underline', color: '#FFF', cursor: 'pointer', outline: 'none' }} value='daiDebt' onClick={this.handleCdpButton}>{`DAI Debt`}</button> */}
               <hr style={{ opacity: '0.7' }} />
-              {this.state.cdpCollateralDebt && this.state.cdpDetails ? this.state.cdpSelection === 'pethCollateral' ? <CdpCollateralChart data={this.state.cdpCollateralDebt} cdpId={this.state.cdpId} /> : <CdpDebtChart data={this.state.cdpCollateralDebt} cdpId={this.state.cdpId} /> : <Loader active inverted inline='centered' />}
-              {this.state.cdpCollateralDebt && this.state.cdpDetails ?
+              {this.state.cdpCollateralDebt ? this.state.cdpSelection === 'pethCollateral' ? <CdpCollateralChart data={this.state.cdpCollateralDebt} cdpId={this.state.cdpId} /> : <CdpDebtChart data={this.state.cdpCollateralDebt} cdpId={this.state.cdpId} /> : <Loader active inverted inline='centered' />}
+              {this.state.cdpCollateralDebt ?
                 <Grid>
                   <Grid.Column textAlign="right">
                     <div className={{ position: "relative" }}>
@@ -489,7 +566,7 @@ class App extends Component {
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
-              height: window.innerWidth > 768 ? '565px' : this.state.systemSelection === "dailyCdps" || this.state.systemSelection === "dailyActionsDai" ? '630px' : '565px',
+              height: window.innerWidth > 768 ? '575px' : this.state.systemSelection === "dailyCdps" ? '625px' : this.state.systemSelection === "dailyActionsDai" ? '655px' : '580px',
               border: '2px solid #38414B',
               borderTop: 0,
               borderTopRadius: 0
@@ -497,17 +574,17 @@ class App extends Component {
             >
               <Grid columns={2} stackable>
                 <Grid.Column>
-                  <span style={{ color: '#FFF' }}>
-                    {`Chart Selection: `}
+                  <Button compact icon labelPosition='left'>
+                    <Icon name='pie graph' />
                     <Dropdown
                       options={systemOptions}
                       value={systemOptions[this.state.systemOptions].value}
                       onChange={this.handleSystemButton}
                     />
-                  </span>
+                  </Button>
                 </Grid.Column>
-                <Grid.Column textAlign={window.innerWidth < 768 ? 'left' : 'right'} style={{paddingTop: window.innerWidth < 768 ? 0 : '14px'}}>
-                {this.state.systemSelection === 'dailyActionsDai' ? <button style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', color: '#FFF', cursor: 'pointer' }} value='stackedBar' onClick={(e)=> this.setState({stackedActivityChart: !this.state.stackedActivityChart})}>{this.state.stackedActivityChart ? 'Show Grouped Bar Chart' :'Show Stacked Bar Chart'}</button> : null}
+                <Grid.Column textAlign={window.innerWidth < 768 ? 'left' : 'right'} style={{ paddingTop: window.innerWidth < 768 ? 0 : '14px' }}>
+                  {this.state.systemSelection === 'dailyActionsDai' ? <Button compact value='stackedBar' onClick={(e) => this.setState({ stackedActivityChart: !this.state.stackedActivityChart })}>{this.state.stackedActivityChart ? 'Show Grouped Bar Chart' : 'Show Stacked Bar Chart'}</Button> : null}
                 </Grid.Column>
               </Grid>
 
@@ -516,8 +593,8 @@ class App extends Component {
                 this.state.dailyCdps && this.state.systemSelection === 'dailyCdps' ? <ChartCdp data={this.state.dailyCdps} /> :
                   this.state.dailyActions && this.state.systemSelection === 'dailyActions' ? <DailyActionsChart data={this.state.dailyActions} /> :
                     this.state.dailyActionsDai && this.state.systemSelection === 'dailyActionsDai' && this.state.stackedActivityChart ? <DailyActionsDaiStackedChart data={this.state.dailyActionsDai} /> :
-                    this.state.dailyActionsDai && this.state.systemSelection === 'dailyActionsDai' ? <DailyActionsDaiChart data={this.state.dailyActionsDai} /> :
-                      <Loader active inverted inline='centered' />
+                      this.state.dailyActionsDai && this.state.systemSelection === 'dailyActionsDai' ? <DailyActionsDaiChart data={this.state.dailyActionsDai} /> :
+                        <Loader active inverted inline='centered' />
               }
               {this.state.systemSelection == "dailyCdps" && this.state.dailyCdps ?
                 <Grid>
@@ -563,19 +640,19 @@ class App extends Component {
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
-              height: window.innerWidth > 768 ? '565px' : this.state.daiSelection == "cumulativeDebt" ? '605px' : '565px',
+              height: window.innerWidth > 768 ? '575px' : this.state.daiSelection == "cumulativeDebt" ? '615px' : '575px',
               border: '2px solid #38414B',
               borderTop: 0,
               borderTopRadius: 0
             }}>
-              <span style={{ color: '#FFF' }}>
-                Chart Selection:{` `}
+              <Button compact icon labelPosition='left'>
+                <Icon name='pie graph' />
                 <Dropdown
                   options={daiOptions}
                   value={daiOptions[this.state.daiOptions].value}
                   onChange={this.handleDaiButton}
                 />
-              </span>
+              </Button>
               <hr style={{ opacity: '0.7' }} />
               {this.state.dailyWipeDraw && this.state.daiSelection === 'dailyWipeDraw' ? <DailyWipeDrawChart data={this.state.dailyWipeDraw} /> : this.state.cumulativeDebt && this.state.daiSelection === 'cumulativeDebt' ? <CumulativeDebt data={this.state.cumulativeDebt} /> : this.state.daiOHLC && this.state.daiSelection === 'daiOHLC' ? <DaiChart data={this.state.daiOHLC} /> : <Loader active inverted inline='centered' />}
               {(this.state.daiSelection == "dailyWipeDraw" || this.state.daiSelection == "cumulativeDebt") && (this.state.dailyWipeDraw || this.state.cumulativeDebt) ?
@@ -622,19 +699,19 @@ class App extends Component {
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
-              height: window.innerWidth > 768 ? '565px' : this.state.pethSelection == "cumulativeCollateral" ? '605px' : '585px',
+              height: window.innerWidth > 768 ? '575px' : this.state.pethSelection == "cumulativeCollateral" ? '615px' : '595px',
               border: '2px solid #38414B',
               borderTop: 0,
               borderTopRadius: 0
             }}>
-              <span style={{ color: '#FFF' }}>
-                Chart Selection:{` `}
+              <Button compact icon labelPosition='left'>
+                <Icon name='pie graph' />
                 <Dropdown
                   options={pethOptions}
                   value={pethOptions[this.state.pethOptions].value}
                   onChange={this.handlePethButton}
                 />
-              </span>
+              </Button>
               <hr style={{ opacity: '0.7' }} />
               {this.state.dailyLockFree && this.state.pethSelection === 'dailyLockFree' ? <DailyLockFreeChart data={this.state.dailyLockFree} /> : this.state.cumulativeCollateral && this.state.pethSelection === 'cumulativeCollateral' ? <CumulativeCollateral data={this.state.cumulativeCollateral} /> : <Loader active inverted inline='centered' />}
               {(this.state.pethSelection == "dailyLockFree" || this.state.pethSelection == "cumulativeCollateral") && (this.state.dailyLockFree || this.state.cumulativeCollateral) ?
@@ -673,20 +750,20 @@ class App extends Component {
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
-              height: '565px',
+              height: '575px',
               border: '2px solid #38414B',
               borderTop: 0,
               borderTopRadius: 0
             }}>
 
-              <span style={{ color: '#FFF' }}>
-                Chart Selection:{` `}
+              <Button compact icon labelPosition='left'>
+                <Icon name='pie graph' />
                 <Dropdown
                   options={mkrOptions}
                   value={mkrOptions[this.state.mkrOptions].value}
                   onChange={this.handleMkrButton}
                 />
-              </span>
+              </Button>
               <hr style={{ opacity: '0.7' }} />
               {this.state.mkrOHLC && this.state.mkrSelection === 'mkrOHLC' ? <MkrChart data={this.state.mkrOHLC} /> : <Loader active inverted inline='centered' />}
 
@@ -716,7 +793,15 @@ class App extends Component {
       const cdpActionsPane = [
         /***************** Tab for Significant CDP Actions table *****************/
         {
-          menuItem: { key: 0, icon: 'lightning', content: 'Significant CDP Actions' },
+          menuItem: {
+            key: 0,
+            icon: 'lightning',
+            content: <span>Significant CDP Actions <Popup trigger={<Icon size='small' style={{ paddingLeft: '3px', cursor: 'help' }}
+              name='question circle' />}
+              header='Significant CDP Actions'
+              content={`Significant CDP Actions whose value is greater than the average CDP debt ${this.state.systemStatus ? '(' + this.state.systemStatus.avgDebt.toFixed(0) + ' DAI)' : '...'} or half the average CDP collateral ${this.state.systemStatus ? '(' + (this.state.systemStatus.avgCollateral / 2).toFixed(0) + ' PETH)' : '...'}`}
+              inverted /></span>,
+          },
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
@@ -727,11 +812,20 @@ class App extends Component {
             }}
             >
               <SignificantActions handleSearchClick={this.handleSearchClick} />
+              <span textAlign='right' style={{ color: '#FFF' }}>* Denotes Shut CDP</span>
             </Tab.Pane>
         },
         /***************** Tab for Largest Daily CDP Actions table *****************/
         {
-          menuItem: { key: 1, icon: 'trophy', content: 'Largest Daily CDP Actions' },
+          menuItem: {
+            key: 1,
+            icon: 'trophy',
+            content: <span>Largest Daily CDP Actions <Popup trigger={<Icon size='small' style={{ paddingLeft: '3px', cursor: 'help' }}
+              name='question circle' />}
+              header='Largest Daily CDP Actions'
+              content={`The top 5 largest transactions and their absolute and relative contribution to the total for each day. Lock and Free actions are converted from PETH to DAI equivalent for comparison purposes`}
+              inverted /></span>,
+          },
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
@@ -746,7 +840,15 @@ class App extends Component {
         },
         /***************** Tab for All CDP Actions table *****************/
         {
-          menuItem: { key: 2, icon: 'history', content: 'All CDP Actions' },
+          menuItem: {
+            key: 2,
+            icon: 'history',
+            content: <span>All CDP Actions <Popup trigger={<Icon size='small' style={{ paddingLeft: '3px', cursor: 'help' }}
+              name='question circle' />}
+              header='All CDP Actions'
+              content={`All CDP Actions that have occurred on the MakerDAO system`}
+              inverted /></span>,
+          },
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
@@ -757,11 +859,20 @@ class App extends Component {
             }}
             >
               <AllRecentActions handleSearchClick={this.handleSearchClick} />
+              <span textAlign='right' style={{ color: '#FFF' }}>* Denotes Shut CDP</span>
             </Tab.Pane>
         },
         /***************** Tab for Liquidations table *****************/
         {
-          menuItem: { key: 3, icon: 'trash', content: 'Liquidations' },
+          menuItem: {
+            key: 3,
+            icon: 'trash',
+            content: <span>Liquidations <Popup trigger={<Icon size='small' style={{ paddingLeft: '3px', cursor: 'help' }}
+              name='question circle' />}
+              header='Liquidations'
+              content={`All CDP Liquidations (Bites) that have occurred on the MakerDAO system`}
+              inverted /></span>,
+          },
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
@@ -772,12 +883,21 @@ class App extends Component {
             }}
             >
               <Liquidations handleSearchClick={this.handleSearchClick} />
+              <span textAlign='right' style={{ color: '#FFF' }}>* Denotes Shut CDP</span>
             </Tab.Pane>
         },
 
         /***************** Tab for Open CDPs table *****************/
         {
-          menuItem: { key: 4, icon: 'globe', content: `Open CDPs` },
+          menuItem: {
+            key: 5,
+            icon: 'globe',
+            content: <span>Open CDPs <Popup trigger={<Icon size='small' style={{ paddingLeft: '3px', cursor: 'help' }}
+              name='question circle' />}
+              header='Open CDPs'
+              content={`All currently Open CDPs on the MakerDAO system. CDPs that have been explicitly shut will not be shown`}
+              inverted /></span>,
+          },
           render: () =>
             <Tab.Pane style={{
               backgroundColor: '#273340',
@@ -787,9 +907,33 @@ class App extends Component {
               padding: 0
             }}
             >
-              <AllCdps handleSearchClick={this.handleSearchClick} systemStatus={this.state.systemStatus} />
+              <OpenCdps handleSearchClick={this.handleSearchClick}/>
             </Tab.Pane>
-        }
+        },
+        /***************** Tab for Shut CDPs table *****************/
+        {
+          menuItem: {
+            key: 4,
+            icon: 'close',
+            content: <span>Shut CDPs <Popup trigger={<Icon size='small' style={{ paddingLeft: '3px', cursor: 'help' }}
+              name='question circle' />}
+              header='Open CDPs'
+              content={`All Shut CDPs on the MakerDAO system. Only CDPs that have been explicitly shut will be shown`}
+              inverted /></span>,
+          },
+          render: () =>
+            <Tab.Pane style={{
+              backgroundColor: '#273340',
+              border: '2px solid #38414B',
+              borderTop: 0,
+              borderTopRadius: 0,
+              padding: 0
+            }}
+            >
+              <ShutCdps handleSearchClick={this.handleSearchClick} systemStatus={this.state.systemStatus} />
+              <span textAlign='right' style={{ color: '#FFF' }}>* Denotes Shut CDP</span>
+            </Tab.Pane>
+        },
       ]
       /***************** Return the actual viewable components to the render method *****************/
       return (
@@ -829,12 +973,12 @@ class App extends Component {
 
             </Tab>
 
-            {this.state.cdpId || this.state.updating ? <RecentActions cdpId={this.state.cdpId} clearCdp={this.clearCdp} updating={this.state.updating} /> : null}
+            {this.state.cdpId || this.state.updating ? <RecentActions cdpId={this.state.cdpId} clearCdp={this.clearCdp} updating={this.state.updating} systemStatus={this.state.systemStatus} /> : null}
             <Tab
               menu={{ attached: 'top', inverted: true, style: { backgroundColor: '#273340', border: '2px solid #38414B', display: 'flex', flexDirection: window.innerWidth > 768 ? 'row' : 'column', flexWrap: 'wrap' } }}
               style={{ paddingTop: '10px', paddingBottom: '10px' }}
               defaultActiveIndex={this.state.cdpActionsTab}
-              onTabChange={(e, { activeIndex }) => this.handleActionsTabChange(e, activeIndex, cdpActionsPane[activeIndex].menuItem.content)}
+              onTabChange={(e, { activeIndex }) => this.handleActionsTabChange(e, activeIndex)}
               panes={cdpActionsPane}
             >
             </Tab>
