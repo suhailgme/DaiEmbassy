@@ -1,7 +1,5 @@
 import React, { Component } from 'react'
-import { Input, Form, Button, Progress, Grid, Icon, Popup, Dropdown, Modal, Table, Segment } from 'semantic-ui-react'
-import MakerService from '../MakerService'
-//Consider limit orders for lock/free and wipe/draw to be executed when oracle prices reaches n
+import { Input, Form, Button, Progress, Grid, Icon, Popup, Dropdown } from 'semantic-ui-react'
 export default class WipeDrawWidget extends Component {
     state = {
         positiveButton: true,
@@ -90,7 +88,7 @@ export default class WipeDrawWidget extends Component {
                 <Form inverted style={{paddingBottom:'0'}}>
                     <Form.Field>
         <label style={{paddingBottom:'5px'}}>
-        <Popup inverted trigger={<a href="#"style={{textDecoration:'underline', color:'inherit', cursor:'help'}}>Simulate</a>} on='hover'>
+        <Popup inverted trigger={<a href="#"style={{color:'inherit', cursor:'help'}}>Simulate <Icon name='question circle'></Icon></a>} on='hover'>
             <Popup.Header>Simulate CDP {this.state.cdpId}</Popup.Header>
             <Popup.Content>
                 Calculate the liquidation ratio of CDP {this.state.cdpId} by adjusting the quantity DAI Created (as debt) or Repaid. 
