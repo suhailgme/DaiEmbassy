@@ -6,7 +6,7 @@ const Humanize = require('humanize-plus')
 const axios = require('axios')
 
 
-export default class AllCdps extends Component {
+export default class OpenCdps extends Component {
     state = {
         ...this.props.systemStatus,
         filtered: true,
@@ -93,7 +93,6 @@ export default class AllCdps extends Component {
             }
 
         })
-        // console.log(processedCdps)
         cdps.sort((a, b) => {
             return (b.daiDebt) - (a.daiDebt)
         })
