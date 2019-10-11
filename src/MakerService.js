@@ -111,6 +111,10 @@ export default class MakerService {
         return parseFloat((await this.cdp.getGovernanceFee(Maker.USD)).toNumber().toFixed(2))
     }
 
+    getGovernanceFeeMkr = async() =>{
+        return parseFloat((await this.cdp.getGovernanceFee()).toNumber().toFixed(2))
+    }
+
     getCurrentAccount = async () => {
         try{
         return this.web3.utils.toChecksumAddress(await this.maker.currentAccount().address)
@@ -153,6 +157,8 @@ export default class MakerService {
             
             const collateralizationRatio = await this.getCollateralizationRatio()
             const governanceFee = await this.getGovernanceFee()
+            const governanceFeeMkr = await this.getGovernanceFeeMkr()
+            
             // console.log('daiDebt, pethCollateral,liquidationRatio, pethWethRatio', daiDebt,pethCollateral,liquidationRatio,pethWethRatio)
 
             return {
@@ -174,7 +180,8 @@ export default class MakerService {
                     pethWethRatio,
                     liquidationPrice,
                     collateralizationRatio,
-                    governanceFee
+                    governanceFee,
+                    governanceFeeMkr
                 }
             }
         }catch(error){
