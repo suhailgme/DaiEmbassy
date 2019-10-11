@@ -73,8 +73,12 @@ export default class CdpDetails extends Component {
                             <Grid.Column textAlign='right'>{this.numberWithCommas(this.state.daiDebt)} DAI</Grid.Column>
                         </Grid.Row> */}
                         <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
-                            <Grid.Column textAlign='left'>Accrued Fees</Grid.Column>
-                            <Grid.Column textAlign='right' style={{whiteSpace:'nowrap'}}>{this.numberWithCommas(this.state.governanceFee)} USD</Grid.Column>
+                            <Grid.Column textAlign='left' style={{whiteSpace:'nowrap'}}>Accrued Fees (USD)</Grid.Column>
+                            <Grid.Column textAlign='right' style={{whiteSpace:'nowrap'}}>{this.numberWithCommas(this.state.governanceFee)}{}</Grid.Column>
+                        </Grid.Row>
+                        <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
+                            <Grid.Column textAlign='left' style={{whiteSpace:'nowrap'}}>Accrued Fees (MKR)</Grid.Column>
+                            <Grid.Column textAlign='right' style={{whiteSpace:'nowrap'}}>{this.numberWithCommas(this.state.governanceFeeMkr)}</Grid.Column>
                         </Grid.Row>
                         <Grid.Row style={{paddingTop:'0',paddingBottom:'5px'}}>
                             <Grid.Column style={{paddingTop:'0'}} textAlign='left'> Liq. Penalty
@@ -83,7 +87,7 @@ export default class CdpDetails extends Component {
                                         size='small'/>}
 
                                         header='Liquidation Penalty' 
-                                        content='Total value subtracted from CDP should liquidation occur at the liquidation price.' 
+                                        content='The quantity of collateral subtracted from the CDP should liquidation occur at the liquidation price without intervention.' 
                                         inverted/>
                             </Grid.Column>
                             <Grid.Column textAlign='right' style={{whiteSpace:'nowrap'}}>{`${this.calculateLiqudationPenalty()} ETH`}</Grid.Column>
