@@ -42,15 +42,16 @@ class Liquidations extends Component {
             recentActions.push(
                 {
                     time: cdp.time,//new Date(action.time).toString().slice(0,-37),
-                    cdpId: <button style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', color: this.colorCdpId(cdp.cdpId), cursor: 'pointer' }} value={cdp.cdpId} onClick={this.handleClick}>{cdp.cdpId}{cdp.shut ? '*' : ''}</button>,
+                    cdpId: cdp.cdpId,
                     act: cdp.act,
                     tx: <a target="_blank" href={`https://etherscan.io/tx/${cdp.tx}`} style={{ textDecoration: 'underline', color: 'inherit' }}>{this.truncateTx(cdp.tx)}</a>,
                     owner: `${this.truncateTx(owner)}`,
                     debtRepaid: `${this.numberWithCommas(cdp.debtRepaid)} DAI`,
                     pethLiquidated: `${this.numberWithCommas(cdp.pethLiquidated)} PETH`,
-                    percentCollateralLiquidated: `${this.numberWithCommas(cdp.percentCollateralLiquidated)} %`,
-                    ratio: `${this.numberWithCommas(cdp.ratio)} %`,
-                    liquidationPrice: `$${this.numberWithCommas(cdp.liquidationPrice)}`,
+                    percentCollateralLiquidated: `${this.numberWithCommas(cdp.percentCollateralLiquidated,2)} %`,
+                    ratio: `${this.numberWithCommas(cdp.ratio,2)} %`,
+                    liquidationPrice: `$${this.numberWithCommas(cdp.liquidationPrice,2)}`,
+                    shut: cdp.shut,
                     id: index
                 })
         })
@@ -64,8 +65,8 @@ class Liquidations extends Component {
         return `${tx.slice(0, 6)}...${tx.slice(-6)}`
     }
 
-    numberWithCommas = (number) => {
-        return Humanize.formatNumber(number, 2)
+    numberWithCommas = (number, commas = 3) => {
+        return Humanize.formatNumber(number, commas)
         // return number.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
     }
 
@@ -104,49 +105,89 @@ class Liquidations extends Component {
 
                         {
                             id: 'date',
-                            Header: 'Date (local)',
-                            accessor: data => new Date(data.time).toString().slice(0, -37)
+                            Header: <span>Date (local)<Icon inverted name='sort' /></span>,
+                            accessor: 'time',
+                            Cell: props => new Date(props.value).toString().slice(0, -37)
                         },
                         {
-                            Header: 'CDP ID',
+                            id: 'id' +1,
+                            Header: <span>CDP ID<Icon inverted name='sort' /></span>,
                             accessor: 'cdpId',
+                            Cell: props => <button style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', color: this.colorCdpId(props.value), cursor: 'pointer' }} value={props.value} onClick={this.handleClick}>{props.value}{props.original.shut ? '*' : ''}</button>
                             
                         },
                         {
+
                             Header: 'Action',
-                            accessor: 'act'
+                            accessor: 'act',
+                            sortable:false
                         },
                         {
-                            Header: 'Debt Repaid',
-                            accessor: 'debtRepaid'
+                            Header: <span>Debt Repaid<Icon inverted name='sort' /></span>,
+                            accessor: 'debtRepaid',
+                            sortMethod: (a, b) => {
+                                if (a.length === b.length) {
+                                  return a > b ? 1 : -1;
+                                }
+                                return a.length > b.length ? 1 : -1;
+                              }
                         },
                         {
-                            Header: 'Collateral Liquidated',
-                            accessor: 'pethLiquidated'
+                            Header: <span>Collateral Liquidated<Icon inverted name='sort' /></span>,
+                            accessor: 'pethLiquidated',
+                            sortMethod: (a, b) => {
+                                if (a.length === b.length) {
+                                  return a > b ? 1 : -1;
+                                }
+                                return a.length > b.length ? 1 : -1;
+                              }
                         },
                         {
-                            Header: '% Collateral Liquidated',
-                            accessor: 'percentCollateralLiquidated'
+                            Header: <span>% Collateral Liquidated<Icon inverted name='sort' /></span>,
+                            accessor: 'percentCollateralLiquidated',
+                            // sortMethod: (a, b) => {
+                            //     if (a.length === b.length) {
+                            //       return a > b ? 1 : -1;
+                            //     }
+                            //     return a.length > b.length ? 1 : -1;
+                            //   }
                         },
                         {
-                            Header: 'Collateralization Ratio',
-                            accessor: "ratio"
+                            Header: <span>Collateralization Ratio<Icon inverted name='sort' /></span>,
+                            accessor: "ratio",
+                            // sortMethod: (a, b) => {
+                            //     if (a.length === b.length) {
+                            //       return a > b ? 1 : -1;
+                            //     }
+                            //     return a.length > b.length ? 1 : -1;
+                            //   }
                         },
                         {
-                            Header: 'Liquidation Price',
-                            accessor: "liquidationPrice"
+                            Header: <span>Liquidation Price<Icon inverted name='sort' /></span>,
+                            accessor: "liquidationPrice",
+                            sortMethod: (a, b) => {
+                                if (a.length === b.length) {
+                                  return a > b ? 1 : -1;
+                                }
+                                return a.length > b.length ? 1 : -1;
+                              }
                         },
                         {
                             Header: "Tx Hash",
-                            accessor: "tx"
+                            accessor: "tx",
+                            sortable:false
+
                         },
                     ]}
                     className="-striped -highlight"
                     defaultPageSize={10}
+                    defaultSorted={[{
+                        id: 'date',
+                        desc:true
+                    }]}
                     style={{ color: '#FFF', textAlign: 'center', }}
                     previousText={<p style={{ color: '#FFF', }}>Previous</p>}
                     nextText={<p style={{ color: '#FFF', }}>Next</p>}
-                    sortable={false}
                     filterable={false}
                     NoDataComponent={() => this.state.loading? <Loader active inverted/> : null}
                     // loading={liquidations.length === 0}
