@@ -164,7 +164,7 @@ class AreaChartWithEdge extends React.Component {
 
 					<ZoomButtons onReset={this.handleReset} />
 
-					<EdgeIndicator displayFormat={format(".4s")} itemType='last' orient='left' edgeAt='right' fill="#6BA583" yAccessor={d => d.daiDebt} />
+					<EdgeIndicator displayFormat={format(".4s")} itemType='last' orient='left' edgeAt='right' fill="#FF0000" yAccessor={d => d.daiDebt} />
 				</Chart>
 				<Chart id={2} yExtents={d => d.liquidationPrice}>
 					<LineSeries
