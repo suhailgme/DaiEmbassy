@@ -1,7 +1,7 @@
-## Dai Embassy
-#### https://www.daiembassy.online/
+## Dai Embassy https://www.daiembassy.online/
 
-### Front-End Usage 
+### Local Front-End Usage*
+##### *Relies on Docker hosted API for application data (Dokku)
 Clone Repo: 
 
 ``` git clone https://github.com/suhailgme/DaiEmbassy.git ```
